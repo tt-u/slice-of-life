@@ -822,7 +822,7 @@ class FrozenInitialWorld:
 
 @dataclass(frozen=True, slots=True)
 class TurnChoice:
-    action: ActionCard
+    action: GeneratedAction
     reason: str
 
 

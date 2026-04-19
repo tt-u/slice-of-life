@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Callable
 
-from eventforge.domain import ActionCard, FrozenInitialWorld, MaterialResearchPack, TurnChoice, WorldReport
+from eventforge.domain import FrozenInitialWorld, GeneratedAction, MaterialResearchPack, TurnChoice, WorldReport
 from eventforge.engine import build_game
 from eventforge.llm import OpenAICompatibleLLM
 from eventforge.research import (
@@ -422,7 +422,7 @@ def print_turn_header(game, pre_turn_event) -> None:
     )
 
 
-def prompt_for_choice(actions: tuple[ActionCard, ...]) -> TurnChoice:
+def prompt_for_choice(actions: tuple[GeneratedAction, ...]) -> TurnChoice:
     for index, action in enumerate(actions, start=1):
         print(f"{index}. {action.label} — {action.description}")
     while True:

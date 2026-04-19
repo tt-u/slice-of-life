@@ -1,7 +1,7 @@
 from dataclasses import replace
 
-from eventforge.engine import action_impact_profile, build_game, run_auto_game, validate_agent_reaction_proposal
-from eventforge.domain import AgentProfile, AgentReactionContext, AgentReactionProposal, AgentRunState, SeedEntity, TurnChoice, ActionCard, FrozenInitialWorld
+from eventforge.engine import build_game, run_auto_game, validate_agent_reaction_proposal
+from eventforge.domain import AgentProfile, AgentReactionContext, AgentReactionProposal, AgentRunState, GeneratedAction, SeedEntity, TurnChoice, ActionCard, FrozenInitialWorld
 from eventforge.scenarios import FLASH_CRASH_SCENARIO
 
 
@@ -259,11 +259,12 @@ def test_available_actions_are_generated_by_llm_each_turn() -> None:
 
     assert llm.choice_calls == 1
     assert len(actions) == 4
-    assert all(isinstance(action, ActionCard) for action in actions)
+    assert all(isinstance(action, GeneratedAction) for action in actions)
     assert actions[0].label == "发布证据时间线"
     assert actions[0].id == "statement"
-    assert "+" in actions[0].description
-    assert "-" in actions[0].description
+    assert actions[0].upside_dimensions
+    assert actions[0].downside_dimensions
+    assert actions[0].commitment_tier in {"low", "medium", "high"}
     assert llm.last_available_templates is not None
     assert llm.last_choice_prompt is not None
     assert llm.last_choice_prompt["player_objective"]
@@ -278,15 +279,17 @@ def test_available_actions_are_generated_by_llm_each_turn() -> None:
 
 
 
-def test_generated_choice_copy_gets_explicit_tradeoff_suffix() -> None:
+def test_generated_choice_copy_gets_explicit_tradeoff_metadata() -> None:
     game = build_game(turns=6, seed=3, llm_client=FakeLLM())
     game.begin_turn()
 
     action = game.available_actions()[0]
 
-    assert "+" in action.description
-    assert "-" in action.description
-    assert "叙事控制" in action.description or "交易所信任" in action.description
+    assert action.rationale
+    assert action.upside_magnitude
+    assert action.downside_magnitude
+    assert set(action.upside_magnitude) == set(action.upside_dimensions)
+    assert set(action.downside_magnitude) == set(action.downside_dimensions)
 
 
 def test_generated_choice_copy_does_not_duplicate_existing_tradeoff_suffix() -> None:
@@ -306,13 +309,13 @@ def test_available_actions_enforce_impact_diversity_when_llm_returns_only_heavy_
     game.begin_turn()
 
     actions = game.available_actions()
-    tiers = [action_impact_profile(action)["impact_tier"] for action in actions]
+    tiers = [action.commitment_tier for action in actions]
 
     assert len(actions) == 4
     assert len(set(action.id for action in actions)) == 4
     assert "low" in tiers
     assert "medium" in tiers
-    assert sum(1 for tier in tiers if tier == "extreme") <= 1
+    assert sum(1 for tier in tiers if tier == "high") <= 2
 
 
 

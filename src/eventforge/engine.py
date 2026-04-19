@@ -16,6 +16,7 @@ from .domain import (
     AgentRelationshipState,
     AgentRunState,
     FrozenInitialWorld,
+    GeneratedAction,
     ScenarioDefinition,
     TurnChoice,
     TurnResolution,
@@ -393,6 +394,7 @@ class CrisisGame:
         self.llm = llm_client or OpenAICompatibleLLM()
         self.frozen_world = frozen_world or scenario.to_frozen_world()
         self.action_templates = tuple(getattr(scenario, "actions", ())) or synthesize_action_templates_from_frozen_world(self.frozen_world)
+        self.action_template_map = {action.id: action for action in self.action_templates}
         self.state = self.frozen_world.instantiate_state(turns_total=turns)
         self.initial_state = self.snapshot_state()
         self.agent_profiles = [
@@ -407,7 +409,7 @@ class CrisisGame:
         self.agent_reaction_results: list[AgentReactionResult] = []
         self.history: list[TurnResolution] = []
         self.pending_event: WorldEvent | None = None
-        self.pending_actions: tuple[ActionCard, ...] | None = None
+        self.pending_actions: tuple[GeneratedAction, ...] | None = None
 
     def snapshot_state(self) -> dict[str, int]:
         return {key: getattr(self.state, key) for key in STATE_KEYS}
@@ -439,7 +441,7 @@ class CrisisGame:
         self.pending_event = event
         return event
 
-    def available_actions(self) -> tuple[ActionCard, ...]:
+    def available_actions(self) -> tuple[GeneratedAction, ...]:
         if self.pending_actions is not None:
             return self.pending_actions
         template_pool = list(self.action_templates)
@@ -491,36 +493,41 @@ class CrisisGame:
             generated_ids=[item["template_id"] for item in generated],
         )
         generated_map = {item["template_id"]: item for item in generated if item["template_id"] in constrained_ids}
-        actions: list[ActionCard] = []
+        actions: list[GeneratedAction] = []
         for template_id in constrained_ids:
             base = template_map[template_id]
             item = generated_map.get(
                 template_id,
                 {"label": base.label, "description": base.description},
             )
-            actions.append(
-                ActionCard(
-                    id=base.id,
-                    label=item["label"],
-                    description=self._normalize_action_description(base=base, description=item["description"]),
-                    tag=base.tag,
-                    public_pressure=base.public_pressure,
-                    narrative_shift=base.narrative_shift,
-                    exchange_shift=base.exchange_shift,
-                    liquidity_shift=base.liquidity_shift,
-                    treasury_shift=base.treasury_shift,
-                    control_shift=base.control_shift,
-                    volatility_shift=base.volatility_shift,
-                    kol_trust_shift=base.kol_trust_shift,
-                    whale_trust_shift=base.whale_trust_shift,
-                    exchange_trust_shift=base.exchange_trust_shift,
-                    unlocks_truth=base.unlocks_truth,
-                )
-            )
+            actions.append(self._build_generated_action(base=base, item=item))
         if len(actions) < 2:
             raise ValueError("LLM-generated actions must include at least two valid choices")
         self.pending_actions = tuple(actions)
         return self.pending_actions
+
+    def _build_generated_action(self, *, base: ActionCard, item: dict[str, str]) -> GeneratedAction:
+        tradeoff = action_tradeoff_profile(base)
+        impact_tier = str(action_impact_profile(base)["impact_tier"])
+        commitment_tier = "low" if impact_tier == "low" else "medium" if impact_tier == "medium" else "high"
+        upside_magnitude = {axis: 6 for axis in tradeoff["upside_axes"]}
+        downside_magnitude = {axis: 5 for axis in tradeoff["downside_axes"]}
+        rationale = f"争取{ '/'.join(tradeoff['upside_axes'][:2]) }，代价是承受{ '/'.join(tradeoff['downside_axes'][:2]) }。"
+        description = self._normalize_action_description(base=base, description=item["description"])
+        return GeneratedAction(
+            id=base.id,
+            label=item["label"],
+            description=description,
+            rationale=rationale,
+            upside_dimensions=tuple(tradeoff["upside_axes"]),
+            downside_dimensions=tuple(tradeoff["downside_axes"]),
+            upside_magnitude=upside_magnitude,
+            downside_magnitude=downside_magnitude,
+            cost_types=(base.tag,),
+            affected_entities=tuple(entity.id for entity in self.frozen_world.entities[:2]),
+            commitment_tier=commitment_tier,
+            tags=(base.tag,),
+        )
 
     def _normalize_action_description(self, *, base: ActionCard, description: str) -> str:
         clean = description.strip()
@@ -530,6 +537,12 @@ class CrisisGame:
         if re.search(r"（[^）]*\+[^）]*-[^）]*）\s*$", clean):
             return clean
         return f"{clean} {suffix}".strip()
+
+    def _resolve_action_template(self, action: GeneratedAction) -> ActionCard:
+        try:
+            return self.action_template_map[action.id]
+        except KeyError as exc:
+            raise ValueError(f"Unknown generated action id: {action.id}") from exc
 
     def _constrain_generated_action_ids(self, *, template_pool: list[ActionCard], generated_ids: list[str]) -> list[str]:
         template_map = {action.id: action for action in template_pool}
@@ -596,8 +609,9 @@ class CrisisGame:
     def apply_choice(self, choice: TurnChoice) -> TurnResolution:
         pre_turn_event = self.begin_turn()
         action = choice.action
+        template_action = self._resolve_action_template(action)
         self.state.turn_index += 1
-        self._apply_action_base_effects(action)
+        self._apply_action_base_effects(template_action)
         reactions = self._generate_agent_reactions(action)
         for reaction in reactions:
             self._apply_delta(reaction.state_delta)
@@ -722,27 +736,27 @@ class CrisisGame:
             flags=set(self.state.flags),
         )
 
-    def _score_action(self, action: ActionCard) -> int:
+    def _score_action(self, action: GeneratedAction) -> int:
+        template = self._resolve_action_template(action)
         emergency_weight = 20 if self.state.exchange_trust < 45 else 0
         panic_weight = 20 if self.state.community_panic > 65 else 0
-        treasury_penalty = 18 if self.state.treasury < 30 and action.treasury_shift < 0 else 0
+        treasury_penalty = 18 if self.state.treasury < 30 and template.treasury_shift < 0 else 0
         score = (
-            action.control_shift * 5
-            + action.narrative_shift * 4
-            + (action.exchange_shift + action.exchange_trust_shift) * 4
-            + action.liquidity_shift * 3
-            - action.public_pressure * 2
-            - max(0, action.volatility_shift) * 2
+            template.control_shift * 5
+            + template.narrative_shift * 4
+            + (template.exchange_shift + template.exchange_trust_shift) * 4
+            + template.liquidity_shift * 3
+            - template.public_pressure * 2
+            - max(0, template.volatility_shift) * 2
             - treasury_penalty
-            + (action.exchange_trust_shift if emergency_weight else 0)
-            + (action.narrative_shift if panic_weight else 0)
+            + (template.exchange_trust_shift if emergency_weight else 0)
+            + (template.narrative_shift if panic_weight else 0)
         )
-        tradeoff = action_tradeoff_profile(action)
         focus_weights = {item["axis"]: int(item["urgency"]) for item in decision_focus_from_state(self.state)}
         for axis, urgency in focus_weights.items():
-            if axis in tradeoff["upside_axes"]:
+            if axis in action.upside_dimensions:
                 score += urgency // 2
-            if axis in tradeoff["downside_axes"]:
+            if axis in action.downside_dimensions:
                 score -= urgency // 2
         if self.state.truth_public and action.id == "shift_blame":
             score -= 80
@@ -891,7 +905,7 @@ class CrisisGame:
         if action.id == "freeze_wallet":
             self.state.flags.add("wallet_frozen")
 
-    def _generate_agent_reactions(self, action: ActionCard) -> list[AgentReaction]:
+    def _generate_agent_reactions(self, action: GeneratedAction) -> list[AgentReaction]:
         reactions: list[AgentReaction] = []
         reaction_results: list[AgentReactionResult] = []
         updated_profiles: list[AgentProfile] = []
@@ -1007,7 +1021,7 @@ class CrisisGame:
             return 1, {"exchange_trust": 1}, f"{agent.name} 暂时记下你的动作，但还没有完全放心。"
         return 0, {}, f"{agent.name} 没有明显反应。"
 
-    def _apply_secondary_world_rules(self, action: ActionCard, reactions: list[AgentReaction]) -> None:
+    def _apply_secondary_world_rules(self, action: GeneratedAction, reactions: list[AgentReaction]) -> None:
         avg_trust = sum(agent.trust_in_player for agent in self.agent_profiles) // len(self.agent_profiles)
         influencer_support = sum(agent.influence for agent in self.agent_profiles if agent.trust_in_player >= 55)
         influencer_hostility = sum(agent.influence for agent in self.agent_profiles if agent.trust_in_player <= 35)
@@ -1061,7 +1075,7 @@ class CrisisGame:
             "exchange_trust": self.state.exchange_trust,
         }
 
-    def _build_bullets(self, action: ActionCard, pre_turn_event: WorldEvent, reactions: list[AgentReaction]) -> Iterable[str]:
+    def _build_bullets(self, action: GeneratedAction, pre_turn_event: WorldEvent, reactions: list[AgentReaction]) -> Iterable[str]:
         yield f"回合前事件：{pre_turn_event.actor_name} / {pre_turn_event.headline}"
         yield f"控制权 {self.state.control} / 100"
         yield f"叙事控制 {self.state.narrative_control} / 100"
