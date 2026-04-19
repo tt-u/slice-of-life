@@ -1,4 +1,7 @@
+import pytest
+
 from eventforge.domain import (
+    ActionGenerationContext,
     AgentMemoryEntry,
     AgentReactionBoundaries,
     AgentReactionProposal,
@@ -6,6 +9,7 @@ from eventforge.domain import (
     AgentRunState,
     AgentStateAxisDef,
     FrozenInitialWorld,
+    GeneratedAction,
     MaterialResearchPack,
     ScenarioDefinition,
     TurnSituation,
@@ -270,3 +274,93 @@ def test_agent_reaction_proposal_round_trips_through_serialized_payload() -> Non
     restored = AgentReactionProposal.from_payload(payload)
 
     assert restored == proposal
+
+
+def test_action_generation_context_round_trips_through_serialized_payload() -> None:
+    frozen = FLASH_CRASH_SCENARIO.to_frozen_world()
+    state = frozen.instantiate_state(turns_total=6)
+    state.exchange_trust = 19
+    state.community_panic = 82
+
+    context = frozen.build_action_generation_context(
+        state=state,
+        situation=TurnSituation(
+            turn_index=3,
+            turns_total=6,
+            selected_player_role="项目创始人",
+            objective="稳住交易所和社区",
+            dominant_tensions=("交易所风控", "社区怀疑"),
+            urgent_dimensions=(),
+            unstable_dimensions=(),
+            recent_action_summaries=("上一回合公开了时间线",),
+        ),
+    )
+
+    payload = context.to_payload()
+
+    assert payload["world_title"] == FLASH_CRASH_SCENARIO.title
+    assert payload["situation"]["selected_player_role"] == "项目创始人"
+    assert payload["action_grammar"]["menu_size"] == 4
+    assert payload["dimension_defs"][0]["key"] == context.dimension_defs[0].key
+
+    restored = ActionGenerationContext.from_payload(payload)
+
+    assert restored == context
+    assert "exchange_trust" in restored.situation.urgent_dimensions
+
+
+def test_generated_action_round_trips_and_enforces_tradeoff_integrity() -> None:
+    action = GeneratedAction(
+        id="publish-timeline",
+        label="公开时间线",
+        description="公开完整时间线，抢回叙事先手，同时暴露更多内部处理细节。",
+        rationale="当前最急迫的是交易所信任和叙事控制。",
+        upside_dimensions=("narrative_control", "exchange_trust"),
+        downside_dimensions=("pressure", "credibility"),
+        upside_magnitude={"narrative_control": 8, "exchange_trust": 5},
+        downside_magnitude={"pressure": 7, "credibility": 2},
+        cost_types=("public",),
+        affected_entities=("community", "exchange-onyx"),
+        commitment_tier="medium",
+        tags=("timeline", "disclosure"),
+    )
+
+    payload = action.to_payload()
+
+    assert payload["upside_dimensions"] == ["narrative_control", "exchange_trust"]
+    assert payload["downside_magnitude"]["pressure"] == 7
+    assert payload["commitment_tier"] == "medium"
+
+    restored = GeneratedAction.from_payload(payload)
+
+    assert restored == action
+
+    with pytest.raises(ValueError, match="at least one upside"):
+        GeneratedAction(
+            id="bad-upside",
+            label="坏动作",
+            description="没有收益。",
+            rationale="测试",
+            upside_dimensions=(),
+            downside_dimensions=("pressure",),
+            upside_magnitude={},
+            downside_magnitude={"pressure": 4},
+            cost_types=("public",),
+            affected_entities=(),
+            commitment_tier="low",
+        )
+
+    with pytest.raises(ValueError, match="must not overlap"):
+        GeneratedAction(
+            id="bad-overlap",
+            label="坏动作",
+            description="上下行重叠。",
+            rationale="测试",
+            upside_dimensions=("control",),
+            downside_dimensions=("control",),
+            upside_magnitude={"control": 3},
+            downside_magnitude={"control": 2},
+            cost_types=("private",),
+            affected_entities=(),
+            commitment_tier="high",
+        )

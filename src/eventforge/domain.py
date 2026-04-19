@@ -158,6 +158,33 @@ class TurnSituation:
     unstable_dimensions: tuple[str, ...]
     recent_action_summaries: tuple[str, ...]
 
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "turn_index": self.turn_index,
+            "turns_total": self.turns_total,
+            "selected_player_role": self.selected_player_role,
+            "objective": self.objective,
+            "dominant_tensions": list(self.dominant_tensions),
+            "urgent_dimensions": list(self.urgent_dimensions),
+            "unstable_dimensions": list(self.unstable_dimensions),
+            "recent_action_summaries": list(self.recent_action_summaries),
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "TurnSituation":
+        if not isinstance(payload, dict):
+            raise TypeError("Turn situation payload must be a dict")
+        return cls(
+            turn_index=int(payload["turn_index"]),
+            turns_total=int(payload["turns_total"]),
+            selected_player_role=str(payload["selected_player_role"]),
+            objective=str(payload["objective"]),
+            dominant_tensions=tuple(str(item) for item in payload.get("dominant_tensions", [])),
+            urgent_dimensions=tuple(str(item) for item in payload.get("urgent_dimensions", [])),
+            unstable_dimensions=tuple(str(item) for item in payload.get("unstable_dimensions", [])),
+            recent_action_summaries=tuple(str(item) for item in payload.get("recent_action_summaries", [])),
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class ActionGenerationContext:
@@ -167,6 +194,29 @@ class ActionGenerationContext:
     dimension_defs: tuple[WorldDimensionDef, ...]
     situation: TurnSituation
     action_grammar: WorldActionGrammar
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "world_title": self.world_title,
+            "player_role": self.player_role,
+            "dimensions": dict(self.dimensions),
+            "dimension_defs": [world_dimension_def_to_payload(dimension) for dimension in self.dimension_defs],
+            "situation": self.situation.to_payload(),
+            "action_grammar": world_action_grammar_to_payload(self.action_grammar),
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "ActionGenerationContext":
+        if not isinstance(payload, dict):
+            raise TypeError("Action generation context payload must be a dict")
+        return cls(
+            world_title=str(payload["world_title"]),
+            player_role=str(payload["player_role"]),
+            dimensions={str(key): int(value) for key, value in dict(payload.get("dimensions", {})).items()},
+            dimension_defs=tuple(world_dimension_def_from_payload(item) for item in payload.get("dimension_defs", [])),
+            situation=TurnSituation.from_payload(payload["situation"]),
+            action_grammar=world_action_grammar_from_payload(payload["action_grammar"]),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -183,6 +233,50 @@ class GeneratedAction:
     affected_entities: tuple[str, ...]
     commitment_tier: Literal["low", "medium", "high"]
     tags: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.upside_dimensions:
+            raise ValueError("Generated actions must include at least one upside dimension")
+        if not self.downside_dimensions:
+            raise ValueError("Generated actions must include at least one downside dimension")
+        overlap = set(self.upside_dimensions) & set(self.downside_dimensions)
+        if overlap:
+            raise ValueError("Generated action upside and downside dimensions must not overlap")
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "id": self.id,
+            "label": self.label,
+            "description": self.description,
+            "rationale": self.rationale,
+            "upside_dimensions": list(self.upside_dimensions),
+            "downside_dimensions": list(self.downside_dimensions),
+            "upside_magnitude": dict(self.upside_magnitude),
+            "downside_magnitude": dict(self.downside_magnitude),
+            "cost_types": list(self.cost_types),
+            "affected_entities": list(self.affected_entities),
+            "commitment_tier": self.commitment_tier,
+            "tags": list(self.tags),
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "GeneratedAction":
+        if not isinstance(payload, dict):
+            raise TypeError("Generated action payload must be a dict")
+        return cls(
+            id=str(payload["id"]),
+            label=str(payload["label"]),
+            description=str(payload["description"]),
+            rationale=str(payload["rationale"]),
+            upside_dimensions=tuple(str(item) for item in payload.get("upside_dimensions", [])),
+            downside_dimensions=tuple(str(item) for item in payload.get("downside_dimensions", [])),
+            upside_magnitude={str(key): int(value) for key, value in dict(payload.get("upside_magnitude", {})).items()},
+            downside_magnitude={str(key): int(value) for key, value in dict(payload.get("downside_magnitude", {})).items()},
+            cost_types=tuple(str(item) for item in payload.get("cost_types", [])),
+            affected_entities=tuple(str(item) for item in payload.get("affected_entities", [])),
+            commitment_tier=str(payload["commitment_tier"]),
+            tags=tuple(str(item) for item in payload.get("tags", [])),
+        )
 
 
 @dataclass(frozen=True, slots=True)
