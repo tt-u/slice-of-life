@@ -30,6 +30,8 @@ export no_proxy="$NO_PROXY"
 
 Deterministic anchor-case research/freeze/inspect flows work without LLM credentials.
 
+Stored frozen-world files are role-specific contracts: `inspect-world` and `play --world-file ...` will reject a conflicting `--player-role` instead of silently pretending a different viewpoint exists inside the artifact.
+
 ## Quick start
 
 ```bash

@@ -557,3 +557,52 @@ def test_module_launcher_rejects_mismatched_player_role_for_world_file(tmp_path)
 
     assert play_result.returncode != 0
     assert "already frozen for role 校方" in play_result.stderr
+
+
+
+def test_module_launcher_rejects_mismatched_player_role_when_inspecting_world_file(tmp_path) -> None:
+    output_path = tmp_path / "wuhan-world.json"
+    env = dict(os.environ)
+    env.pop("OPENAI_API_KEY", None)
+    env.pop("OPENAI_BASE_URL", None)
+    env.pop("OPENAI_MODEL", None)
+
+    freeze_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "eventforge",
+            "freeze-world",
+            "--case",
+            "wuhan-university-yang-jingyuan",
+            "--player-role",
+            "校方",
+            "--output",
+            str(output_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    assert freeze_result.returncode == 0
+
+    inspect_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "eventforge",
+            "inspect-world",
+            "--world-file",
+            str(output_path),
+            "--player-role",
+            "杨景媛",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert inspect_result.returncode != 0
+    assert "already frozen for role 校方" in inspect_result.stderr

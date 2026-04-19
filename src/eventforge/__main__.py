@@ -146,7 +146,11 @@ def handle_freeze_world(args: argparse.Namespace) -> None:
 
 
 def handle_inspect_world(args: argparse.Namespace) -> None:
-    world = load_frozen_world(Path(args.world_file)) if args.world_file else build_anchor_frozen_world(args.case, player_role=args.player_role)
+    if args.world_file:
+        world = load_frozen_world(Path(args.world_file))
+        ensure_player_role_matches_frozen_world(world, requested_role=args.player_role, source_label=args.world_file)
+    else:
+        world = build_anchor_frozen_world(args.case, player_role=args.player_role)
     print_world_inspection(world)
 
 
@@ -154,11 +158,7 @@ def handle_play(args: argparse.Namespace) -> None:
     try:
         if args.world_file:
             frozen_world = load_frozen_world(Path(args.world_file))
-            if args.player_role and args.player_role != frozen_world.player_role:
-                raise ValueError(
-                    f"World file {args.world_file} is already frozen for role {frozen_world.player_role}; "
-                    "freeze a new world artifact for a different viewpoint instead."
-                )
+            ensure_player_role_matches_frozen_world(frozen_world, requested_role=args.player_role, source_label=args.world_file)
             if args.list_player_roles:
                 print(f"# 可选玩家角色：{frozen_world.title}")
                 print(f"当前选择：{frozen_world.player_role}")
@@ -231,6 +231,21 @@ def load_frozen_world(path: Path) -> FrozenInitialWorld:
 def write_json_payload(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+
+def ensure_player_role_matches_frozen_world(
+    frozen_world: FrozenInitialWorld,
+    *,
+    requested_role: str | None,
+    source_label: str,
+) -> None:
+    if requested_role and requested_role != frozen_world.player_role:
+        raise ValueError(
+            f"World file {source_label} is already frozen for role {frozen_world.player_role}; "
+            "freeze a new world artifact for a different viewpoint instead."
+        )
+
 
 
 def print_world_inspection(world: FrozenInitialWorld) -> None:
