@@ -349,13 +349,57 @@ def test_decision_focus_reflects_current_state_gaps() -> None:
     game.state.exchange_trust = 18
     game.state.community_panic = 88
     game.state.liquidity = 24
+    game.state.sell_pressure = 24
+    game.state.volatility = 28
+    game.state.rumor_level = 22
+    game.state.control = 78
+    game.state.narrative_control = 72
+    game.state.price = 68
     game.begin_turn()
 
     game.available_actions()
 
     focus = llm.last_choice_prompt["decision_focus"]
-    assert focus[0]["axis"] == "exchange_trust"
-    assert {item["axis"] for item in focus[:3]} >= {"exchange_trust", "community_panic", "liquidity"}
+    assert {item["axis"] for item in focus[:3]} == {"exchange_trust", "community_panic", "liquidity"}
+    assert {item["axis"] for item in focus[:2]} <= {"exchange_trust", "community_panic"}
+
+
+
+def test_decision_focus_uses_frozen_world_dimension_thresholds_over_flash_crash_defaults() -> None:
+    llm = FakeLLM()
+    frozen_world = FLASH_CRASH_SCENARIO.to_frozen_world()
+    custom_dimension_defs = tuple(
+        replace(dimension, warning_threshold=10, crisis_threshold=5)
+        if dimension.key == "exchange_trust"
+        else replace(dimension, warning_threshold=80, crisis_threshold=75)
+        if dimension.key == "liquidity"
+        else dimension
+        for dimension in frozen_world.dimension_defs
+    )
+    game = build_game(
+        turns=6,
+        seed=3,
+        llm_client=llm,
+        frozen_world=replace(frozen_world, dimension_defs=custom_dimension_defs),
+    )
+    game.state.exchange_trust = 18
+    game.state.liquidity = 70
+    game.state.community_panic = 40
+    game.state.sell_pressure = 20
+    game.state.volatility = 18
+    game.state.rumor_level = 18
+    game.state.control = 85
+    game.state.narrative_control = 78
+    game.state.price = 70
+    game.state.credibility = 82
+    game.state.pressure = 30
+    game.state.treasury = 72
+
+    game.available_actions()
+
+    focus = llm.last_choice_prompt["decision_focus"]
+    assert focus[0]["axis"] == "liquidity"
+    assert "exchange_trust" not in {item["axis"] for item in focus}
 
 
 
@@ -405,7 +449,7 @@ def test_score_action_rewards_reductions_on_lower_is_better_dimensions() -> None
     game = build_game(turns=6, seed=3, llm_client=FakeLLM())
     game.action_template_map = {}
     original_focus = engine_module.decision_focus_from_state
-    engine_module.decision_focus_from_state = lambda state: []
+    engine_module.decision_focus_from_state = lambda state, dimension_defs=None: []
     try:
         action = GeneratedAction(
             id="steady-the-room",

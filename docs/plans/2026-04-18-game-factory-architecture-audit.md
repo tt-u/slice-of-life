@@ -33,6 +33,7 @@ Important migration wins already landed:
 - stored `MaterialResearchPack` and `FrozenInitialWorld` artifacts are first-class and have committed anchor-case fixtures
 - runtime can boot directly from a supplied `FrozenInitialWorld`
 - generated actions now drive the live choice surface, with frozen-world action grammar preferred over legacy scenario actions
+- action-focus / dominant-tension ranking now reads each frozen world's own `dimension_defs` thresholds instead of flash-crash-specific urgency constants
 - ending resolution already comes from `FrozenInitialWorld.resolve_ending_band(...)`
 - agent run-state / reaction-boundary schemas exist and are validated at runtime
 - flash-crash is isolated as sample/regression content instead of package identity

@@ -21,6 +21,7 @@ from .domain import (
     TurnChoice,
     TurnResolution,
     TurnSituation,
+    WorldDimensionDef,
     WorldEvent,
     WorldReport,
     WorldState,
@@ -157,20 +158,35 @@ def action_tradeoff_profile(action: ActionCard) -> dict[str, list[str]]:
     }
 
 
-def decision_focus_from_state(state: WorldState) -> list[dict[str, int | str]]:
-    focus_candidates = [
-        {"axis": "control", "urgency": max(0, 60 - state.control), "desired_direction": "up"},
-        {"axis": "narrative_control", "urgency": max(0, 70 - state.narrative_control), "desired_direction": "up"},
-        {"axis": "exchange_trust", "urgency": max(0, 75 - state.exchange_trust), "desired_direction": "up"},
-        {"axis": "liquidity", "urgency": max(0, 65 - state.liquidity), "desired_direction": "up"},
-        {"axis": "price", "urgency": max(0, 55 - state.price), "desired_direction": "up"},
-        {"axis": "community_panic", "urgency": max(0, state.community_panic - 45), "desired_direction": "down"},
-        {"axis": "rumor_level", "urgency": max(0, state.rumor_level - 40), "desired_direction": "down"},
-        {"axis": "sell_pressure", "urgency": max(0, state.sell_pressure - 40), "desired_direction": "down"},
-        {"axis": "volatility", "urgency": max(0, state.volatility - 45), "desired_direction": "down"},
-        {"axis": "pressure", "urgency": max(0, state.pressure - 55), "desired_direction": "down"},
-        {"axis": "treasury", "urgency": max(0, 35 - state.treasury), "desired_direction": "up"},
-    ]
+def decision_focus_from_state(
+    state: WorldState,
+    *,
+    dimension_defs: tuple[WorldDimensionDef, ...] | None = None,
+) -> list[dict[str, int | str]]:
+    dimensions = state.to_dimension_map()
+    resolved_dimension_defs = dimension_defs or tuple()
+    if not resolved_dimension_defs:
+        resolved_dimension_defs = tuple(
+            self_dimension
+            for self_dimension in get_default_scenario().to_frozen_world().resolved_dimension_defs()
+            if self_dimension.key in dimensions
+        )
+    focus_candidates: list[dict[str, int | str]] = []
+    for dimension in resolved_dimension_defs:
+        value = dimensions.get(dimension.key)
+        if value is None:
+            continue
+        warning = 50 if dimension.warning_threshold is None else dimension.warning_threshold
+        if dimension.direction_of_health == "higher_is_better":
+            urgency = max(0, warning - value)
+            desired_direction = "up"
+        elif dimension.direction_of_health == "lower_is_better":
+            urgency = max(0, value - warning)
+            desired_direction = "down"
+        else:
+            urgency = abs(value - 50)
+            desired_direction = "balance"
+        focus_candidates.append({"axis": dimension.key, "urgency": urgency, "desired_direction": desired_direction})
     focus_candidates.sort(key=lambda item: int(item["urgency"]), reverse=True)
     return [item for item in focus_candidates if int(item["urgency"]) > 0][:4]
 
@@ -452,7 +468,10 @@ class CrisisGame:
         if "wallet_frozen" in self.state.flags:
             template_pool = [a for a in template_pool if a.id != "freeze_wallet"]
         templates = []
-        decision_focus = decision_focus_from_state(self.state)
+        decision_focus = decision_focus_from_state(
+            self.state,
+            dimension_defs=self.frozen_world.resolved_dimension_defs(),
+        )
         for action in template_pool:
             profile = action_impact_profile(action)
             tradeoff = action_tradeoff_profile(action)
@@ -758,7 +777,13 @@ class CrisisGame:
             + (dimension_deltas.get("exchange_trust", 0) if emergency_weight else 0)
             + (dimension_deltas.get("narrative_control", 0) if panic_weight else 0)
         )
-        focus_weights = {item["axis"]: int(item["urgency"]) for item in decision_focus_from_state(self.state)}
+        focus_weights = {
+            item["axis"]: int(item["urgency"])
+            for item in decision_focus_from_state(
+                self.state,
+                dimension_defs=self.frozen_world.resolved_dimension_defs(),
+            )
+        }
         for axis, urgency in focus_weights.items():
             if axis in action.upside_dimensions:
                 score += urgency // 2
@@ -965,7 +990,13 @@ class CrisisGame:
                 current_dimensions=self.state.to_dimension_map(),
                 urgent_dimensions=(),
                 unstable_dimensions=(),
-                dominant_tensions=tuple(item["axis"] for item in decision_focus_from_state(self.state)[:3]),
+                dominant_tensions=tuple(
+                    item["axis"]
+                    for item in decision_focus_from_state(
+                        self.state,
+                        dimension_defs=self.frozen_world.resolved_dimension_defs(),
+                    )[:3]
+                ),
                 acting_agent=run_state,
                 relevant_entities=relevant_entities,
                 recent_turn_summaries=tuple(resolution.action_label for resolution in self.history[-2:]),
