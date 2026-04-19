@@ -365,6 +365,82 @@ def test_generated_choice_copy_gets_explicit_tradeoff_metadata() -> None:
     assert set(action.downside_magnitude) == set(action.downside_dimensions)
 
 
+
+def test_auto_choose_action_avoids_worsening_already_collapsed_axes() -> None:
+    game = build_game(
+        turns=6,
+        seed=3,
+        llm_client=FakeLLM(),
+        frozen_world=build_cz_star_xu_public_conflict_frozen_world(player_role="CZ"),
+    )
+    game.state.credibility = 0
+    game.state.control = 0
+    game.state.pressure = 100
+    game.state.rumor_level = 100
+    game.state.community_panic = 92
+    game.pending_actions = (
+        GeneratedAction(
+            id="spiral",
+            label="继续火上浇油",
+            description="继续抢叙事但把脆弱维度压得更惨。",
+            rationale="换叙事，丢控制。",
+            upside_dimensions=("narrative_control", "exchange_trust"),
+            downside_dimensions=("credibility", "control", "pressure"),
+            upside_magnitude={"narrative_control": 6, "exchange_trust": 6},
+            downside_magnitude={"credibility": 6, "control": 6, "pressure": 6},
+            cost_types=("public",),
+            affected_entities=("cz-binance",),
+            commitment_tier="medium",
+            tags=("spiral",),
+        ),
+        GeneratedAction(
+            id="recover",
+            label="先抢救底盘",
+            description="先把已经塌穿的维度往回拉。",
+            rationale="止血优先。",
+            upside_dimensions=("credibility", "control", "pressure"),
+            downside_dimensions=("narrative_control",),
+            upside_magnitude={"credibility": 6, "control": 6, "pressure": 6},
+            downside_magnitude={"narrative_control": 3},
+            cost_types=("private",),
+            affected_entities=("cz-binance",),
+            commitment_tier="medium",
+            tags=("recover",),
+        ),
+    )
+
+    choice = game.auto_choose_action()
+
+    assert choice.action.id == "recover"
+
+
+
+def test_auto_choose_action_prefers_crisis_recovery_over_sideways_resource_padding_in_late_game() -> None:
+    game = build_game(
+        turns=20,
+        seed=7,
+        llm_client=FakeLLM(),
+        frozen_world=build_cz_star_xu_public_conflict_frozen_world(player_role="CZ"),
+    )
+    game.state.credibility = 0
+    game.state.pressure = 100
+    game.state.narrative_control = 97
+    game.state.exchange_trust = 77
+    game.state.liquidity = 73
+    game.state.volatility = 76
+    game.state.rumor_level = 100
+    game.state.control = 11
+    game.begin_turn()
+
+    available_ids = {action.id for action in game.available_actions()}
+    choice = game.auto_choose_action()
+
+    assert "credibility-hedge-6-4" in available_ids
+    assert "treasury-coalition-8-3" in available_ids
+    assert choice.action.id == "credibility-hedge-6-4"
+
+
+
 def test_generated_choice_copy_prefers_world_authored_rule_metadata_over_legacy_template_bridge() -> None:
     frozen_world = FLASH_CRASH_SCENARIO.to_frozen_world()
     custom_rules = tuple(
@@ -401,6 +477,36 @@ def test_generated_choice_copy_prefers_world_authored_rule_metadata_over_legacy_
     assert action.commitment_tier == "high"
     assert "audit" in action.tags
     assert "freeze" in action.tags
+
+
+def test_frozen_world_action_grammar_exposes_large_cross_dimension_possibility_space() -> None:
+    grammar = build_cz_star_xu_public_conflict_frozen_world(player_role="CZ").action_grammar
+
+    assert grammar is not None
+    assert len(grammar.rules) >= 60
+    assert len({rule.tags[0] for rule in grammar.rules if rule.tags}) >= 6
+    assert len({rule.trigger_dimensions for rule in grammar.rules}) >= 30
+    assert any(len(rule.preferred_upside_dimensions) >= 3 for rule in grammar.rules)
+    assert any(len(rule.likely_downside_dimensions) >= 3 for rule in grammar.rules)
+    assert any(len(rule.allowed_cost_types) >= 4 for rule in grammar.rules)
+
+
+def test_available_actions_prompt_includes_sampled_template_metadata_for_llm_rationalization() -> None:
+    llm = FakeLLM()
+    game = build_game(
+        turns=6,
+        seed=3,
+        llm_client=llm,
+        frozen_world=build_cz_star_xu_public_conflict_frozen_world(player_role="CZ"),
+    )
+    game.begin_turn()
+    game.available_actions()
+
+    assert llm.last_available_templates is not None
+    assert all("tactic_family" in template for template in llm.last_available_templates)
+    assert all("primary_dimension" in template for template in llm.last_available_templates)
+    assert all("sampled_for" in template for template in llm.last_available_templates)
+    assert all(template["sampled_for"] in {"focus", "diversity", "backfill"} for template in llm.last_available_templates)
 
 
 def test_world_authored_action_tags_drive_base_effect_hooks_without_legacy_action_ids() -> None:

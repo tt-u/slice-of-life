@@ -506,6 +506,21 @@ class CrisisGame:
             tags.append("freeze")
         return tuple(dict.fromkeys(tags))
 
+    def _template_tactic_family(self, action: ActionCard) -> str:
+        tags = self._template_tags(action)
+        return tags[0] if tags else action.tag
+
+    def _template_primary_dimension(self, action: ActionCard) -> str:
+        rule = self._action_generation_rule(action.id)
+        if rule is not None and rule.trigger_dimensions:
+            return rule.trigger_dimensions[0]
+        tradeoff = self._template_tradeoff_profile(action)
+        if tradeoff["upside_axes"]:
+            return tradeoff["upside_axes"][0]
+        if tradeoff["downside_axes"]:
+            return tradeoff["downside_axes"][0]
+        return "control"
+
     def available_actions(self) -> tuple[GeneratedAction, ...]:
         if self.pending_actions is not None:
             return self.pending_actions
@@ -523,7 +538,9 @@ class CrisisGame:
         urgent_dimensions = infer_urgent_dimensions(self.state.to_dimension_map(), dimension_defs)
         unstable_dimensions = infer_unstable_dimensions(self.state.to_dimension_map(), dimension_defs)
         templates = []
-        for action in sampled_templates:
+        sampled_template_cards = [item["action"] for item in sampled_templates]
+        for sampled in sampled_templates:
+            action = sampled["action"]
             profile = action_impact_profile(action)
             commitment_tier = self._template_commitment_tier(action)
             tradeoff = self._template_tradeoff_profile(action)
@@ -541,6 +558,9 @@ class CrisisGame:
                     "trigger_dimensions": list(rule.trigger_dimensions) if rule is not None else [],
                     "upside_axes": tradeoff["upside_axes"],
                     "downside_axes": tradeoff["downside_axes"],
+                    "tactic_family": str(sampled["tactic_family"]),
+                    "primary_dimension": str(sampled["primary_dimension"]),
+                    "sampled_for": str(sampled["sampled_for"]),
                 }
             )
         action_context = self.frozen_world.build_action_generation_context(
@@ -565,9 +585,9 @@ class CrisisGame:
             available_templates=templates,
             action_context=action_context,
         )
-        template_map = {action.id: action for action in sampled_templates}
+        template_map = {action.id: action for action in sampled_template_cards}
         constrained_ids = self._constrain_generated_action_ids(
-            template_pool=sampled_templates,
+            template_pool=sampled_template_cards,
             generated_ids=[item["template_id"] for item in generated],
         )
         generated_map = {item["template_id"]: item for item in generated if item["template_id"] in constrained_ids}
@@ -589,64 +609,117 @@ class CrisisGame:
         *,
         template_pool: list[ActionCard],
         decision_focus: list[dict[str, int | str]],
-    ) -> list[ActionCard]:
+    ) -> list[dict[str, object]]:
         grammar = self.frozen_world.action_grammar
         target_size = min(len(template_pool), max(2, grammar.menu_size if grammar is not None else 4))
         if len(template_pool) <= target_size:
-            return list(template_pool)
+            return [
+                {
+                    "action": action,
+                    "sampled_for": "backfill",
+                    "tactic_family": self._template_tactic_family(action),
+                    "primary_dimension": self._template_primary_dimension(action),
+                }
+                for action in template_pool
+            ]
 
         focus_axes = {str(item["axis"]) for item in decision_focus[:4]}
         low_slots = max(0, grammar.low_commitment_slots if grammar is not None else 1)
         medium_slots = max(0, grammar.medium_commitment_slots if grammar is not None else 2)
         high_slots = max(0, grammar.high_commitment_slots if grammar is not None else 1)
-        selected: list[ActionCard] = []
+        selected: list[dict[str, object]] = []
         selected_ids: set[str] = set()
         seen_families: set[str] = set()
-
-        def family_for(action: ActionCard) -> str:
-            tags = self._template_tags(action)
-            return tags[0] if tags else action.tag
-
-        def rule_overlap(action: ActionCard) -> int:
-            rule = self._action_generation_rule(action.id)
-            if rule is None:
-                return 0
-            return len(focus_axes & set(rule.trigger_dimensions))
-
+        seen_primary_dimensions: set[str] = set()
+        seen_tradeoffs: set[tuple[str, ...]] = set()
+        focus_weight = {str(item["axis"]): max(1, int(item["urgency"])) for item in decision_focus[:4]}
         shuffled_pool = list(template_pool)
         self.random.shuffle(shuffled_pool)
 
-        def ranked_candidates(candidates: list[ActionCard]) -> list[ActionCard]:
-            return sorted(
-                candidates,
-                key=lambda action: (
-                    rule_overlap(action),
-                    1 if family_for(action) not in seen_families else 0,
-                ),
-                reverse=True,
-            )
+        def tradeoff_signature(action: ActionCard) -> tuple[str, ...]:
+            tradeoff = self._template_tradeoff_profile(action)
+            return tuple(sorted(dict.fromkeys((*tradeoff["upside_axes"][:2], *tradeoff["downside_axes"][:2]))))
 
-        def add_one(*, tier: str | None = None) -> bool:
-            candidates = [action for action in shuffled_pool if action.id not in selected_ids]
-            if tier is not None:
-                tier_candidates = [action for action in candidates if self._template_commitment_tier(action) == tier]
-                if tier_candidates:
-                    candidates = tier_candidates
-            if not candidates:
+        def candidate_score(action: ActionCard) -> int:
+            rule = self._action_generation_rule(action.id)
+            trigger_dimensions = tuple(rule.trigger_dimensions) if rule is not None else ()
+            family = self._template_tactic_family(action)
+            primary_dimension = self._template_primary_dimension(action)
+            tags = set(self._template_tags(action))
+            score = sum(focus_weight.get(axis, 0) for axis in trigger_dimensions)
+            if family not in seen_families:
+                score += 6
+            if primary_dimension not in seen_primary_dimensions:
+                score += 5
+            if tradeoff_signature(action) not in seen_tradeoffs:
+                score += 4
+            if set(trigger_dimensions) & focus_axes:
+                score += 3
+            if {"audit", "disclosure"} & tags:
+                score += 8
+            if "freeze" in tags:
+                score += 3
+            return score
+
+        def choose(candidates: list[ActionCard], *, sampled_for: str) -> bool:
+            unresolved = [action for action in candidates if action.id not in selected_ids]
+            if not unresolved:
                 return False
-            chosen = ranked_candidates(candidates)[0]
-            selected.append(chosen)
-            selected_ids.add(chosen.id)
-            seen_families.add(family_for(chosen))
+            ranked = sorted(unresolved, key=candidate_score, reverse=True)
+            if sampled_for == "focus":
+                choice = ranked[0]
+            else:
+                top_band = ranked[: min(5, len(ranked))]
+                weights = [max(1, candidate_score(action)) for action in top_band]
+                choice = self.random.choices(top_band, weights=weights, k=1)[0]
+            family = self._template_tactic_family(choice)
+            primary_dimension = self._template_primary_dimension(choice)
+            selected.append(
+                {
+                    "action": choice,
+                    "sampled_for": sampled_for,
+                    "tactic_family": family,
+                    "primary_dimension": primary_dimension,
+                }
+            )
+            selected_ids.add(choice.id)
+            seen_families.add(family)
+            seen_primary_dimensions.add(primary_dimension)
+            seen_tradeoffs.add(tradeoff_signature(choice))
             return True
 
-        for tier, slots in (("low", low_slots), ("medium", medium_slots), ("high", high_slots)):
+        def tier_candidates(required_tier: str) -> list[ActionCard]:
+            return [action for action in shuffled_pool if self._template_commitment_tier(action) == required_tier]
+
+        def overlaps_focus(action: ActionCard) -> bool:
+            rule = self._action_generation_rule(action.id)
+            trigger_dimensions = tuple(rule.trigger_dimensions) if rule is not None else ()
+            return bool(set(trigger_dimensions) & focus_axes)
+
+        for required_tier, slots in (("low", low_slots), ("medium", medium_slots), ("high", high_slots)):
             for _ in range(slots):
                 if len(selected) >= target_size:
                     break
-                add_one(tier=tier)
-        while len(selected) < target_size and add_one():
-            pass
+                focused = [action for action in tier_candidates(required_tier) if overlaps_focus(action)]
+                if choose(focused, sampled_for="focus"):
+                    continue
+                choose(tier_candidates(required_tier), sampled_for="diversity")
+
+        while len(selected) < target_size:
+            diversity_candidates = [
+                action
+                for action in shuffled_pool
+                if action.id not in selected_ids
+                and (
+                    self._template_tactic_family(action) not in seen_families
+                    or self._template_primary_dimension(action) not in seen_primary_dimensions
+                    or tradeoff_signature(action) not in seen_tradeoffs
+                )
+            ]
+            if choose(diversity_candidates, sampled_for="diversity"):
+                continue
+            if not choose(shuffled_pool, sampled_for="backfill"):
+                break
         return selected[:target_size]
 
     def _build_generated_action(self, *, base: ActionCard, item: dict[str, str]) -> GeneratedAction:
@@ -755,8 +828,10 @@ class CrisisGame:
         for action in self.available_actions():
             score = self._score_action(action)
             scored.append((score, action))
-        _, action = max(scored, key=lambda item: item[0])
-        return TurnChoice(action=action, reason="Auto player chooses the highest control-preserving move.")
+        scored.sort(key=lambda item: item[0], reverse=True)
+        capped_action_ids = {resolution.action_id for resolution in self.history if sum(1 for item in self.history if item.action_id == resolution.action_id) >= 5}
+        chosen_action = next((action for _, action in scored if action.id not in capped_action_ids), scored[0][1])
+        return TurnChoice(action=chosen_action, reason="Auto player chooses the highest control-preserving move.")
 
     def apply_choice(self, choice: TurnChoice) -> TurnResolution:
         pre_turn_event = self.begin_turn()
@@ -908,7 +983,12 @@ class CrisisGame:
             if resolution.action_id != action.id:
                 break
             streak += 1
-        return exact_repeat_count * 14 + max(0, family_repeat_count - exact_repeat_count) * 5 + streak * 8
+        penalty = exact_repeat_count * 18 + max(0, family_repeat_count - exact_repeat_count) * 8 + streak * 12
+        if exact_repeat_count >= 4:
+            penalty += (exact_repeat_count - 3) * 24
+        if streak >= 2:
+            penalty += (streak - 1) * 18
+        return penalty
 
     def _score_action(self, action: GeneratedAction) -> int:
         dimension_deltas = self._generated_action_dimension_deltas(action)
@@ -917,17 +997,54 @@ class CrisisGame:
         treasury_penalty = 18 if self.state.treasury < 30 and dimension_deltas.get("treasury", 0) < 0 else 0
         novelty_penalty = self._action_novelty_penalty(action)
         score = (
-            dimension_deltas.get("control", 0) * 5
+            dimension_deltas.get("credibility", 0) * 6
+            + dimension_deltas.get("control", 0) * 3
             + dimension_deltas.get("narrative_control", 0) * 4
             + dimension_deltas.get("exchange_trust", 0) * 4
-            + dimension_deltas.get("liquidity", 0) * 3
-            - dimension_deltas.get("pressure", 0) * 2
+            + dimension_deltas.get("liquidity", 0) * 2
+            - dimension_deltas.get("pressure", 0) * 3
             - dimension_deltas.get("volatility", 0) * 2
+            - dimension_deltas.get("community_panic", 0) * 2
+            - dimension_deltas.get("rumor_level", 0) * 2
             - treasury_penalty
             - novelty_penalty
             + (dimension_deltas.get("exchange_trust", 0) if emergency_weight else 0)
             + (dimension_deltas.get("narrative_control", 0) if panic_weight else 0)
         )
+        crisis_defs = {dimension.key: dimension for dimension in self.frozen_world.resolved_dimension_defs()}
+        for axis, delta in dimension_deltas.items():
+            dimension = crisis_defs.get(axis)
+            if dimension is None:
+                continue
+            current_value = self.state.to_dimension_map().get(axis, 0)
+            crisis_threshold = dimension.crisis_threshold if dimension.crisis_threshold is not None else (35 if dimension.direction_of_health == "higher_is_better" else 65)
+            if dimension.direction_of_health == "higher_is_better":
+                if current_value <= 10:
+                    if delta > 0:
+                        score += abs(delta) * 18
+                    elif delta < 0:
+                        score -= abs(delta) * 6
+                elif current_value <= crisis_threshold:
+                    if delta > 0:
+                        score += abs(delta) * 4
+                    elif delta < 0:
+                        score -= abs(delta) * 6
+                elif delta < 0 and current_value <= crisis_threshold + 10:
+                    score -= abs(delta) * 3
+            elif dimension.direction_of_health == "lower_is_better":
+                if current_value >= 90:
+                    if delta < 0:
+                        score += abs(delta) * 12
+                    elif delta > 0:
+                        score -= abs(delta) * 12
+                elif current_value >= crisis_threshold:
+                    if delta < 0:
+                        score += abs(delta) * 4
+                    elif delta > 0:
+                        score -= abs(delta) * 6
+                elif delta > 0 and current_value >= crisis_threshold - 10:
+                    score -= abs(delta) * 3
+
         focus_weights = {
             item["axis"]: int(item["urgency"])
             for item in decision_focus_from_state(
@@ -942,6 +1059,10 @@ class CrisisGame:
                 score -= urgency // 2
         if self.state.truth_public and action.id == "shift_blame":
             score -= 80
+        if {"audit", "disclosure"} & set(action.tags):
+            score += 12
+        if "freeze" in action.tags:
+            score += 4
         return score
 
     def _pick_event_actor(self) -> AgentProfile:

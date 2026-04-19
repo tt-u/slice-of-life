@@ -343,7 +343,7 @@
   "action_grammar": {
     "rules": [
       {
-        "key": "rumor_level-probe-1",
+        "key": "rumor_level-probe-1-1",
         "label": "试探压低旧案噪声",
         "description": "CZ先用轻量动作试探旧案噪声的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分可信度与节奏掌控。",
         "trigger_dimensions": [
@@ -366,8 +366,8 @@
         ],
         "minimum_upside_count": 1,
         "minimum_downside_count": 1,
-        "max_upside_count": 1,
-        "max_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
         "intensity_range": [
           1,
           1
@@ -380,14 +380,52 @@
         ]
       },
       {
-        "key": "rumor_level-coalition-1",
+        "key": "rumor_level-signal-1-2",
+        "label": "放话压低旧案噪声",
+        "description": "CZ围绕旧案噪声主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "treasury",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "rumor_level",
+          "signaling"
+        ]
+      },
+      {
+        "key": "rumor_level-coalition-1-3",
         "label": "联动压低旧案噪声",
-        "description": "CZ拉动关键关系一起处理旧案噪声，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩可信度与节奏掌控。",
+        "description": "CZ拉动关键关系一起处理旧案噪声，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩可信度与资源余量。",
         "trigger_dimensions": [
           "rumor_level",
           "credibility",
           "narrative_control",
-          "control"
+          "treasury"
         ],
         "preferred_upside_dimensions": [
           "rumor_level",
@@ -395,7 +433,7 @@
         ],
         "likely_downside_dimensions": [
           "credibility",
-          "control"
+          "treasury"
         ],
         "allowed_cost_types": [
           "public",
@@ -418,7 +456,7 @@
         ]
       },
       {
-        "key": "rumor_level-hedge-1",
+        "key": "rumor_level-hedge-1-4",
         "label": "对冲压低旧案噪声",
         "description": "CZ把旧案噪声和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁可信度与节奏掌控。",
         "trigger_dimensions": [
@@ -458,7 +496,85 @@
         ]
       },
       {
-        "key": "rumor_level-commit-1",
+        "key": "rumor_level-exploit-1-5",
+        "label": "借势压低旧案噪声",
+        "description": "CZ利用旧案噪声上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受可信度与节奏掌控的副作用。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "treasury",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "rumor_level",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "rumor_level-shield-1-6",
+        "label": "护栏压低旧案噪声",
+        "description": "CZ先给旧案噪声加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分可信度与资源余量空间。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "narrative_control",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "rumor_level",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "rumor_level-commit-1-7",
         "label": "重押压低旧案噪声",
         "description": "CZ以更重承诺直接改写旧案噪声，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下可信度与节奏掌控的反噬。",
         "trigger_dimensions": [
@@ -498,7 +614,7 @@
         ]
       },
       {
-        "key": "volatility-probe-2",
+        "key": "volatility-probe-2-1",
         "label": "试探压低情绪波动",
         "description": "CZ先用轻量动作试探情绪波动的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分节奏掌控与资源余量。",
         "trigger_dimensions": [
@@ -523,8 +639,8 @@
         ],
         "minimum_upside_count": 1,
         "minimum_downside_count": 1,
-        "max_upside_count": 1,
-        "max_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
         "intensity_range": [
           1,
           1
@@ -537,12 +653,13 @@
         ]
       },
       {
-        "key": "volatility-coalition-2",
-        "label": "联动压低情绪波动",
-        "description": "CZ拉动关键关系一起处理情绪波动，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩节奏掌控与资源余量。",
+        "key": "volatility-signal-2-2",
+        "label": "放话压低情绪波动",
+        "description": "CZ围绕情绪波动主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露节奏掌控与资源余量。",
         "trigger_dimensions": [
           "volatility",
           "liquidity",
+          "credibility",
           "control",
           "treasury"
         ],
@@ -552,7 +669,47 @@
         ],
         "likely_downside_dimensions": [
           "control",
-          "treasury"
+          "treasury",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "volatility",
+          "signaling"
+        ]
+      },
+      {
+        "key": "volatility-coalition-2-3",
+        "label": "联动压低情绪波动",
+        "description": "CZ拉动关键关系一起处理情绪波动，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩节奏掌控与可信度。",
+        "trigger_dimensions": [
+          "volatility",
+          "liquidity",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "volatility",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "credibility"
         ],
         "allowed_cost_types": [
           "finance",
@@ -575,7 +732,7 @@
         ]
       },
       {
-        "key": "volatility-hedge-2",
+        "key": "volatility-hedge-2-4",
         "label": "对冲压低情绪波动",
         "description": "CZ把情绪波动和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁节奏掌控与资源余量。",
         "trigger_dimensions": [
@@ -614,7 +771,86 @@
         ]
       },
       {
-        "key": "volatility-commit-2",
+        "key": "volatility-exploit-2-5",
+        "label": "借势压低情绪波动",
+        "description": "CZ利用情绪波动上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受节奏掌控与资源余量的副作用。",
+        "trigger_dimensions": [
+          "volatility",
+          "liquidity",
+          "credibility",
+          "control",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "volatility",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "treasury",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "volatility",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "volatility-shield-2-6",
+        "label": "护栏压低情绪波动",
+        "description": "CZ先给情绪波动加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分节奏掌控与可信度空间。",
+        "trigger_dimensions": [
+          "volatility",
+          "liquidity",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "volatility",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "volatility",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "volatility-commit-2-7",
         "label": "重押压低情绪波动",
         "description": "CZ以更重承诺直接改写情绪波动，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下节奏掌控与资源余量的反噬。",
         "trigger_dimensions": [
@@ -652,7 +888,7 @@
         ]
       },
       {
-        "key": "price-probe-3",
+        "key": "price-probe-3-1",
         "label": "试探压低热度位",
         "description": "CZ先用轻量动作试探热度位的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分腾挪空间与可信度。",
         "trigger_dimensions": [
@@ -676,7 +912,7 @@
         "minimum_upside_count": 1,
         "minimum_downside_count": 1,
         "max_upside_count": 1,
-        "max_downside_count": 1,
+        "max_downside_count": 2,
         "intensity_range": [
           1,
           1
@@ -689,12 +925,13 @@
         ]
       },
       {
-        "key": "price-coalition-3",
-        "label": "联动压低热度位",
-        "description": "CZ拉动关键关系一起处理热度位，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩腾挪空间与可信度。",
+        "key": "price-signal-3-2",
+        "label": "放话压低热度位",
+        "description": "CZ围绕热度位主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露腾挪空间与可信度。",
         "trigger_dimensions": [
           "price",
           "liquidity",
+          "treasury",
           "credibility"
         ],
         "preferred_upside_dimensions": [
@@ -702,16 +939,56 @@
         ],
         "likely_downside_dimensions": [
           "liquidity",
+          "credibility",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "price",
+          "signaling"
+        ]
+      },
+      {
+        "key": "price-coalition-3-3",
+        "label": "联动压低热度位",
+        "description": "CZ拉动关键关系一起处理热度位，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩腾挪空间与资源余量。",
+        "trigger_dimensions": [
+          "price",
+          "liquidity",
+          "credibility",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "price",
           "credibility"
+        ],
+        "likely_downside_dimensions": [
+          "liquidity",
+          "treasury"
         ],
         "allowed_cost_types": [
           "finance",
           "private",
           "public"
         ],
-        "minimum_upside_count": 1,
+        "minimum_upside_count": 2,
         "minimum_downside_count": 1,
-        "max_upside_count": 1,
+        "max_upside_count": 2,
         "max_downside_count": 2,
         "intensity_range": [
           2,
@@ -725,7 +1002,7 @@
         ]
       },
       {
-        "key": "price-hedge-3",
+        "key": "price-hedge-3-4",
         "label": "对冲压低热度位",
         "description": "CZ把热度位和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁腾挪空间与可信度。",
         "trigger_dimensions": [
@@ -762,7 +1039,84 @@
         ]
       },
       {
-        "key": "price-commit-3",
+        "key": "price-exploit-3-5",
+        "label": "借势压低热度位",
+        "description": "CZ利用热度位上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受腾挪空间与可信度的副作用。",
+        "trigger_dimensions": [
+          "price",
+          "liquidity",
+          "treasury",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "price"
+        ],
+        "likely_downside_dimensions": [
+          "liquidity",
+          "credibility",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "price",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "price-shield-3-6",
+        "label": "护栏压低热度位",
+        "description": "CZ先给热度位加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分腾挪空间与资源余量空间。",
+        "trigger_dimensions": [
+          "price",
+          "liquidity",
+          "credibility",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "price",
+          "credibility"
+        ],
+        "likely_downside_dimensions": [
+          "liquidity",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "price",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "price-commit-3-7",
         "label": "重押压低热度位",
         "description": "CZ以更重承诺直接改写热度位，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下腾挪空间与可信度的反噬。",
         "trigger_dimensions": [
@@ -798,7 +1152,7 @@
         ]
       },
       {
-        "key": "narrative_control-probe-4",
+        "key": "narrative_control-probe-4-1",
         "label": "试探补强叙事控制",
         "description": "CZ先用轻量动作试探叙事控制的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分可信度与承压值。",
         "trigger_dimensions": [
@@ -821,8 +1175,8 @@
         ],
         "minimum_upside_count": 1,
         "minimum_downside_count": 1,
-        "max_upside_count": 1,
-        "max_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
         "intensity_range": [
           1,
           1
@@ -835,14 +1189,52 @@
         ]
       },
       {
-        "key": "narrative_control-coalition-4",
+        "key": "narrative_control-signal-4-2",
+        "label": "放话补强叙事控制",
+        "description": "CZ围绕叙事控制主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露可信度与承压值。",
+        "trigger_dimensions": [
+          "narrative_control",
+          "credibility",
+          "treasury",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "narrative_control",
+          "signaling"
+        ]
+      },
+      {
+        "key": "narrative_control-coalition-4-3",
         "label": "联动补强叙事控制",
-        "description": "CZ拉动关键关系一起处理叙事控制，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩可信度与承压值。",
+        "description": "CZ拉动关键关系一起处理叙事控制，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩可信度与资源余量。",
         "trigger_dimensions": [
           "narrative_control",
           "credibility",
           "exchange_trust",
-          "pressure"
+          "treasury"
         ],
         "preferred_upside_dimensions": [
           "narrative_control",
@@ -850,7 +1242,7 @@
         ],
         "likely_downside_dimensions": [
           "credibility",
-          "pressure"
+          "treasury"
         ],
         "allowed_cost_types": [
           "public",
@@ -873,7 +1265,7 @@
         ]
       },
       {
-        "key": "narrative_control-hedge-4",
+        "key": "narrative_control-hedge-4-4",
         "label": "对冲补强叙事控制",
         "description": "CZ把叙事控制和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁可信度与承压值。",
         "trigger_dimensions": [
@@ -913,7 +1305,85 @@
         ]
       },
       {
-        "key": "narrative_control-commit-4",
+        "key": "narrative_control-exploit-4-5",
+        "label": "借势补强叙事控制",
+        "description": "CZ利用叙事控制上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受可信度与承压值的副作用。",
+        "trigger_dimensions": [
+          "narrative_control",
+          "credibility",
+          "treasury",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "narrative_control",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "narrative_control-shield-4-6",
+        "label": "护栏补强叙事控制",
+        "description": "CZ先给叙事控制加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分可信度与资源余量空间。",
+        "trigger_dimensions": [
+          "narrative_control",
+          "credibility",
+          "exchange_trust",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "narrative_control",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "narrative_control-commit-4-7",
         "label": "重押补强叙事控制",
         "description": "CZ以更重承诺直接改写叙事控制，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下可信度与承压值的反噬。",
         "trigger_dimensions": [
@@ -953,7 +1423,7 @@
         ]
       },
       {
-        "key": "control-probe-5",
+        "key": "control-probe-5-1",
         "label": "试探补强节奏掌控",
         "description": "CZ先用轻量动作试探节奏掌控的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分可信度与承压值。",
         "trigger_dimensions": [
@@ -978,8 +1448,8 @@
         ],
         "minimum_upside_count": 1,
         "minimum_downside_count": 1,
-        "max_upside_count": 1,
-        "max_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
         "intensity_range": [
           1,
           1
@@ -992,12 +1462,13 @@
         ]
       },
       {
-        "key": "control-coalition-5",
-        "label": "联动补强节奏掌控",
-        "description": "CZ拉动关键关系一起处理节奏掌控，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩可信度与承压值。",
+        "key": "control-signal-5-2",
+        "label": "放话补强节奏掌控",
+        "description": "CZ围绕节奏掌控主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露可信度与承压值。",
         "trigger_dimensions": [
           "control",
           "exchange_trust",
+          "treasury",
           "credibility",
           "pressure"
         ],
@@ -1007,7 +1478,47 @@
         ],
         "likely_downside_dimensions": [
           "credibility",
-          "pressure"
+          "pressure",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "control",
+          "signaling"
+        ]
+      },
+      {
+        "key": "control-coalition-5-3",
+        "label": "联动补强节奏掌控",
+        "description": "CZ拉动关键关系一起处理节奏掌控，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩可信度与资源余量。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "credibility",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "treasury"
         ],
         "allowed_cost_types": [
           "private",
@@ -1030,7 +1541,7 @@
         ]
       },
       {
-        "key": "control-hedge-5",
+        "key": "control-hedge-5-4",
         "label": "对冲补强节奏掌控",
         "description": "CZ把节奏掌控和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁可信度与承压值。",
         "trigger_dimensions": [
@@ -1070,7 +1581,86 @@
         ]
       },
       {
-        "key": "control-commit-5",
+        "key": "control-exploit-5-5",
+        "label": "借势补强节奏掌控",
+        "description": "CZ利用节奏掌控上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受可信度与承压值的副作用。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "treasury",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "public",
+          "finance"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "control",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "control-shield-5-6",
+        "label": "护栏补强节奏掌控",
+        "description": "CZ先给节奏掌控加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分可信度与资源余量空间。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "credibility",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "control",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "control-commit-5-7",
         "label": "重押补强节奏掌控",
         "description": "CZ以更重承诺直接改写节奏掌控，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下可信度与承压值的反噬。",
         "trigger_dimensions": [
@@ -1108,7 +1698,7 @@
         ]
       },
       {
-        "key": "credibility-probe-6",
+        "key": "credibility-probe-6-1",
         "label": "试探补强可信度",
         "description": "CZ先用轻量动作试探可信度的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分承压值与节奏掌控。",
         "trigger_dimensions": [
@@ -1133,8 +1723,8 @@
         ],
         "minimum_upside_count": 1,
         "minimum_downside_count": 1,
-        "max_upside_count": 1,
-        "max_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
         "intensity_range": [
           1,
           1
@@ -1147,15 +1737,55 @@
         ]
       },
       {
-        "key": "credibility-coalition-6",
+        "key": "credibility-signal-6-2",
+        "label": "放话补强可信度",
+        "description": "CZ围绕可信度主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露承压值与节奏掌控。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "treasury",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "credibility",
+          "signaling"
+        ]
+      },
+      {
+        "key": "credibility-coalition-6-3",
         "label": "联动补强可信度",
-        "description": "CZ拉动关键关系一起处理可信度，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩承压值与节奏掌控。",
+        "description": "CZ拉动关键关系一起处理可信度，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩承压值与资源余量。",
         "trigger_dimensions": [
           "credibility",
           "narrative_control",
           "exchange_trust",
-          "pressure",
-          "control"
+          "treasury",
+          "pressure"
         ],
         "preferred_upside_dimensions": [
           "credibility",
@@ -1164,7 +1794,7 @@
         ],
         "likely_downside_dimensions": [
           "pressure",
-          "control"
+          "treasury"
         ],
         "allowed_cost_types": [
           "public",
@@ -1173,7 +1803,7 @@
         ],
         "minimum_upside_count": 2,
         "minimum_downside_count": 1,
-        "max_upside_count": 2,
+        "max_upside_count": 3,
         "max_downside_count": 2,
         "intensity_range": [
           2,
@@ -1187,7 +1817,7 @@
         ]
       },
       {
-        "key": "credibility-hedge-6",
+        "key": "credibility-hedge-6-4",
         "label": "对冲补强可信度",
         "description": "CZ把可信度和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁承压值与节奏掌控。",
         "trigger_dimensions": [
@@ -1229,7 +1859,89 @@
         ]
       },
       {
-        "key": "credibility-commit-6",
+        "key": "credibility-exploit-6-5",
+        "label": "借势补强可信度",
+        "description": "CZ利用可信度上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受承压值与节奏掌控的副作用。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "treasury",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "credibility",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "credibility-shield-6-6",
+        "label": "护栏补强可信度",
+        "description": "CZ先给可信度加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分承压值与资源余量空间。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust",
+          "treasury",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "credibility",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "credibility-commit-6-7",
         "label": "重押补强可信度",
         "description": "CZ以更重承诺直接改写可信度，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下承压值与节奏掌控的反噬。",
         "trigger_dimensions": [
@@ -1267,6 +1979,1674 @@
           "commit",
           "world-generated",
           "credibility",
+          "commitment"
+        ]
+      },
+      {
+        "key": "pressure-probe-7-1",
+        "label": "试探压低承压值",
+        "description": "CZ先用轻量动作试探承压值的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "pressure",
+          "tempo"
+        ]
+      },
+      {
+        "key": "pressure-signal-7-2",
+        "label": "放话压低承压值",
+        "description": "CZ围绕承压值主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "treasury",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "pressure",
+          "signaling"
+        ]
+      },
+      {
+        "key": "pressure-coalition-7-3",
+        "label": "联动压低承压值",
+        "description": "CZ拉动关键关系一起处理承压值，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩可信度与资源余量。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "pressure",
+          "coordination"
+        ]
+      },
+      {
+        "key": "pressure-hedge-7-4",
+        "label": "对冲压低承压值",
+        "description": "CZ把承压值和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "finance",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "pressure",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
+        "key": "pressure-exploit-7-5",
+        "label": "借势压低承压值",
+        "description": "CZ利用承压值上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受可信度与节奏掌控的副作用。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "treasury",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "finance"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "pressure",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "pressure-shield-7-6",
+        "label": "护栏压低承压值",
+        "description": "CZ先给承压值加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分可信度与资源余量空间。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "legal",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "pressure",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "pressure-commit-7-7",
+        "label": "重押压低承压值",
+        "description": "CZ以更重承诺直接改写承压值，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下可信度与节奏掌控的反噬。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "legal",
+          "finance"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "pressure",
+          "commitment"
+        ]
+      },
+      {
+        "key": "treasury-probe-8-1",
+        "label": "试探补强资源余量",
+        "description": "CZ先用轻量动作试探资源余量的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分承压值与可信度。",
+        "trigger_dimensions": [
+          "treasury",
+          "liquidity",
+          "control",
+          "pressure",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "treasury",
+          "liquidity",
+          "control"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "treasury",
+          "tempo"
+        ]
+      },
+      {
+        "key": "treasury-signal-8-2",
+        "label": "放话补强资源余量",
+        "description": "CZ围绕资源余量主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露承压值与可信度。",
+        "trigger_dimensions": [
+          "treasury",
+          "liquidity",
+          "credibility",
+          "pressure",
+          "price"
+        ],
+        "preferred_upside_dimensions": [
+          "treasury",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "credibility",
+          "price"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "treasury",
+          "signaling"
+        ]
+      },
+      {
+        "key": "treasury-coalition-8-3",
+        "label": "联动补强资源余量",
+        "description": "CZ拉动关键关系一起处理资源余量，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩承压值与热度位。",
+        "trigger_dimensions": [
+          "treasury",
+          "liquidity",
+          "control",
+          "credibility",
+          "pressure",
+          "price"
+        ],
+        "preferred_upside_dimensions": [
+          "treasury",
+          "liquidity",
+          "control",
+          "credibility"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "price"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "treasury",
+          "coordination"
+        ]
+      },
+      {
+        "key": "treasury-hedge-8-4",
+        "label": "对冲补强资源余量",
+        "description": "CZ把资源余量和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁承压值与可信度。",
+        "trigger_dimensions": [
+          "treasury",
+          "liquidity",
+          "control",
+          "pressure",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "treasury",
+          "liquidity",
+          "control"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "treasury",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
+        "key": "treasury-exploit-8-5",
+        "label": "借势补强资源余量",
+        "description": "CZ利用资源余量上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受承压值与可信度的副作用。",
+        "trigger_dimensions": [
+          "treasury",
+          "liquidity",
+          "credibility",
+          "pressure",
+          "price"
+        ],
+        "preferred_upside_dimensions": [
+          "treasury",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "credibility",
+          "price"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "treasury",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "treasury-shield-8-6",
+        "label": "护栏补强资源余量",
+        "description": "CZ先给资源余量加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分承压值与热度位空间。",
+        "trigger_dimensions": [
+          "treasury",
+          "liquidity",
+          "control",
+          "credibility",
+          "pressure",
+          "price"
+        ],
+        "preferred_upside_dimensions": [
+          "treasury",
+          "liquidity",
+          "control",
+          "credibility"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "price"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "treasury",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "treasury-commit-8-7",
+        "label": "重押补强资源余量",
+        "description": "CZ以更重承诺直接改写资源余量，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下承压值与可信度的反噬。",
+        "trigger_dimensions": [
+          "treasury",
+          "liquidity",
+          "control",
+          "pressure",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "treasury",
+          "liquidity",
+          "control"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "treasury",
+          "commitment"
+        ]
+      },
+      {
+        "key": "liquidity-probe-9-1",
+        "label": "试探补强腾挪空间",
+        "description": "CZ先用轻量动作试探腾挪空间的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分资源余量与节奏掌控。",
+        "trigger_dimensions": [
+          "liquidity",
+          "price",
+          "exchange_trust",
+          "treasury",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "liquidity",
+          "price",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "liquidity",
+          "tempo"
+        ]
+      },
+      {
+        "key": "liquidity-signal-9-2",
+        "label": "放话补强腾挪空间",
+        "description": "CZ围绕腾挪空间主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露资源余量与节奏掌控。",
+        "trigger_dimensions": [
+          "liquidity",
+          "price",
+          "credibility",
+          "treasury",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "liquidity",
+          "price"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "control",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "liquidity",
+          "signaling"
+        ]
+      },
+      {
+        "key": "liquidity-coalition-9-3",
+        "label": "联动补强腾挪空间",
+        "description": "CZ拉动关键关系一起处理腾挪空间，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩资源余量与可信度。",
+        "trigger_dimensions": [
+          "liquidity",
+          "price",
+          "exchange_trust",
+          "credibility",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "liquidity",
+          "price",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "liquidity",
+          "coordination"
+        ]
+      },
+      {
+        "key": "liquidity-hedge-9-4",
+        "label": "对冲补强腾挪空间",
+        "description": "CZ把腾挪空间和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁资源余量与节奏掌控。",
+        "trigger_dimensions": [
+          "liquidity",
+          "price",
+          "exchange_trust",
+          "treasury",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "liquidity",
+          "price",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "liquidity",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
+        "key": "liquidity-exploit-9-5",
+        "label": "借势补强腾挪空间",
+        "description": "CZ利用腾挪空间上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受资源余量与节奏掌控的副作用。",
+        "trigger_dimensions": [
+          "liquidity",
+          "price",
+          "credibility",
+          "treasury",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "liquidity",
+          "price"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "control",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "liquidity",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "liquidity-shield-9-6",
+        "label": "护栏补强腾挪空间",
+        "description": "CZ先给腾挪空间加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分资源余量与可信度空间。",
+        "trigger_dimensions": [
+          "liquidity",
+          "price",
+          "exchange_trust",
+          "credibility",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "liquidity",
+          "price",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "liquidity",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "liquidity-commit-9-7",
+        "label": "重押补强腾挪空间",
+        "description": "CZ以更重承诺直接改写腾挪空间，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下资源余量与节奏掌控的反噬。",
+        "trigger_dimensions": [
+          "liquidity",
+          "price",
+          "exchange_trust",
+          "treasury",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "liquidity",
+          "price",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "liquidity",
+          "commitment"
+        ]
+      },
+      {
+        "key": "sell_pressure-probe-10-1",
+        "label": "试探压低抛压联想",
+        "description": "CZ先用轻量动作试探抛压联想的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分资源余量与可信度。",
+        "trigger_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "exchange_trust",
+          "treasury",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "sell_pressure",
+          "tempo"
+        ]
+      },
+      {
+        "key": "sell_pressure-signal-10-2",
+        "label": "放话压低抛压联想",
+        "description": "CZ围绕抛压联想主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露资源余量与可信度。",
+        "trigger_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "credibility",
+          "treasury",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "sell_pressure",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "sell_pressure",
+          "signaling"
+        ]
+      },
+      {
+        "key": "sell_pressure-coalition-10-3",
+        "label": "联动压低抛压联想",
+        "description": "CZ拉动关键关系一起处理抛压联想，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩资源余量与承压值。",
+        "trigger_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "exchange_trust",
+          "credibility",
+          "treasury",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "exchange_trust",
+          "credibility"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "sell_pressure",
+          "coordination"
+        ]
+      },
+      {
+        "key": "sell_pressure-hedge-10-4",
+        "label": "对冲压低抛压联想",
+        "description": "CZ把抛压联想和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁资源余量与可信度。",
+        "trigger_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "exchange_trust",
+          "treasury",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "sell_pressure",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
+        "key": "sell_pressure-exploit-10-5",
+        "label": "借势压低抛压联想",
+        "description": "CZ利用抛压联想上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受资源余量与可信度的副作用。",
+        "trigger_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "credibility",
+          "treasury",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "sell_pressure",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "sell_pressure",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "sell_pressure-shield-10-6",
+        "label": "护栏压低抛压联想",
+        "description": "CZ先给抛压联想加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分资源余量与承压值空间。",
+        "trigger_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "exchange_trust",
+          "credibility",
+          "treasury",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "exchange_trust",
+          "credibility"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "sell_pressure",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "sell_pressure-commit-10-7",
+        "label": "重押压低抛压联想",
+        "description": "CZ以更重承诺直接改写抛压联想，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下资源余量与可信度的反噬。",
+        "trigger_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "exchange_trust",
+          "treasury",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "sell_pressure",
+          "liquidity",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "treasury",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "sell_pressure",
+          "commitment"
+        ]
+      },
+      {
+        "key": "community_panic-probe-11-1",
+        "label": "试探压低用户惊惧",
+        "description": "CZ先用轻量动作试探用户惊惧的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "community_panic",
+          "tempo"
+        ]
+      },
+      {
+        "key": "community_panic-signal-11-2",
+        "label": "放话压低用户惊惧",
+        "description": "CZ围绕用户惊惧主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "treasury",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "community_panic",
+          "signaling"
+        ]
+      },
+      {
+        "key": "community_panic-coalition-11-3",
+        "label": "联动压低用户惊惧",
+        "description": "CZ拉动关键关系一起处理用户惊惧，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩可信度与资源余量。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "community_panic",
+          "coordination"
+        ]
+      },
+      {
+        "key": "community_panic-hedge-11-4",
+        "label": "对冲压低用户惊惧",
+        "description": "CZ把用户惊惧和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "community_panic",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
+        "key": "community_panic-exploit-11-5",
+        "label": "借势压低用户惊惧",
+        "description": "CZ利用用户惊惧上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受可信度与节奏掌控的副作用。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "treasury",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "community_panic",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "community_panic-shield-11-6",
+        "label": "护栏压低用户惊惧",
+        "description": "CZ先给用户惊惧加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分可信度与资源余量空间。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "community_panic",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "community_panic-commit-11-7",
+        "label": "重押压低用户惊惧",
+        "description": "CZ以更重承诺直接改写用户惊惧，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下可信度与节奏掌控的反噬。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "community_panic",
+          "commitment"
+        ]
+      },
+      {
+        "key": "exchange_trust-probe-12-1",
+        "label": "试探补强平台信任",
+        "description": "CZ先用轻量动作试探平台信任的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分节奏掌控与承压值。",
+        "trigger_dimensions": [
+          "exchange_trust",
+          "control",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "exchange_trust",
+          "credibility"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "exchange_trust",
+          "tempo"
+        ]
+      },
+      {
+        "key": "exchange_trust-signal-12-2",
+        "label": "放话补强平台信任",
+        "description": "CZ围绕平台信任主动放出信号，试图重排“在重提旧案时守住自己版本的可信度，并”的预期，但会提前暴露节奏掌控与承压值。",
+        "trigger_dimensions": [
+          "exchange_trust",
+          "control",
+          "treasury",
+          "pressure",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "exchange_trust",
+          "treasury"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "pressure",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          2
+        ],
+        "tags": [
+          "signal",
+          "world-generated",
+          "exchange_trust",
+          "signaling"
+        ]
+      },
+      {
+        "key": "exchange_trust-coalition-12-3",
+        "label": "联动补强平台信任",
+        "description": "CZ拉动关键关系一起处理平台信任，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩节奏掌控与可信度。",
+        "trigger_dimensions": [
+          "exchange_trust",
+          "control",
+          "credibility",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "exchange_trust",
+          "treasury"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "exchange_trust",
+          "coordination"
+        ]
+      },
+      {
+        "key": "exchange_trust-hedge-12-4",
+        "label": "对冲补强平台信任",
+        "description": "CZ把平台信任和相关筹码一起打包对冲，尽量稳住“在重提旧案时守住自己版本的可信度，并”的关键盘面，但会转嫁节奏掌控与承压值。",
+        "trigger_dimensions": [
+          "exchange_trust",
+          "control",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "exchange_trust",
+          "credibility"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "exchange_trust",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
+        "key": "exchange_trust-exploit-12-5",
+        "label": "借势补强平台信任",
+        "description": "CZ利用平台信任上的波动与裂缝借势推进“在重提旧案时守住自己版本的可信度，并”，但必须承受节奏掌控与承压值的副作用。",
+        "trigger_dimensions": [
+          "exchange_trust",
+          "control",
+          "treasury",
+          "pressure",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "exchange_trust",
+          "treasury"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "pressure",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 3,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "exploit",
+          "world-generated",
+          "exchange_trust",
+          "opportunistic"
+        ]
+      },
+      {
+        "key": "exchange_trust-shield-12-6",
+        "label": "护栏补强平台信任",
+        "description": "CZ先给平台信任加上护栏，尽量守住“在重提旧案时守住自己版本的可信度，并”的下限，但会锁死部分节奏掌控与可信度空间。",
+        "trigger_dimensions": [
+          "exchange_trust",
+          "control",
+          "credibility",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "exchange_trust",
+          "treasury"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "shield",
+          "world-generated",
+          "exchange_trust",
+          "guardrail"
+        ]
+      },
+      {
+        "key": "exchange_trust-commit-12-7",
+        "label": "重押补强平台信任",
+        "description": "CZ以更重承诺直接改写平台信任，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下节奏掌控与承压值的反噬。",
+        "trigger_dimensions": [
+          "exchange_trust",
+          "control",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "exchange_trust",
+          "credibility"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "exchange_trust",
           "commitment"
         ]
       }

@@ -1270,7 +1270,7 @@ def dimension_driven_world_action_grammar(
         if fallback_key in initial_dimensions and fallback_key not in prioritized_keys:
             prioritized_keys.append(fallback_key)
 
-    selected_keys = prioritized_keys[: min(6, len(prioritized_keys))]
+    selected_keys = tuple(dict.fromkeys(prioritized_keys))
     rules: list[ActionGenerationRule] = []
     objective_snippet = objective[:18] if objective else "稳住局势"
     role_snippet = player_role[:8] if player_role else "当事方"
@@ -1282,10 +1282,22 @@ def dimension_driven_world_action_grammar(
             "extra_cost_types": ("delay", "public"),
             "intensity_range": (1, 1),
             "min_upside": 1,
-            "max_upside": 1,
+            "max_upside": 2,
             "min_downside": 1,
-            "max_downside": 1,
+            "max_downside": 2,
             "extra_tags": ("tempo",),
+        },
+        {
+            "family": "signal",
+            "label_prefix": "放话",
+            "description": "{role}围绕{dimension}主动放出信号，试图重排“{objective}”的预期，但会提前暴露{downside}。",
+            "extra_cost_types": ("public", "delay", "private"),
+            "intensity_range": (1, 2),
+            "min_upside": 1,
+            "max_upside": 2,
+            "min_downside": 1,
+            "max_downside": 2,
+            "extra_tags": ("signaling",),
         },
         {
             "family": "coalition",
@@ -1294,7 +1306,7 @@ def dimension_driven_world_action_grammar(
             "extra_cost_types": ("private", "public"),
             "intensity_range": (2, 2),
             "min_upside": 2,
-            "max_upside": 2,
+            "max_upside": 3,
             "min_downside": 1,
             "max_downside": 2,
             "extra_tags": ("coordination",),
@@ -1308,8 +1320,32 @@ def dimension_driven_world_action_grammar(
             "min_upside": 2,
             "max_upside": 3,
             "min_downside": 2,
-            "max_downside": 2,
+            "max_downside": 3,
             "extra_tags": ("tradeoff", "hedge"),
+        },
+        {
+            "family": "exploit",
+            "label_prefix": "借势",
+            "description": "{role}利用{dimension}上的波动与裂缝借势推进“{objective}”，但必须承受{downside}的副作用。",
+            "extra_cost_types": ("public", "finance", "private"),
+            "intensity_range": (2, 3),
+            "min_upside": 2,
+            "max_upside": 3,
+            "min_downside": 2,
+            "max_downside": 3,
+            "extra_tags": ("opportunistic",),
+        },
+        {
+            "family": "shield",
+            "label_prefix": "护栏",
+            "description": "{role}先给{dimension}加上护栏，尽量守住“{objective}”的下限，但会锁死部分{downside}空间。",
+            "extra_cost_types": ("legal", "private", "delay"),
+            "intensity_range": (2, 3),
+            "min_upside": 2,
+            "max_upside": 3,
+            "min_downside": 2,
+            "max_downside": 3,
+            "extra_tags": ("guardrail",),
         },
         {
             "family": "commit",
@@ -1318,9 +1354,9 @@ def dimension_driven_world_action_grammar(
             "extra_cost_types": ("legal", "finance", "private"),
             "intensity_range": (3, 4),
             "min_upside": 2,
-            "max_upside": 3,
+            "max_upside": 4,
             "min_downside": 2,
-            "max_downside": 2,
+            "max_downside": 3,
             "extra_tags": ("commitment",),
         },
     )
@@ -1328,9 +1364,11 @@ def dimension_driven_world_action_grammar(
         dimension = dimension_by_key.get(dimension_key)
         if dimension is None:
             continue
-        downside_dimensions = _dimension_focus_downside_dimensions(dimension_key, initial_dimensions)
-        support_dimensions = _dimension_focus_support_dimensions(dimension_key, initial_dimensions)
-        for tactic in tactic_specs:
+        support_variants = _dimension_focus_support_dimension_sets(dimension_key, initial_dimensions)
+        downside_variants = _dimension_focus_downside_dimension_sets(dimension_key, initial_dimensions)
+        for tactic_index, tactic in enumerate(tactic_specs, start=1):
+            support_dimensions = support_variants[(tactic_index - 1) % len(support_variants)]
+            downside_dimensions = downside_variants[((tactic_index - 1) * 2) % len(downside_variants)]
             upside_dimensions = tuple(
                 dict.fromkeys(key for key in (dimension_key, *support_dimensions) if key not in downside_dimensions)
             )
@@ -1338,7 +1376,7 @@ def dimension_driven_world_action_grammar(
             max_downside = min(len(downside_dimensions), int(tactic["max_downside"]))
             rules.append(
                 ActionGenerationRule(
-                    key=f"{dimension_key}-{tactic['family']}-{index}",
+                    key=f"{dimension_key}-{tactic['family']}-{index}-{tactic_index}",
                     label=f"{tactic['label_prefix']}{_dimension_focus_label_prefix(dimension)}{dimension.label}",
                     description=str(tactic["description"]).format(
                         role=role_snippet,
@@ -1413,6 +1451,24 @@ def _dimension_focus_support_dimensions(dimension_key: str, initial_dimensions: 
 
 
 
+def _dimension_focus_support_dimension_sets(dimension_key: str, initial_dimensions: dict[str, int]) -> tuple[tuple[str, ...], ...]:
+    primary = _dimension_focus_support_dimensions(dimension_key, initial_dimensions)
+    fallback_candidates = tuple(key for key in initial_dimensions if key != dimension_key and key not in primary)
+    variants: list[tuple[str, ...]] = []
+    if primary:
+        variants.append(primary[:2])
+    if primary[:1] and fallback_candidates:
+        variants.append(tuple(dict.fromkeys((*primary[:1], fallback_candidates[0]))))
+    if len(primary) >= 2 and fallback_candidates:
+        variants.append(tuple(dict.fromkeys((primary[0], primary[1], fallback_candidates[0]))))
+    elif primary and len(fallback_candidates) >= 2:
+        variants.append(tuple(dict.fromkeys((primary[0], fallback_candidates[0], fallback_candidates[1]))))
+    if not variants:
+        variants.append(primary or fallback_candidates[:1] or (dimension_key,))
+    return tuple(dict.fromkeys(variants))
+
+
+
 def _dimension_tradeoff_phrase(
     dimension_keys: tuple[str, ...],
     dimension_by_key: dict[str, WorldDimensionDef],
@@ -1444,6 +1500,24 @@ def _dimension_focus_downside_dimensions(dimension_key: str, initial_dimensions:
         return resolved[:2]
     fallback = tuple(key for key in initial_dimensions if key != dimension_key)
     return fallback[:1] or (dimension_key,)
+
+
+
+def _dimension_focus_downside_dimension_sets(dimension_key: str, initial_dimensions: dict[str, int]) -> tuple[tuple[str, ...], ...]:
+    primary = _dimension_focus_downside_dimensions(dimension_key, initial_dimensions)
+    fallback_candidates = tuple(key for key in initial_dimensions if key != dimension_key and key not in primary)
+    variants: list[tuple[str, ...]] = []
+    if primary:
+        variants.append(primary[:2])
+    if primary[:1] and fallback_candidates:
+        variants.append(tuple(dict.fromkeys((*primary[:1], fallback_candidates[0]))))
+    if len(primary) >= 2 and fallback_candidates:
+        variants.append(tuple(dict.fromkeys((primary[0], primary[1], fallback_candidates[0]))))
+    elif primary and len(fallback_candidates) >= 2:
+        variants.append(tuple(dict.fromkeys((primary[0], fallback_candidates[0], fallback_candidates[1]))))
+    if not variants:
+        variants.append(primary or fallback_candidates[:1] or (dimension_key,))
+    return tuple(dict.fromkeys(variants))
 
 
 def _dimension_focus_cost_types(dimension_key: str) -> tuple[str, ...]:
