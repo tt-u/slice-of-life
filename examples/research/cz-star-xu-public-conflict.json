@@ -66,6 +66,72 @@
       "influence": 91,
       "stance": "高热围观",
       "details": "一旦把冲突理解为平台治理风险，而不只是创始人口角，外溢杀伤会迅速放大。"
+    },
+    {
+      "id": "okx-users",
+      "name": "OKX 核心用户与做单社群",
+      "role": "平台用户",
+      "public_goal": "确认资产与提币安全不会再次被创始人旧案拖进治理恐慌",
+      "pressure_point": "最怕这轮互撕重新触发 2020 年提币暂停联想",
+      "starting_trust": 26,
+      "influence": 86,
+      "stance": "脆弱观望",
+      "details": "他们不想深究谁更会讲故事，只会先用撤资、减仓与流向变化表达态度。"
+    },
+    {
+      "id": "binance-watchers",
+      "name": "Binance 生态伙伴与交易对手",
+      "role": "生态伙伴",
+      "public_goal": "避免 CZ 的个人旧账伤及 Binance 生态合作信誉",
+      "pressure_point": "担心所有合作方都被迫为个人叙事冲突买单",
+      "starting_trust": 44,
+      "influence": 79,
+      "stance": "谨慎切割",
+      "details": "他们的沉默与背书撤回，会直接削弱 CZ 的高位叙事掌控。"
+    },
+    {
+      "id": "crypto-media",
+      "name": "加密媒体与自媒体放大器",
+      "role": "媒体放大器",
+      "public_goal": "把零散旧案拼成最能持续吸引注意力的剧情线",
+      "pressure_point": "如果拿不到新细节，流量就会转向更激烈的猜测与站队",
+      "starting_trust": 29,
+      "influence": 84,
+      "stance": "高频剪辑",
+      "details": "他们决定公众先看到哪组截图、哪条控诉、哪种标题框架。"
+    },
+    {
+      "id": "compliance-watchers",
+      "name": "监管与合规观察者",
+      "role": "合规观察者",
+      "public_goal": "把旧案重新映射成平台治理、内控和披露一致性的风险画像",
+      "pressure_point": "任何关于个人控制钱包或伪造材料的线索都会提高观察等级",
+      "starting_trust": 33,
+      "influence": 74,
+      "stance": "冷面审视",
+      "details": "他们未必公开发声，但能让双方平台后续承受更长期的摩擦成本。"
+    },
+    {
+      "id": "liquidity-desks",
+      "name": "做市商与大户流动性桌",
+      "role": "流动性桌",
+      "public_goal": "在平台信任波动前抢先重配风险敞口",
+      "pressure_point": "最怕围观情绪突然转成真实资金迁移和报价收缩",
+      "starting_trust": 27,
+      "influence": 81,
+      "stance": "先手抽梯",
+      "details": "他们不会判定谁更正义，只会决定市场是否开始为这场冲突定价。"
+    },
+    {
+      "id": "okcoin-alumni",
+      "name": "OKCoin 旧员工与历史知情网络",
+      "role": "历史知情网络",
+      "public_goal": "保留自身叙述空间而不被任何一方彻底垄断旧案记忆",
+      "pressure_point": "匿名碎片证词很容易被媒体和当事人二次利用",
+      "starting_trust": 37,
+      "influence": 67,
+      "stance": "碎片泄露",
+      "details": "他们既可能提供关键补丁，也可能让争议永远停留在半验证状态。"
     }
   ],
   "candidate_viewpoints": [
@@ -270,6 +336,207 @@
           "source_title": "CZ memoir revives feud with OKX founder Star Xu over contract forgery, Huobi arrest",
           "source_url": "https://cointelegraph.com/news/cz-memoir-reignites-feud-with-okx-star-xu",
           "note": "Cointelegraph 2026-04-08 报道：CZ 新回忆录再次点燃与徐明星的长期公开冲突，争议聚焦 OKCoin 旧合约伪造指控、徐明星是否举报李林，以及 2020 年 OKEx 暂停提币。"
+        }
+      ]
+    },
+    {
+      "entity_id": "okx-users",
+      "name": "OKX 核心用户与做单社群",
+      "role": "平台用户",
+      "stance": "并不在乎创始人旧怨本身，只关心互撕会不会再次变成平台可用性和提币安全问题",
+      "public_position": "一旦旧案重新指向 2020 年提币暂停，用户会迅速把冲突理解为 OKX 的系统性治理与钱包控制风险。",
+      "conflict_stakes": "核心利害是平台资产安全感、留存与流动性稳定；他们的耐心比围观者更短。",
+      "notable_pressures": [
+        "最怕旧案被重新锚定到提币冻结",
+        "会把模糊回应直接读成风控缺口"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "star-xu-okx",
+          "relation_type": "confidence-test",
+          "summary": "其留存与提币信心决定徐明星/OKX 阵营能否扛住治理质疑。"
+        },
+        {
+          "target_entity_id": "market-watchers",
+          "relation_type": "panic-feedback",
+          "summary": "用户情绪会反向放大市场围观者的风险联想。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "CZ memoir revives feud with OKX founder Star Xu over contract forgery, Huobi arrest",
+          "source_url": "https://cointelegraph.com/news/cz-memoir-reignites-feud-with-okx-star-xu",
+          "note": "Cointelegraph 2026-04-08 报道：CZ 新回忆录再次点燃与徐明星的长期公开冲突，争议聚焦 OKCoin 旧合约伪造指控、徐明星是否举报李林，以及 2020 年 OKEx 暂停提币。"
+        }
+      ]
+    },
+    {
+      "entity_id": "binance-watchers",
+      "name": "Binance 生态伙伴与交易对手",
+      "role": "生态伙伴",
+      "stance": "虽然不是被点名的一方，但会衡量 CZ 是否把个人旧账带回到整个 Binance 生态的信誉资产上",
+      "public_position": "他们并不急着站队，却会据此调整对 CZ 话语、合作风险与行业协调能力的判断。",
+      "conflict_stakes": "核心利害是合作可信度与行业协调资本，一旦生态伙伴退后，CZ 的高位叙事控制就会松动。",
+      "notable_pressures": [
+        "担心个人冲突污染平台生态品牌",
+        "会把证据不足视为领导力消耗"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "cz-binance",
+          "relation_type": "ecosystem-license",
+          "summary": "生态伙伴是否继续跟随，决定 CZ 能否把冲突留在个人叙事层面。"
+        },
+        {
+          "target_entity_id": "market-watchers",
+          "relation_type": "credibility-echo",
+          "summary": "合作方的冷处理会被外界读成不愿替 CZ 背书。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "CZ memoir revives feud with OKX founder Star Xu over contract forgery, Huobi arrest",
+          "source_url": "https://cointelegraph.com/news/cz-memoir-reignites-feud-with-okx-star-xu",
+          "note": "Cointelegraph 2026-04-08 报道：CZ 新回忆录再次点燃与徐明星的长期公开冲突，争议聚焦 OKCoin 旧合约伪造指控、徐明星是否举报李林，以及 2020 年 OKEx 暂停提币。"
+        }
+      ]
+    },
+    {
+      "entity_id": "crypto-media",
+      "name": "加密媒体与自媒体放大器",
+      "role": "媒体放大器",
+      "stance": "会主动挑选最抓人的旧截图、旧控诉与新发言，把分散材料重新包装成可传播的连续剧情",
+      "public_position": "媒体既想讲创始人旧怨，也会追问这场争吵究竟意味着谁的平台治理更不可信。",
+      "conflict_stakes": "核心利害是议题设定权；谁被媒体定成“持续撒谎的一方”，谁就会在后续每轮发声里持续失血。",
+      "notable_pressures": [
+        "偏爱高冲突叙事而不是慢速求证",
+        "会把单条帖文升级成多日话题链"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "cz-binance",
+          "relation_type": "framing-pressure",
+          "summary": "媒体能把 CZ 的回忆录包装成爆料，也能包装成再度翻旧账。"
+        },
+        {
+          "target_entity_id": "star-xu-okx",
+          "relation_type": "framing-pressure",
+          "summary": "媒体会把徐明星的反击写成硬刚，也可能写成情绪化甩锅。"
+        },
+        {
+          "target_entity_id": "market-watchers",
+          "relation_type": "attention-fuel",
+          "summary": "媒体选择直接决定围观者优先看到哪条冲突线。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "CZ memoir revives feud with OKX founder Star Xu over contract forgery, Huobi arrest",
+          "source_url": "https://cointelegraph.com/news/cz-memoir-reignites-feud-with-okx-star-xu",
+          "note": "Cointelegraph 2026-04-08 报道：CZ 新回忆录再次点燃与徐明星的长期公开冲突，争议聚焦 OKCoin 旧合约伪造指控、徐明星是否举报李林，以及 2020 年 OKEx 暂停提币。"
+        },
+        {
+          "source_title": "Star Xu X post calling CZ a habitual liar",
+          "source_url": "https://x.com/star_okx/status/2041785361807114422",
+          "note": "徐明星在 X 上点名称 CZ 为“habitual liar”，把冲突重新拉回 OKCoin 入离职历史、Roger Ver 合约争议、是否操纵市场，以及是否在调查中充当污点证人等多条旧案。"
+        }
+      ]
+    },
+    {
+      "entity_id": "compliance-watchers",
+      "name": "监管与合规观察者",
+      "role": "合规观察者",
+      "stance": "不会因为口水战立刻行动，但会把合约伪造、举报传闻和钱包控制旧案作为风险画像再评估的输入",
+      "public_position": "在他们眼中，真正重要的是平台治理链是否再次暴露出个人控制、内控脆弱或信息披露不一致。",
+      "conflict_stakes": "核心利害是未来审查强度与业务摩擦成本；一旦被他们重新标红，双方平台都可能付出长期代价。",
+      "notable_pressures": [
+        "对旧案治理瑕疵非常敏感",
+        "不需要完全定责也会先提高观察等级"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "star-xu-okx",
+          "relation_type": "governance-audit",
+          "summary": "OKX 阵营最怕旧案重新触发合规疑云。"
+        },
+        {
+          "target_entity_id": "cz-binance",
+          "relation_type": "credibility-audit",
+          "summary": "CZ 若被视为选择性叙事，也会损耗其对外合规说服力。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "CZ memoir revives feud with OKX founder Star Xu over contract forgery, Huobi arrest",
+          "source_url": "https://cointelegraph.com/news/cz-memoir-reignites-feud-with-okx-star-xu",
+          "note": "Cointelegraph 2026-04-08 报道：CZ 新回忆录再次点燃与徐明星的长期公开冲突，争议聚焦 OKCoin 旧合约伪造指控、徐明星是否举报李林，以及 2020 年 OKEx 暂停提币。"
+        }
+      ]
+    },
+    {
+      "entity_id": "liquidity-desks",
+      "name": "做市商与大户流动性桌",
+      "role": "流动性桌",
+      "stance": "他们不会裁判谁更有道理，但会最快把平台治理争议映射成风险溢价、撤单节奏和深度折损",
+      "public_position": "对他们来说，创始人口角的价值只在于是否足以改变盘口、信任与资产迁移速度。",
+      "conflict_stakes": "核心利害是流动性深度与波动放大器位置；一旦他们开始保守，整个事件会从舆论战进入市场结构层。",
+      "notable_pressures": [
+        "对用户惊惧和提币联想高度敏感",
+        "会提前自保而不是等待事实完全澄清"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "okx-users",
+          "relation_type": "panic-proxy",
+          "summary": "用户焦虑会迅速传导到做市深度和对手盘报价。"
+        },
+        {
+          "target_entity_id": "market-watchers",
+          "relation_type": "volatility-loop",
+          "summary": "围观热度越高，流动性桌越容易把它视作值得定价的风险。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "CZ memoir revives feud with OKX founder Star Xu over contract forgery, Huobi arrest",
+          "source_url": "https://cointelegraph.com/news/cz-memoir-reignites-feud-with-okx-star-xu",
+          "note": "Cointelegraph 2026-04-08 报道：CZ 新回忆录再次点燃与徐明星的长期公开冲突，争议聚焦 OKCoin 旧合约伪造指控、徐明星是否举报李林，以及 2020 年 OKEx 暂停提币。"
+        }
+      ]
+    },
+    {
+      "entity_id": "okcoin-alumni",
+      "name": "OKCoin 旧员工与历史知情网络",
+      "role": "历史知情网络",
+      "stance": "既可能补充碎片证词，也可能因为自身立场和记忆偏差让旧案更难收束",
+      "public_position": "这批人不一定公开站队，却是任何“当年到底发生了什么”叙事都绕不开的潜在佐证池。",
+      "conflict_stakes": "核心利害是旧案细节解释权；只要他们不断被点名，争议就很难停留在两位创始人的口头对撞。",
+      "notable_pressures": [
+        "证词碎片化且难统一核验",
+        "任何匿名爆料都可能重启新的猜疑回路"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "roger-ver-contract",
+          "relation_type": "memory-fragments",
+          "summary": "他们掌握的碎片记忆会持续影响旧合约材料如何被解读。"
+        },
+        {
+          "target_entity_id": "crypto-media",
+          "relation_type": "leak-channel",
+          "summary": "媒体会不断试图从他们身上挖到可传播的新旧细节。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "CZ memoir revives feud with OKX founder Star Xu over contract forgery, Huobi arrest",
+          "source_url": "https://cointelegraph.com/news/cz-memoir-reignites-feud-with-okx-star-xu",
+          "note": "Cointelegraph 2026-04-08 报道：CZ 新回忆录再次点燃与徐明星的长期公开冲突，争议聚焦 OKCoin 旧合约伪造指控、徐明星是否举报李林，以及 2020 年 OKEx 暂停提币。"
+        },
+        {
+          "source_title": "Star Xu X post calling CZ a habitual liar",
+          "source_url": "https://x.com/star_okx/status/2041785361807114422",
+          "note": "徐明星在 X 上点名称 CZ 为“habitual liar”，把冲突重新拉回 OKCoin 入离职历史、Roger Ver 合约争议、是否操纵市场，以及是否在调查中充当污点证人等多条旧案。"
         }
       ]
     }

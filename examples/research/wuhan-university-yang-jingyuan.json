@@ -66,6 +66,61 @@
       "influence": 88,
       "stance": "高烈度撕裂",
       "details": "既推动追问，也是放大传言和惩罚性舆情的主要场域。"
+    },
+    {
+      "id": "alumni-parents",
+      "name": "校友与家长网络",
+      "role": "校友/家长网络",
+      "public_goal": "确认学校没有在程序和声誉上失去共同体信任",
+      "pressure_point": "担心单次通报无法修复长期品牌伤口",
+      "starting_trust": 27,
+      "influence": 76,
+      "stance": "失望施压",
+      "details": "他们会把校园内冲突转译成更广的社会口碑和招生信号。"
+    },
+    {
+      "id": "degree-review-committee",
+      "name": "学位评定与复核体系",
+      "role": "学位评定体系",
+      "public_goal": "证明学位维持结论来自制度判断而非临时止损",
+      "pressure_point": "复核细节越少，越容易被认定为橡皮图章",
+      "starting_trust": 30,
+      "influence": 72,
+      "stance": "程序背书",
+      "details": "这套体系是校方最需要守住的制度锚，但也最容易被追问具体依据。"
+    },
+    {
+      "id": "legal-judgment-chain",
+      "name": "一二审判决与法律节点",
+      "role": "司法节点",
+      "public_goal": "为校方后续纠偏和肖某瑫处境反转提供程序底座",
+      "pressure_point": "外界常把司法结论误读成对全部争议的一次性裁定",
+      "starting_trust": 44,
+      "influence": 70,
+      "stance": "硬锚存在",
+      "details": "它不是万能答案，却是这场事件里最不容忽视的外部程序支点。"
+    },
+    {
+      "id": "rumor-amplifiers",
+      "name": "传言搬运号与碎片截图扩散链",
+      "role": "传言扩散者",
+      "public_goal": "持续用模糊材料维持事件热度和站队冲突",
+      "pressure_point": "一旦失去新的碎片，他们就要重新剪旧料制造爆点",
+      "starting_trust": 14,
+      "influence": 81,
+      "stance": "持续拱火",
+      "details": "他们不对事实负责，却不断重塑别人看到事件的入口。"
+    },
+    {
+      "id": "education-watchers",
+      "name": "教育治理观察者与高校同行",
+      "role": "教育治理观察者",
+      "public_goal": "把此案作为高校处理学位复核和舆情问责的制度样本来审视",
+      "pressure_point": "任何闭环断裂都会被视作高校治理范本失败",
+      "starting_trust": 35,
+      "influence": 68,
+      "stance": "冷静比对",
+      "details": "他们会把这起事件外推到更大的高校治理讨论，而不止停留在个案热搜。"
     }
   ],
   "candidate_viewpoints": [
@@ -255,6 +310,161 @@
           "target_entity_id": "xiao-moutao",
           "relation_type": "reputation-whiplash",
           "summary": "会在受害、翻盘与反攻叙事之间快速切换。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "武汉大学情况通报",
+          "source_url": "https://www.whu.edu.cn/info/5231/258444.htm",
+          "note": "2025-09-20 校方通报：二审维持一审驳回杨某媛诉肖某瑫性骚扰损害纠纷请求，学校撤销肖某瑫记过处分，维持杨某媛硕士学位，并同步公布多项校内问责与辟谣结论。"
+        }
+      ]
+    },
+    {
+      "entity_id": "alumni-parents",
+      "name": "校友与家长网络",
+      "role": "校友/家长网络",
+      "stance": "既担心学校声誉塌陷，也会把事件当作判断学校是否还值得信任的重要样本",
+      "public_position": "他们关注的不只是当事人输赢，而是学校是否在程序、培养和危机回应上失去了共同体信誉。",
+      "conflict_stakes": "核心利害是学校长期品牌与招生吸引力；这群人的失望会比即时热搜更持久。",
+      "notable_pressures": [
+        "对学校声誉伤口非常敏感",
+        "容易把程序争议外推成系统性治理失败"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "whu-admin",
+          "relation_type": "reputation-demand",
+          "summary": "他们要求校方给出比通报更能长期自洽的解释。"
+        },
+        {
+          "target_entity_id": "campus-public",
+          "relation_type": "sentiment-bridge",
+          "summary": "他们会把校园内部争议带到更广的社会关系网中。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "武汉大学情况通报",
+          "source_url": "https://www.whu.edu.cn/info/5231/258444.htm",
+          "note": "2025-09-20 校方通报：二审维持一审驳回杨某媛诉肖某瑫性骚扰损害纠纷请求，学校撤销肖某瑫记过处分，维持杨某媛硕士学位，并同步公布多项校内问责与辟谣结论。"
+        }
+      ]
+    },
+    {
+      "entity_id": "degree-review-committee",
+      "name": "学位评定与复核体系",
+      "role": "学位评定体系",
+      "stance": "试图证明复核结论是制度化产物而不是个别护短，但越解释越容易被继续要求细节",
+      "public_position": "其存在意义是把学位维持结论包装为可重复的程序判断，而非单次公关动作。",
+      "conflict_stakes": "核心利害是学位制度本身的可信度；一旦被视为橡皮图章，整个校内解释都会失去支撑。",
+      "notable_pressures": [
+        "复核过程透明度不足",
+        "任何细节缺口都会被解读成程序偏袒"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "yang-jingyuan",
+          "relation_type": "degree-basis",
+          "summary": "学位是否站得住脚，直接绑定于这套复核体系能否被相信。"
+        },
+        {
+          "target_entity_id": "whu-admin",
+          "relation_type": "process-backbone",
+          "summary": "校方对外说服力取决于这套体系能否承担制度背书。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "武汉大学情况通报",
+          "source_url": "https://www.whu.edu.cn/info/5231/258444.htm",
+          "note": "2025-09-20 校方通报：二审维持一审驳回杨某媛诉肖某瑫性骚扰损害纠纷请求，学校撤销肖某瑫记过处分，维持杨某媛硕士学位，并同步公布多项校内问责与辟谣结论。"
+        }
+      ]
+    },
+    {
+      "entity_id": "legal-judgment-chain",
+      "name": "一二审判决与法律节点",
+      "role": "司法节点",
+      "stance": "其文本并不直接回答全部公共质疑，却成为校方纠偏与肖某瑫翻盘最硬的程序锚点",
+      "public_position": "二审维持一审结果，使得校方得以把后续处置更多建立在司法节点而非纯校内判断之上。",
+      "conflict_stakes": "核心利害是程序权威的外部来源；若公众不再相信司法节点能解释校园后续处置，校方的锚点会迅速松动。",
+      "notable_pressures": [
+        "法律结论无法覆盖所有学术与舆情争议",
+        "容易被误读为替代全部事实判断"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "xiao-moutao",
+          "relation_type": "vindication-anchor",
+          "summary": "肖某瑫的叙事回升直接依赖司法节点提供的程序反转。"
+        },
+        {
+          "target_entity_id": "whu-admin",
+          "relation_type": "decision-anchor",
+          "summary": "校方用司法节点为处分撤销和后续通报提供底座。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "武汉大学情况通报",
+          "source_url": "https://www.whu.edu.cn/info/5231/258444.htm",
+          "note": "2025-09-20 校方通报：二审维持一审驳回杨某媛诉肖某瑫性骚扰损害纠纷请求，学校撤销肖某瑫记过处分，维持杨某媛硕士学位，并同步公布多项校内问责与辟谣结论。"
+        }
+      ]
+    },
+    {
+      "entity_id": "rumor-amplifiers",
+      "name": "传言搬运号与碎片截图扩散链",
+      "role": "传言扩散者",
+      "stance": "他们不承担求证责任，却持续把最刺激的碎片重新剪成能引爆情绪的版本",
+      "public_position": "优秀论文、家庭背景、联名信、网暴后果等内容之所以久拖不散，很大程度上依赖这条再传播链。",
+      "conflict_stakes": "核心利害是事实边界；只要扩散链不断，校方和当事人都要被迫反复回应旧问题。",
+      "notable_pressures": [
+        "最擅长把旧材料重新包装成新爆点",
+        "靠模糊引用制造真假难分的热度"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "campus-public",
+          "relation_type": "heat-loop",
+          "summary": "传言扩散链给公众撕裂持续输送燃料。"
+        },
+        {
+          "target_entity_id": "yang-jingyuan",
+          "relation_type": "identity-pressure",
+          "summary": "其个人形象和背景猜测不断被这条链条重新放大。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "武汉大学情况通报",
+          "source_url": "https://www.whu.edu.cn/info/5231/258444.htm",
+          "note": "2025-09-20 校方通报：二审维持一审驳回杨某媛诉肖某瑫性骚扰损害纠纷请求，学校撤销肖某瑫记过处分，维持杨某媛硕士学位，并同步公布多项校内问责与辟谣结论。"
+        }
+      ]
+    },
+    {
+      "entity_id": "education-watchers",
+      "name": "教育治理观察者与高校同行",
+      "role": "教育治理观察者",
+      "stance": "把此案当作高校如何处理性骚扰争议、学位复核与校内问责的公开样本来观察",
+      "public_position": "他们不会替任何一方简单站队，而是会据此判断高校治理是否还具备可复制的制度说服力。",
+      "conflict_stakes": "核心利害是案例外溢效应；一旦他们把武汉大学定为负面范本，事件会超出单校舆情范围。",
+      "notable_pressures": [
+        "会把个案上升为制度案例",
+        "对问责链和复核链的闭环完整度要求很高"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "whu-admin",
+          "relation_type": "governance-benchmark",
+          "summary": "校方的一举一动都可能被拿去和其他高校治理实践比较。"
+        },
+        {
+          "target_entity_id": "degree-review-committee",
+          "relation_type": "process-benchmark",
+          "summary": "复核体系是否经得起旁观者拆解，决定这起事件的制度外溢评价。"
         }
       ],
       "evidence": [

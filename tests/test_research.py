@@ -84,7 +84,9 @@ def test_wuhan_anchor_research_pack_captures_direct_conflict_parties_and_evidenc
 
     assert pack.case_id == "wuhan-university-yang-jingyuan"
     assert pack.candidate_viewpoints == ("校方", "杨景媛")
-    assert len(pack.entity_cards) >= 4
+    assert len(pack.entities) >= 10
+    assert len(pack.entity_cards) >= 10
+    assert len({entity.role for entity in pack.entities}) >= 8
     assert {card.role for card in pack.entity_cards} >= {"校方", "杨景媛"}
     assert any(dispute.key == "degree-integrity" for dispute in pack.disputed_points)
     assert any(
@@ -110,7 +112,9 @@ def test_cz_star_xu_anchor_research_pack_captures_direct_conflict_parties_and_so
     assert pack.case_id == "cz-star-xu-public-conflict"
     assert pack.title == "CZ / 徐明星公开冲突"
     assert pack.candidate_viewpoints == ("CZ", "徐明星/OKX camp")
-    assert len(pack.entity_cards) >= 4
+    assert len(pack.entities) >= 10
+    assert len(pack.entity_cards) >= 10
+    assert len({entity.role for entity in pack.entities}) >= 8
     assert {card.role for card in pack.entity_cards} >= {"CZ", "徐明星/OKX camp"}
     assert any(dispute.key == "contract-forgery" for dispute in pack.disputed_points)
     source_urls = {

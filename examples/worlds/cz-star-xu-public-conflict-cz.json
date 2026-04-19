@@ -136,6 +136,72 @@
       "influence": 91,
       "stance": "高热围观",
       "details": "一旦把冲突理解为平台治理风险，而不只是创始人口角，外溢杀伤会迅速放大。"
+    },
+    {
+      "id": "okx-users",
+      "name": "OKX 核心用户与做单社群",
+      "role": "平台用户",
+      "public_goal": "确认资产与提币安全不会再次被创始人旧案拖进治理恐慌",
+      "pressure_point": "最怕这轮互撕重新触发 2020 年提币暂停联想",
+      "starting_trust": 26,
+      "influence": 86,
+      "stance": "脆弱观望",
+      "details": "他们不想深究谁更会讲故事，只会先用撤资、减仓与流向变化表达态度。"
+    },
+    {
+      "id": "binance-watchers",
+      "name": "Binance 生态伙伴与交易对手",
+      "role": "生态伙伴",
+      "public_goal": "避免 CZ 的个人旧账伤及 Binance 生态合作信誉",
+      "pressure_point": "担心所有合作方都被迫为个人叙事冲突买单",
+      "starting_trust": 44,
+      "influence": 79,
+      "stance": "谨慎切割",
+      "details": "他们的沉默与背书撤回，会直接削弱 CZ 的高位叙事掌控。"
+    },
+    {
+      "id": "crypto-media",
+      "name": "加密媒体与自媒体放大器",
+      "role": "媒体放大器",
+      "public_goal": "把零散旧案拼成最能持续吸引注意力的剧情线",
+      "pressure_point": "如果拿不到新细节，流量就会转向更激烈的猜测与站队",
+      "starting_trust": 29,
+      "influence": 84,
+      "stance": "高频剪辑",
+      "details": "他们决定公众先看到哪组截图、哪条控诉、哪种标题框架。"
+    },
+    {
+      "id": "compliance-watchers",
+      "name": "监管与合规观察者",
+      "role": "合规观察者",
+      "public_goal": "把旧案重新映射成平台治理、内控和披露一致性的风险画像",
+      "pressure_point": "任何关于个人控制钱包或伪造材料的线索都会提高观察等级",
+      "starting_trust": 33,
+      "influence": 74,
+      "stance": "冷面审视",
+      "details": "他们未必公开发声，但能让双方平台后续承受更长期的摩擦成本。"
+    },
+    {
+      "id": "liquidity-desks",
+      "name": "做市商与大户流动性桌",
+      "role": "流动性桌",
+      "public_goal": "在平台信任波动前抢先重配风险敞口",
+      "pressure_point": "最怕围观情绪突然转成真实资金迁移和报价收缩",
+      "starting_trust": 27,
+      "influence": 81,
+      "stance": "先手抽梯",
+      "details": "他们不会判定谁更正义，只会决定市场是否开始为这场冲突定价。"
+    },
+    {
+      "id": "okcoin-alumni",
+      "name": "OKCoin 旧员工与历史知情网络",
+      "role": "历史知情网络",
+      "public_goal": "保留自身叙述空间而不被任何一方彻底垄断旧案记忆",
+      "pressure_point": "匿名碎片证词很容易被媒体和当事人二次利用",
+      "starting_trust": 37,
+      "influence": 67,
+      "stance": "碎片泄露",
+      "details": "他们既可能提供关键补丁，也可能让争议永远停留在半验证状态。"
     }
   ],
   "ending_bands": [
