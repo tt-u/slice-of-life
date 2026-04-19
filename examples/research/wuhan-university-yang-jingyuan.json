@@ -1,0 +1,298 @@
+{
+  "case_id": "wuhan-university-yang-jingyuan",
+  "title": "武汉大学杨景媛事件",
+  "source_material": "以武汉大学 2025-09-20《情况通报》为核心公开材料，整理处分撤销、二审判决、学位维持、导师/学院问责与网络传言清理的多线冲突结构。",
+  "premise": "一份校方通报把司法结果、校内处分、学位复核、导师责任与舆情辟谣全部压到同一冲突面上。",
+  "opponent": "对位当事人、持续撕裂的公众舆论与无法回避的程序公信力质疑",
+  "audience": [
+    "学生",
+    "校友",
+    "公众",
+    "媒体观察者"
+  ],
+  "truth": "这已不是单点指控，而是司法节点、校方复核、论文质量争议和网络传言同时争夺定义权的复合冲突。",
+  "entities": [
+    {
+      "id": "whu-admin",
+      "name": "武汉大学校方",
+      "role": "校方",
+      "public_goal": "稳住程序合法性与学校公信力",
+      "pressure_point": "处分撤销和学位维持结论不被公众接受",
+      "starting_trust": 32,
+      "influence": 93,
+      "stance": "高压止损",
+      "details": "手握正式通报与问责权，但每一步都受外部舆论放大检视。"
+    },
+    {
+      "id": "yang-jingyuan",
+      "name": "杨景媛",
+      "role": "杨景媛",
+      "public_goal": "保住学位与个人叙事合法性",
+      "pressure_point": "论文不规范问题与背景传言持续发酵",
+      "starting_trust": 28,
+      "influence": 82,
+      "stance": "被动自证",
+      "details": "直接冲突当事人之一，其学位与个人名誉已被绑定到校方复核结论上。"
+    },
+    {
+      "id": "xiao-moutao",
+      "name": "肖某瑫",
+      "role": "肖某瑫",
+      "public_goal": "巩固处分撤销后的名誉回升",
+      "pressure_point": "任何新说法都可能把事件重新拉回旧叙事",
+      "starting_trust": 41,
+      "influence": 77,
+      "stance": "翻盘反击",
+      "details": "另一核心冲突当事人，司法节点和校方复核使其位置明显回升。"
+    },
+    {
+      "id": "econ-management-chain",
+      "name": "经管学院与导师责任链",
+      "role": "导师/学院体系",
+      "public_goal": "把整改限制在制度修补层面",
+      "pressure_point": "论文审核责任被继续深挖",
+      "starting_trust": 24,
+      "influence": 65,
+      "stance": "防御整改",
+      "details": "承接论文规范争议与培养责任问责，是校方体系内部的重要受压点。"
+    },
+    {
+      "id": "campus-public",
+      "name": "校内外舆论与网络围观者",
+      "role": "公众舆论",
+      "public_goal": "逼出可被相信的完整解释",
+      "pressure_point": "被不实信息和情绪化站队牵着走",
+      "starting_trust": 18,
+      "influence": 88,
+      "stance": "高烈度撕裂",
+      "details": "既推动追问，也是放大传言和惩罚性舆情的主要场域。"
+    }
+  ],
+  "candidate_viewpoints": [
+    "校方",
+    "杨景媛"
+  ],
+  "opening_event": {
+    "headline": "校方通报引爆二次舆论对冲",
+    "summary": "处分撤销、学位维持与多项辟谣被同时抛出，直接把校方与杨景媛再次推到舆论核心。",
+    "severity": 85,
+    "actor_id": "whu-admin",
+    "actor_name": "武汉大学校方",
+    "state_delta": {}
+  },
+  "research_notes": [
+    "当前研究包以武汉大学官方公开通报为核心证据源，适合作为第一版锚点世界的可审查基线。",
+    "首批可玩角色限定为直接冲突双方中的校方与杨景媛；肖某瑫保留为高影响对位实体。",
+    "论文质量争议、处分撤销争议与传言真假边界是后续冻结世界时必须保留的三条主冲突轴。"
+  ],
+  "entity_cards": [
+    {
+      "entity_id": "whu-admin",
+      "name": "武汉大学校方",
+      "role": "校方",
+      "stance": "强调依法依规复核并试图收束舆情外溢",
+      "public_position": "尊重司法判决，撤销肖某瑫处分，维持杨景媛硕士学位，并对校内责任链启动问责整改。",
+      "conflict_stakes": "核心风险是程序公信力、内部治理能力和持续舆论攻击的叠加损耗。",
+      "notable_pressures": [
+        "处分撤销后的公信力追问",
+        "学位复核结论能否服众",
+        "多部门被追责后的治理压力"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "yang-jingyuan",
+          "relation_type": "institutional-review",
+          "summary": "对其论文、学位授予与相关传言进行复核并维持学位决定。"
+        },
+        {
+          "target_entity_id": "xiao-moutao",
+          "relation_type": "discipline-reversal",
+          "summary": "在司法节点后撤销对其记过处分，直接改变对位关系。"
+        },
+        {
+          "target_entity_id": "campus-public",
+          "relation_type": "legitimacy-pressure",
+          "summary": "需要同时面对校内外对于程序正当性和处置尺度的持续质疑。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "武汉大学情况通报",
+          "source_url": "https://www.whu.edu.cn/info/5231/258444.htm",
+          "note": "2025-09-20 校方通报：二审维持一审驳回杨某媛诉肖某瑫性骚扰损害纠纷请求，学校撤销肖某瑫记过处分，维持杨某媛硕士学位，并同步公布多项校内问责与辟谣结论。"
+        }
+      ]
+    },
+    {
+      "entity_id": "yang-jingyuan",
+      "name": "杨景媛",
+      "role": "杨景媛",
+      "stance": "维护个人学位与叙事合法性，但处在持续被审视的位置",
+      "public_position": "其硕士学位经校内两阶段复核后被维持，校方称未发现抄袭、主观造假、篡改数据或编造结论。",
+      "conflict_stakes": "核心利害是个人声誉、学位合法性与对外界质疑的承压能力。",
+      "notable_pressures": [
+        "论文存在百余处不规范问题",
+        "网络传言叠加身份关系猜测",
+        "与校方结论绑定后的被动性"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "whu-admin",
+          "relation_type": "dependent-conflict",
+          "summary": "其学位与公开叙事高度依赖校方复核结论，同时也承受校方流程瑕疵外溢后果。"
+        },
+        {
+          "target_entity_id": "xiao-moutao",
+          "relation_type": "direct-conflict",
+          "summary": "与肖某瑫的纠纷是整个事件的原始冲突轴。"
+        },
+        {
+          "target_entity_id": "campus-public",
+          "relation_type": "credibility-contest",
+          "summary": "公众对其论文质量、背景传言和事件责任分配持续争执。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "武汉大学情况通报",
+          "source_url": "https://www.whu.edu.cn/info/5231/258444.htm",
+          "note": "2025-09-20 校方通报：二审维持一审驳回杨某媛诉肖某瑫性骚扰损害纠纷请求，学校撤销肖某瑫记过处分，维持杨某媛硕士学位，并同步公布多项校内问责与辟谣结论。"
+        }
+      ]
+    },
+    {
+      "entity_id": "xiao-moutao",
+      "name": "肖某瑫",
+      "role": "肖某瑫",
+      "stance": "借司法与校内复核节点获得翻盘空间",
+      "public_position": "二审维持一审驳回杨某媛全部诉讼请求，校方随后撤销对其记过处分，并称其学业未中断。",
+      "conflict_stakes": "核心利害是个人名誉、处分撤销后的叙事重建，以及是否继续承受公共争议余波。",
+      "notable_pressures": [
+        "仍被卷入长期舆论对冲",
+        "围绕网暴与个人受损的传言反复扩散"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "whu-admin",
+          "relation_type": "vindication-via-review",
+          "summary": "其局面改善依赖司法节点与校方复核结论。"
+        },
+        {
+          "target_entity_id": "yang-jingyuan",
+          "relation_type": "direct-conflict",
+          "summary": "与杨景媛之间的纠纷继续决定公众如何理解整个事件。"
+        },
+        {
+          "target_entity_id": "campus-public",
+          "relation_type": "sympathy-volatility",
+          "summary": "不同舆论群体会在同情、怀疑与反击之间快速切换。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "武汉大学情况通报",
+          "source_url": "https://www.whu.edu.cn/info/5231/258444.htm",
+          "note": "2025-09-20 校方通报：二审维持一审驳回杨某媛诉肖某瑫性骚扰损害纠纷请求，学校撤销肖某瑫记过处分，维持杨某媛硕士学位，并同步公布多项校内问责与辟谣结论。"
+        }
+      ]
+    },
+    {
+      "entity_id": "econ-management-chain",
+      "name": "经管学院与导师责任链",
+      "role": "导师/学院体系",
+      "stance": "进入防御整改状态，试图把问题限制在论文规范与培养流程层面",
+      "public_position": "导师被约谈并暂停研究生招生资格两年，学院学位评定分委员会被责令检查整改。",
+      "conflict_stakes": "核心利害是研究生培养责任、论文审核机制和学院治理信誉。",
+      "notable_pressures": [
+        "导师把关失守",
+        "学院分委员会审核不严",
+        "问责后制度修补压力"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "yang-jingyuan",
+          "relation_type": "training-chain",
+          "summary": "其论文质量争议直接指向导师指导和学院审核责任。"
+        },
+        {
+          "target_entity_id": "whu-admin",
+          "relation_type": "accountability",
+          "summary": "校方问责将学院与导师链条直接纳入责任修复工程。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "武汉大学情况通报",
+          "source_url": "https://www.whu.edu.cn/info/5231/258444.htm",
+          "note": "2025-09-20 校方通报：二审维持一审驳回杨某媛诉肖某瑫性骚扰损害纠纷请求，学校撤销肖某瑫记过处分，维持杨某媛硕士学位，并同步公布多项校内问责与辟谣结论。"
+        }
+      ]
+    },
+    {
+      "entity_id": "campus-public",
+      "name": "校内外舆论与网络围观者",
+      "role": "公众舆论",
+      "stance": "围绕程序公正、论文质量与当事人遭遇持续撕裂",
+      "public_position": "围绕优秀论文、修改论文、家庭背景、校友联名信及网暴后果等说法大量扩散，校方逐项辟谣。",
+      "conflict_stakes": "核心利害是事件定义权——是程序纠偏、学术失范、舆论失真还是机构护短。",
+      "notable_pressures": [
+        "信息碎片化传播",
+        "辟谣与再传播并存",
+        "情绪化站队压缩细节讨论空间"
+      ],
+      "relationships": [
+        {
+          "target_entity_id": "whu-admin",
+          "relation_type": "trust-crisis",
+          "summary": "对校方通报既是监督力量，也是持续施压来源。"
+        },
+        {
+          "target_entity_id": "yang-jingyuan",
+          "relation_type": "credibility-pressure",
+          "summary": "对其论文、背景与个人角色持续进行放大审视。"
+        },
+        {
+          "target_entity_id": "xiao-moutao",
+          "relation_type": "reputation-whiplash",
+          "summary": "会在受害、翻盘与反攻叙事之间快速切换。"
+        }
+      ],
+      "evidence": [
+        {
+          "source_title": "武汉大学情况通报",
+          "source_url": "https://www.whu.edu.cn/info/5231/258444.htm",
+          "note": "2025-09-20 校方通报：二审维持一审驳回杨某媛诉肖某瑫性骚扰损害纠纷请求，学校撤销肖某瑫记过处分，维持杨某媛硕士学位，并同步公布多项校内问责与辟谣结论。"
+        }
+      ]
+    }
+  ],
+  "disputed_points": [
+    {
+      "key": "discipline-reversal",
+      "claim": "对肖某瑫的纪律处分是否应被撤销",
+      "sides": [
+        "尊重司法判决与校方复核的一方",
+        "质疑校方此前程序与现在纠偏尺度的一方"
+      ],
+      "status": "contested"
+    },
+    {
+      "key": "degree-integrity",
+      "claim": "杨景媛论文虽未被认定学术不端，但在百余处不规范问题下是否仍应维持学位",
+      "sides": [
+        "主张学位维持的一方",
+        "认为论文质量问题已足以动摇学位合法性的一方"
+      ],
+      "status": "contested"
+    },
+    {
+      "key": "rumor-boundary",
+      "claim": "围绕背景关系、优秀论文、联名信和网暴后果的大量传言哪些属于事实",
+      "sides": [
+        "校方集中辟谣口径",
+        "持续扩散未经核实说法的舆论人群"
+      ],
+      "status": "active"
+    }
+  ]
+}

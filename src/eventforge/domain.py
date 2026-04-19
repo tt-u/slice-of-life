@@ -536,6 +536,123 @@ class WorldEndingBand:
 
 
 @dataclass(frozen=True, slots=True)
+class EvidenceNote:
+    source_title: str
+    source_url: str
+    note: str
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "source_title": self.source_title,
+            "source_url": self.source_url,
+            "note": self.note,
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "EvidenceNote":
+        if not isinstance(payload, dict):
+            raise TypeError("Evidence note payload must be a dict")
+        return cls(
+            source_title=str(payload["source_title"]),
+            source_url=str(payload["source_url"]),
+            note=str(payload["note"]),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ResearchRelationship:
+    target_entity_id: str
+    relation_type: str
+    summary: str
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "target_entity_id": self.target_entity_id,
+            "relation_type": self.relation_type,
+            "summary": self.summary,
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "ResearchRelationship":
+        if not isinstance(payload, dict):
+            raise TypeError("Research relationship payload must be a dict")
+        return cls(
+            target_entity_id=str(payload["target_entity_id"]),
+            relation_type=str(payload["relation_type"]),
+            summary=str(payload["summary"]),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ResearchDispute:
+    key: str
+    claim: str
+    sides: tuple[str, ...]
+    status: str
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "key": self.key,
+            "claim": self.claim,
+            "sides": list(self.sides),
+            "status": self.status,
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "ResearchDispute":
+        if not isinstance(payload, dict):
+            raise TypeError("Research dispute payload must be a dict")
+        return cls(
+            key=str(payload["key"]),
+            claim=str(payload["claim"]),
+            sides=tuple(str(item) for item in payload.get("sides", [])),
+            status=str(payload["status"]),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class EntityResearchCard:
+    entity_id: str
+    name: str
+    role: str
+    stance: str
+    public_position: str
+    conflict_stakes: str
+    notable_pressures: tuple[str, ...] = ()
+    relationships: tuple[ResearchRelationship, ...] = ()
+    evidence: tuple[EvidenceNote, ...] = ()
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "entity_id": self.entity_id,
+            "name": self.name,
+            "role": self.role,
+            "stance": self.stance,
+            "public_position": self.public_position,
+            "conflict_stakes": self.conflict_stakes,
+            "notable_pressures": list(self.notable_pressures),
+            "relationships": [relationship.to_payload() for relationship in self.relationships],
+            "evidence": [note.to_payload() for note in self.evidence],
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "EntityResearchCard":
+        if not isinstance(payload, dict):
+            raise TypeError("Entity research card payload must be a dict")
+        return cls(
+            entity_id=str(payload["entity_id"]),
+            name=str(payload["name"]),
+            role=str(payload["role"]),
+            stance=str(payload["stance"]),
+            public_position=str(payload["public_position"]),
+            conflict_stakes=str(payload["conflict_stakes"]),
+            notable_pressures=tuple(str(item) for item in payload.get("notable_pressures", [])),
+            relationships=tuple(ResearchRelationship.from_payload(item) for item in payload.get("relationships", [])),
+            evidence=tuple(EvidenceNote.from_payload(item) for item in payload.get("evidence", [])),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class MaterialResearchPack:
     case_id: str
     title: str
@@ -548,6 +665,8 @@ class MaterialResearchPack:
     candidate_viewpoints: tuple[str, ...]
     opening_event: "WorldEvent"
     research_notes: tuple[str, ...] = ()
+    entity_cards: tuple[EntityResearchCard, ...] = ()
+    disputed_points: tuple[ResearchDispute, ...] = ()
 
     def to_payload(self) -> dict[str, object]:
         return {
@@ -562,6 +681,8 @@ class MaterialResearchPack:
             "candidate_viewpoints": list(self.candidate_viewpoints),
             "opening_event": world_event_to_payload(self.opening_event),
             "research_notes": list(self.research_notes),
+            "entity_cards": [card.to_payload() for card in self.entity_cards],
+            "disputed_points": [dispute.to_payload() for dispute in self.disputed_points],
         }
 
     @classmethod
@@ -578,6 +699,8 @@ class MaterialResearchPack:
             candidate_viewpoints=tuple(str(item) for item in payload.get("candidate_viewpoints", [])),
             opening_event=world_event_from_payload(payload["opening_event"]),
             research_notes=tuple(str(item) for item in payload.get("research_notes", [])),
+            entity_cards=tuple(EntityResearchCard.from_payload(item) for item in payload.get("entity_cards", [])),
+            disputed_points=tuple(ResearchDispute.from_payload(item) for item in payload.get("disputed_points", [])),
         )
 
 
