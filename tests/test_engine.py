@@ -109,6 +109,8 @@ def test_available_actions_are_generated_by_llm_each_turn() -> None:
     assert llm.last_choice_prompt is not None
     assert llm.last_choice_prompt["player_objective"]
     assert llm.last_choice_prompt["decision_focus"]
+    assert llm.last_choice_prompt["action_context"].action_grammar.menu_size == 4
+    assert llm.last_choice_prompt["action_context"].situation.urgent_dimensions
     assert all("impact_tier" in template for template in llm.last_available_templates)
     assert all("upside_axes" in template for template in llm.last_available_templates)
     assert all("downside_axes" in template for template in llm.last_available_templates)
@@ -126,6 +128,17 @@ def test_generated_choice_copy_gets_explicit_tradeoff_suffix() -> None:
     assert "+" in action.description
     assert "-" in action.description
     assert "叙事控制" in action.description or "交易所信任" in action.description
+
+
+def test_generated_choice_copy_does_not_duplicate_existing_tradeoff_suffix() -> None:
+    game = build_game(turns=6, seed=3, llm_client=FakeLLM())
+
+    description = game._normalize_action_description(
+        base=game.scenario.actions[0],
+        description="把证据按时间线公开，争取叙事权。（+叙事控制/+平台信任 / -传言水平/-压力）",
+    )
+
+    assert description.count("（+") == 1
 
 
 

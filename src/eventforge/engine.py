@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+import re
 from dataclasses import replace
 from typing import Iterable
 
@@ -11,6 +12,7 @@ from .domain import (
     ScenarioDefinition,
     TurnChoice,
     TurnResolution,
+    TurnSituation,
     WorldEvent,
     WorldReport,
     WorldState,
@@ -211,6 +213,7 @@ class CrisisGame:
         self.seed = seed
         self.random = random.Random(seed)
         self.llm = llm_client or OpenAICompatibleLLM()
+        self.frozen_world = scenario.to_frozen_world()
         initial_world = scenario.initial_world
         self.state = WorldState(
             turn_index=0,
@@ -275,6 +278,19 @@ class CrisisGame:
                     "downside_axes": tradeoff["downside_axes"],
                 }
             )
+        action_context = self.frozen_world.build_action_generation_context(
+            state=self.state,
+            situation=TurnSituation(
+                turn_index=self.state.turn_index,
+                turns_total=self.state.turns_total,
+                selected_player_role=self.scenario.player_role,
+                objective=self.scenario.objective,
+                dominant_tensions=tuple(item["axis"] for item in decision_focus[:3]),
+                urgent_dimensions=(),
+                unstable_dimensions=(),
+                recent_action_summaries=tuple(resolution.action_label for resolution in self.history[-2:]),
+            ),
+        )
         generated = self.llm.generate_turn_actions(
             scenario_title=self.scenario.title,
             player_role=self.scenario.player_role,
@@ -282,6 +298,7 @@ class CrisisGame:
             state_summary=self._state_summary(),
             decision_focus=decision_focus,
             available_templates=templates,
+            action_context=action_context,
         )
         template_map = {action.id: action for action in template_pool}
         constrained_ids = self._constrain_generated_action_ids(
@@ -324,6 +341,8 @@ class CrisisGame:
         clean = description.strip()
         suffix = format_tradeoff_suffix(base)
         if suffix in clean:
+            return clean
+        if re.search(r"（[^）]*\+[^）]*-[^）]*）\s*$", clean):
             return clean
         return f"{clean} {suffix}".strip()
 

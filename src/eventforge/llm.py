@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any
 from urllib import request
 
@@ -224,6 +224,7 @@ class OpenAICompatibleLLM:
         state_summary: dict[str, int],
         decision_focus: list[dict[str, int | str]],
         available_templates: list[dict[str, Any]],
+        action_context: Any | None = None,
     ) -> list[dict[str, str]]:
         messages = [
             {
@@ -249,6 +250,7 @@ class OpenAICompatibleLLM:
                         "state_summary": state_summary,
                         "decision_focus": decision_focus,
                         "available_templates": available_templates,
+                        "action_context": asdict(action_context) if action_context is not None else None,
                         "instruction": "Return json only.",
                     },
                     ensure_ascii=False,

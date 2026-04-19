@@ -148,6 +148,28 @@ class WorldActionGrammar:
 
 
 @dataclass(frozen=True, slots=True)
+class TurnSituation:
+    turn_index: int
+    turns_total: int
+    selected_player_role: str
+    objective: str
+    dominant_tensions: tuple[str, ...]
+    urgent_dimensions: tuple[str, ...]
+    unstable_dimensions: tuple[str, ...]
+    recent_action_summaries: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ActionGenerationContext:
+    world_title: str
+    player_role: str
+    dimensions: dict[str, int]
+    dimension_defs: tuple[WorldDimensionDef, ...]
+    situation: TurnSituation
+    action_grammar: WorldActionGrammar
+
+
+@dataclass(frozen=True, slots=True)
 class GeneratedAction:
     id: str
     label: str
@@ -203,10 +225,14 @@ class FrozenInitialWorld:
     initial_dimensions: tuple[tuple[str, int], ...]
     entities: tuple[SeedEntity, ...]
     ending_bands: tuple[WorldEndingBand, ...]
+    dimension_defs: tuple[WorldDimensionDef, ...] = ()
     action_grammar: WorldActionGrammar | None = None
 
     def initial_dimension_map(self) -> dict[str, int]:
         return {key: value for key, value in self.initial_dimensions}
+
+    def resolved_dimension_defs(self) -> tuple[WorldDimensionDef, ...]:
+        return self.dimension_defs or default_world_dimension_defs(self.initial_dimension_map())
 
     def instantiate_state(self, *, turns_total: int) -> WorldState:
         dimension_map = self.initial_dimension_map()
@@ -233,6 +259,23 @@ class FrozenInitialWorld:
         score = max(0, min(100, ending_score))
         ordered = sorted(self.ending_bands, key=lambda band: band.min_score, reverse=True)
         return next(band for band in ordered if score >= band.min_score)
+
+    def build_action_generation_context(self, *, state: WorldState, situation: TurnSituation) -> ActionGenerationContext:
+        dimensions = state.to_dimension_map()
+        dimension_defs = self.resolved_dimension_defs()
+        resolved_situation = replace(
+            situation,
+            urgent_dimensions=situation.urgent_dimensions or infer_urgent_dimensions(dimensions, dimension_defs),
+            unstable_dimensions=situation.unstable_dimensions or infer_unstable_dimensions(dimensions, dimension_defs),
+        )
+        return ActionGenerationContext(
+            world_title=self.title,
+            player_role=resolved_situation.selected_player_role,
+            dimensions=dimensions,
+            dimension_defs=dimension_defs,
+            situation=resolved_situation,
+            action_grammar=self.action_grammar or default_world_action_grammar(()),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -355,9 +398,11 @@ class ScenarioDefinition:
         *,
         allowed_turn_counts: tuple[int, ...] = (4, 6, 8, 10),
         ending_bands: tuple[WorldEndingBand, ...] | None = None,
+        dimension_defs: tuple[WorldDimensionDef, ...] | None = None,
         action_grammar: WorldActionGrammar | None = None,
     ) -> FrozenInitialWorld:
         resolved_bands = ending_bands or default_world_ending_bands()
+        resolved_dimension_defs = dimension_defs or default_world_dimension_defs(self.initial_world.to_dimension_map())
         return FrozenInitialWorld(
             world_id=self.id,
             title=self.title,
@@ -374,7 +419,8 @@ class ScenarioDefinition:
             initial_dimensions=tuple(self.initial_world.to_dimension_map().items()),
             entities=self.seed_entities,
             ending_bands=resolved_bands,
-            action_grammar=action_grammar,
+            dimension_defs=resolved_dimension_defs,
+            action_grammar=action_grammar or default_world_action_grammar(self.actions),
         )
 
 
@@ -386,6 +432,172 @@ def default_world_ending_bands() -> tuple[WorldEndingBand, ...]:
         WorldEndingBand(min_score=25, ending_id="pyrrhic-survival", label="惨胜续命", description="你保住了部分控制权，但代价高到几乎透支未来。"),
         WorldEndingBand(min_score=0, ending_id="collapse", label="失控崩解", description="局势脱离了你的掌控，外部叙事和内部秩序一同崩塌。"),
     )
+
+
+def default_world_dimension_defs(initial_dimensions: dict[str, int]) -> tuple[WorldDimensionDef, ...]:
+    defaults = {
+        "credibility": ("公信力", "higher_is_better", 60, 35, 20),
+        "treasury": ("资源储备", "higher_is_better", 45, 25, 10),
+        "pressure": ("压力", "lower_is_better", 55, 75, 90),
+        "price": ("市场价格", "higher_is_better", 50, 30, 15),
+        "liquidity": ("流动性", "higher_is_better", 55, 30, 15),
+        "sell_pressure": ("抛压", "lower_is_better", 45, 65, 80),
+        "volatility": ("波动", "lower_is_better", 45, 65, 80),
+        "community_panic": ("群体恐慌", "lower_is_better", 45, 65, 80),
+        "rumor_level": ("传言水平", "lower_is_better", 40, 60, 75),
+        "narrative_control": ("叙事控制", "higher_is_better", 55, 35, 20),
+        "exchange_trust": ("平台信任", "higher_is_better", 60, 35, 20),
+        "control": ("控制权", "higher_is_better", 60, 35, 20),
+    }
+    dimension_defs: list[WorldDimensionDef] = []
+    for key in initial_dimensions:
+        label, direction, warning, crisis, terminal = defaults.get(key, (key, "balanced", 50, 70, 85))
+        dimension_defs.append(
+            WorldDimensionDef(
+                key=key,
+                label=label,
+                description=f"{label} 维度。",
+                direction_of_health=direction,
+                warning_threshold=warning,
+                crisis_threshold=crisis,
+                terminal_threshold=terminal,
+            )
+        )
+    return tuple(dimension_defs)
+
+
+def default_world_action_grammar(actions: tuple[ActionCard, ...]) -> WorldActionGrammar:
+    cost_types = tuple(
+        ActionCostType(key=key, label=label, description=description)
+        for key, label, description in (
+            ("public", "公开代价", "带来公开关注、质疑或舆论压力。"),
+            ("private", "私下协调代价", "需要消耗私下协调空间或关系信用。"),
+            ("finance", "资源代价", "需要消耗预算、现金或资产缓冲。"),
+            ("legal", "制度代价", "需要承担程序、审计或制度约束。"),
+            ("delay", "时机代价", "通过拖延换取喘息，但损失先手。"),
+        )
+    )
+    rules = tuple(
+        ActionGenerationRule(
+            key=action.id,
+            label=action.label,
+            description=action.description,
+            trigger_dimensions=tuple(dict.fromkeys((*_action_upside_axes(action), *_action_downside_axes(action)))),
+            preferred_upside_dimensions=_action_upside_axes(action),
+            likely_downside_dimensions=_action_downside_axes(action),
+            allowed_cost_types=(action.tag,),
+            minimum_upside_count=max(1, len(_action_upside_axes(action))),
+            minimum_downside_count=max(1, len(_action_downside_axes(action))),
+            max_upside_count=max(1, len(_action_upside_axes(action))),
+            max_downside_count=max(1, len(_action_downside_axes(action))),
+            intensity_range=_action_intensity_range(action),
+            tags=(action.tag,),
+        )
+        for action in actions
+    )
+    return WorldActionGrammar(
+        rules=rules,
+        cost_types=cost_types,
+        menu_size=min(4, len(actions)) if actions else 4,
+    )
+
+
+def infer_urgent_dimensions(dimensions: dict[str, int], dimension_defs: tuple[WorldDimensionDef, ...]) -> tuple[str, ...]:
+    scored = sorted(
+        ((dimension.key, _dimension_urgency_score(dimensions.get(dimension.key, 0), dimension)) for dimension in dimension_defs),
+        key=lambda item: item[1],
+        reverse=True,
+    )
+    return tuple(key for key, score in scored if score > 0)[:4]
+
+
+def infer_unstable_dimensions(dimensions: dict[str, int], dimension_defs: tuple[WorldDimensionDef, ...]) -> tuple[str, ...]:
+    unstable: list[str] = []
+    for dimension in dimension_defs:
+        value = dimensions.get(dimension.key, 0)
+        if dimension.direction_of_health == "higher_is_better" and dimension.crisis_threshold is not None and value <= dimension.crisis_threshold:
+            unstable.append(dimension.key)
+        elif dimension.direction_of_health == "lower_is_better" and dimension.crisis_threshold is not None and value >= dimension.crisis_threshold:
+            unstable.append(dimension.key)
+        elif dimension.direction_of_health == "balanced" and abs(value - 50) >= 20:
+            unstable.append(dimension.key)
+    return tuple(unstable)
+
+
+def _dimension_urgency_score(value: int, dimension: WorldDimensionDef) -> int:
+    warning = dimension.warning_threshold if dimension.warning_threshold is not None else 50
+    if dimension.direction_of_health == "higher_is_better":
+        return max(0, warning - value)
+    if dimension.direction_of_health == "lower_is_better":
+        return max(0, value - warning)
+    return abs(value - 50)
+
+
+def _action_upside_axes(action: ActionCard) -> tuple[str, ...]:
+    axes: list[str] = []
+    if action.narrative_shift > 0:
+        axes.append("narrative_control")
+    if action.exchange_shift + action.exchange_trust_shift > 0:
+        axes.append("exchange_trust")
+    if action.liquidity_shift > 0:
+        axes.append("liquidity")
+    if action.treasury_shift > 0:
+        axes.append("treasury")
+    if action.control_shift > 0:
+        axes.append("control")
+    if action.volatility_shift < 0:
+        axes.append("volatility")
+    if action.kol_trust_shift > 0:
+        axes.append("rumor_level")
+    if action.whale_trust_shift > 0:
+        axes.append("sell_pressure")
+    if action.public_pressure < 0:
+        axes.append("pressure")
+    return tuple(dict.fromkeys(axes or ["control"]))
+
+
+def _action_downside_axes(action: ActionCard) -> tuple[str, ...]:
+    axes: list[str] = []
+    if action.narrative_shift < 0:
+        axes.append("narrative_control")
+    if action.exchange_shift + action.exchange_trust_shift < 0:
+        axes.append("exchange_trust")
+    if action.liquidity_shift < 0:
+        axes.append("liquidity")
+    if action.treasury_shift < 0:
+        axes.append("treasury")
+    if action.control_shift < 0:
+        axes.append("control")
+    if action.volatility_shift > 0:
+        axes.append("volatility")
+    if action.kol_trust_shift < 0:
+        axes.append("rumor_level")
+    if action.whale_trust_shift < 0:
+        axes.append("sell_pressure")
+    if action.public_pressure > 0:
+        axes.append("pressure")
+    return tuple(dict.fromkeys(axes or ["pressure"]))
+
+
+def _action_intensity_range(action: ActionCard) -> tuple[int, int]:
+    impact_cost = (
+        max(0, action.public_pressure)
+        + max(0, -action.narrative_shift)
+        + max(0, -(action.exchange_shift + action.exchange_trust_shift))
+        + max(0, -action.liquidity_shift)
+        + max(0, -action.treasury_shift)
+        + max(0, -action.control_shift)
+        + max(0, action.volatility_shift)
+        + max(0, -action.kol_trust_shift)
+        + max(0, -action.whale_trust_shift)
+    )
+    if impact_cost <= 6:
+        return (1, 1)
+    if impact_cost <= 14:
+        return (2, 2)
+    if impact_cost <= 24:
+        return (3, 3)
+    return (4, 4)
 
 
 @dataclass(frozen=True, slots=True)
