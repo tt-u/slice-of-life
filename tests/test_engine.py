@@ -1,5 +1,8 @@
+from dataclasses import replace
+
 from eventforge.engine import action_impact_profile, build_game, run_auto_game, validate_agent_reaction_proposal
 from eventforge.domain import AgentProfile, AgentReactionContext, AgentReactionProposal, AgentRunState, SeedEntity, TurnChoice, ActionCard
+from eventforge.scenarios import FLASH_CRASH_SCENARIO
 
 
 class FakeLLM:
@@ -7,8 +10,18 @@ class FakeLLM:
         self.choice_calls = 0
         self.last_available_templates = None
         self.last_choice_prompt = None
+        self.profile_calls: list[dict[str, str]] = []
+        self.last_summary_prompt = None
 
     def generate_agent_profile(self, *, entity: SeedEntity, scenario_title: str, world_truth: str) -> AgentProfile:
+        self.profile_calls.append(
+            {
+                "entity_id": entity.id,
+                "entity_name": entity.name,
+                "scenario_title": scenario_title,
+                "world_truth": world_truth,
+            }
+        )
         return AgentProfile(
             id=entity.id,
             name=entity.name,
@@ -37,7 +50,8 @@ class FakeLLM:
     def narrate_turn(self, **_: object) -> str:
         return "llm narration"
 
-    def summarize_world_state(self, **_: object) -> tuple[str, str]:
+    def summarize_world_state(self, **kwargs: object) -> tuple[str, str]:
+        self.last_summary_prompt = kwargs
         return (
             "世界总结：市场暂时稳住，但仍然脆弱。",
             "可分享：市场暂时稳住，但交易所仍在观察，社区情绪有所回落。",
@@ -55,6 +69,65 @@ class HighImpactOnlyLLM(FakeLLM):
             {"template_id": "silent", "label": "继续沉默", "description": "先不说话，观察市场。"},
         ]
 
+
+class FrozenBackedScenario:
+    def __init__(self) -> None:
+        frozen_entity = SeedEntity(
+            id="frozen-observer",
+            name="Frozen Observer",
+            role="observer",
+            public_goal="根据冻结世界中的设定行动",
+            pressure_point="不想被旧 demo 结构污染",
+            starting_trust=61,
+            influence=44,
+            stance="等待冻结世界的信号",
+            details="只存在于 frozen world artifact 中。",
+        )
+        frozen_world = replace(
+            FLASH_CRASH_SCENARIO.to_frozen_world(),
+            title="Frozen Crisis",
+            player_role="校方",
+            objective="根据冻结世界推进局势",
+            truth="冻结世界中的关键事实。",
+            entities=(frozen_entity,),
+            initial_dimensions=(
+                ("credibility", 73),
+                ("treasury", 57),
+                ("pressure", 19),
+                ("price", 48),
+                ("liquidity", 52),
+                ("sell_pressure", 31),
+                ("volatility", 26),
+                ("community_panic", 29),
+                ("rumor_level", 22),
+                ("narrative_control", 64),
+                ("exchange_trust", 68),
+                ("control", 77),
+            ),
+        )
+        self._frozen_world = frozen_world
+        self.title = "Legacy Demo Title"
+        self.player_role = "legacy-role"
+        self.objective = "legacy objective"
+        self.truth = "legacy truth"
+        self.seed_entities = (
+            SeedEntity(
+                id="legacy-observer",
+                name="Legacy Observer",
+                role="legacy",
+                public_goal="沿用旧 demo 叙事",
+                pressure_point="被替换",
+                starting_trust=15,
+                influence=20,
+                stance="坚持旧世界",
+                details="只存在于 legacy scenario 字段中。",
+            ),
+        )
+        self.actions = FLASH_CRASH_SCENARIO.actions
+        self.initial_world = FLASH_CRASH_SCENARIO.initial_world
+
+    def to_frozen_world(self):
+        return self._frozen_world
 
 
 def test_initial_world_state_is_explicit_and_crisis_shaped() -> None:
@@ -74,6 +147,43 @@ def test_initial_world_state_is_explicit_and_crisis_shaped() -> None:
         "exchange_trust": 43,
         "control": 51,
     }
+
+
+
+def test_build_game_uses_frozen_world_state_and_entities_instead_of_legacy_scenario_fields() -> None:
+    llm = FakeLLM()
+    scenario = FrozenBackedScenario()
+
+    game = build_game(turns=6, seed=1, llm_client=llm, scenario=scenario)
+
+    assert game.initial_state == scenario.to_frozen_world().initial_dimension_map()
+    assert [profile.name for profile in game.agent_profiles] == ["Frozen Observer"]
+    assert llm.profile_calls == [
+        {
+            "entity_id": "frozen-observer",
+            "entity_name": "Frozen Observer",
+            "scenario_title": "Frozen Crisis",
+            "world_truth": "冻结世界中的关键事实。",
+        }
+    ]
+
+
+
+def test_runtime_prompts_and_report_use_frozen_world_metadata() -> None:
+    llm = FakeLLM()
+    scenario = FrozenBackedScenario()
+    game = build_game(turns=6, seed=3, llm_client=llm, scenario=scenario)
+    game.begin_turn()
+
+    action = game.available_actions()[0]
+    game.apply_choice(TurnChoice(action=action, reason="test"))
+    game.build_world_report()
+
+    assert llm.last_choice_prompt["scenario_title"] == "Frozen Crisis"
+    assert llm.last_choice_prompt["player_role"] == "校方"
+    assert llm.last_choice_prompt["player_objective"] == "根据冻结世界推进局势"
+    assert llm.last_summary_prompt["scenario_title"] == "Frozen Crisis"
+    assert llm.last_summary_prompt["player_role"] == "校方"
 
 
 

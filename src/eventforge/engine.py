@@ -329,29 +329,16 @@ class CrisisGame:
         self.random = random.Random(seed)
         self.llm = llm_client or OpenAICompatibleLLM()
         self.frozen_world = scenario.to_frozen_world()
-        initial_world = scenario.initial_world
-        self.state = WorldState(
-            turn_index=0,
-            turns_total=turns,
-            credibility=initial_world.credibility,
-            treasury=initial_world.treasury,
-            pressure=initial_world.pressure,
-            price=initial_world.price,
-            liquidity=initial_world.liquidity,
-            sell_pressure=initial_world.sell_pressure,
-            volatility=initial_world.volatility,
-            community_panic=initial_world.community_panic,
-            rumor_level=initial_world.rumor_level,
-            narrative_control=initial_world.narrative_control,
-            exchange_trust=initial_world.exchange_trust,
-            control=initial_world.control,
-            truth_public=False,
-            flags=set(),
-        )
+        self.action_templates = tuple(getattr(scenario, "actions", ()))
+        self.state = self.frozen_world.instantiate_state(turns_total=turns)
         self.initial_state = self.snapshot_state()
         self.agent_profiles = [
-            self.llm.generate_agent_profile(entity=entity, scenario_title=scenario.title, world_truth=scenario.truth)
-            for entity in scenario.seed_entities
+            self.llm.generate_agent_profile(
+                entity=entity,
+                scenario_title=self.frozen_world.title,
+                world_truth=self.frozen_world.truth,
+            )
+            for entity in self.frozen_world.entities
         ]
         self.agent_run_states = {profile.id: self._build_initial_agent_run_state(profile) for profile in self.agent_profiles}
         self.agent_reaction_results: list[AgentReactionResult] = []
@@ -392,7 +379,7 @@ class CrisisGame:
     def available_actions(self) -> tuple[ActionCard, ...]:
         if self.pending_actions is not None:
             return self.pending_actions
-        template_pool = list(self.scenario.actions)
+        template_pool = list(self.action_templates)
         if self.state.treasury < 20:
             template_pool = [a for a in template_pool if a.id != "buyback"]
         if "wallet_frozen" in self.state.flags:
@@ -418,8 +405,8 @@ class CrisisGame:
             situation=TurnSituation(
                 turn_index=self.state.turn_index,
                 turns_total=self.state.turns_total,
-                selected_player_role=self.scenario.player_role,
-                objective=self.scenario.objective,
+                selected_player_role=self.frozen_world.player_role,
+                objective=self.frozen_world.objective,
                 dominant_tensions=tuple(item["axis"] for item in decision_focus[:3]),
                 urgent_dimensions=(),
                 unstable_dimensions=(),
@@ -427,9 +414,9 @@ class CrisisGame:
             ),
         )
         generated = self.llm.generate_turn_actions(
-            scenario_title=self.scenario.title,
-            player_role=self.scenario.player_role,
-            player_objective=self.scenario.objective,
+            scenario_title=self.frozen_world.title,
+            player_role=self.frozen_world.player_role,
+            player_objective=self.frozen_world.objective,
             state_summary=self._state_summary(),
             decision_focus=decision_focus,
             available_templates=templates,
@@ -557,7 +544,7 @@ class CrisisGame:
         narrative = self.llm.narrate_turn(
             turn_number=self.state.turn_index,
             action_label=action.label,
-            player_objective=self.scenario.objective,
+            player_objective=self.frozen_world.objective,
             state_summary=self._state_summary(),
             agent_profiles=self.agent_profiles,
         )
@@ -583,8 +570,8 @@ class CrisisGame:
         diff = {key: final_state[key] - self.initial_state[key] for key in STATE_KEYS}
         timeline = self.timeline_lines()
         summary, share_text = self.llm.summarize_world_state(
-            scenario_title=self.scenario.title,
-            player_role=self.scenario.player_role,
+            scenario_title=self.frozen_world.title,
+            player_role=self.frozen_world.player_role,
             initial_state=self.initial_state,
             final_state=final_state,
             diff=diff,
@@ -846,7 +833,7 @@ class CrisisGame:
         reaction_results: list[AgentReactionResult] = []
         updated_profiles: list[AgentProfile] = []
         known_entities = {agent.id for agent in self.agent_profiles}
-        relevant_entities = tuple(entity.id for entity in self.scenario.seed_entities if entity.id != action.id)
+        relevant_entities = tuple(entity.id for entity in self.frozen_world.entities)
         for agent in self.agent_profiles:
             trust_delta, state_delta, summary = self._agent_reaction_payload(agent, action)
             trust = max(0, min(100, agent.trust_in_player + trust_delta))
@@ -873,8 +860,8 @@ class CrisisGame:
                 world_title=self.frozen_world.title,
                 turn_index=self.state.turn_index,
                 turns_total=self.state.turns_total,
-                player_role=self.scenario.player_role,
-                player_objective=self.scenario.objective,
+                player_role=self.frozen_world.player_role,
+                player_objective=self.frozen_world.objective,
                 chosen_action_id=action.id,
                 chosen_action_label=action.label,
                 chosen_action_summary=action.description,
