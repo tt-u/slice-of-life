@@ -259,6 +259,49 @@ class FrozenInitialWorld:
     dimension_defs: tuple[WorldDimensionDef, ...] = ()
     action_grammar: WorldActionGrammar | None = None
 
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "world_id": self.world_id,
+            "title": self.title,
+            "premise": self.premise,
+            "player_role": self.player_role,
+            "player_secret": self.player_secret,
+            "objective": self.objective,
+            "opponent": self.opponent,
+            "audience": list(self.audience),
+            "truth": self.truth,
+            "selectable_roles": list(self.selectable_roles),
+            "allowed_turn_counts": list(self.allowed_turn_counts),
+            "opening_event": world_event_to_payload(self.opening_event),
+            "initial_dimensions": [[key, value] for key, value in self.initial_dimensions],
+            "entities": [seed_entity_to_payload(entity) for entity in self.entities],
+            "ending_bands": [world_ending_band_to_payload(band) for band in self.ending_bands],
+            "dimension_defs": [world_dimension_def_to_payload(dimension) for dimension in self.dimension_defs],
+            "action_grammar": world_action_grammar_to_payload(self.action_grammar) if self.action_grammar is not None else None,
+        }
+
+    @classmethod
+    def from_payload(cls, payload: dict[str, object]) -> "FrozenInitialWorld":
+        return cls(
+            world_id=str(payload["world_id"]),
+            title=str(payload["title"]),
+            premise=str(payload["premise"]),
+            player_role=str(payload["player_role"]),
+            player_secret=str(payload["player_secret"]),
+            objective=str(payload["objective"]),
+            opponent=str(payload["opponent"]),
+            audience=tuple(str(item) for item in payload.get("audience", [])),
+            truth=str(payload["truth"]),
+            selectable_roles=tuple(str(item) for item in payload.get("selectable_roles", [])),
+            allowed_turn_counts=tuple(int(item) for item in payload.get("allowed_turn_counts", [])),
+            opening_event=world_event_from_payload(payload["opening_event"]),
+            initial_dimensions=tuple((str(key), int(value)) for key, value in payload.get("initial_dimensions", [])),
+            entities=tuple(seed_entity_from_payload(item) for item in payload.get("entities", [])),
+            ending_bands=tuple(world_ending_band_from_payload(item) for item in payload.get("ending_bands", [])),
+            dimension_defs=tuple(world_dimension_def_from_payload(item) for item in payload.get("dimension_defs", [])),
+            action_grammar=world_action_grammar_from_payload(payload["action_grammar"]) if payload.get("action_grammar") is not None else None,
+        )
+
     def initial_dimension_map(self) -> dict[str, int]:
         return {key: value for key, value in self.initial_dimensions}
 
@@ -376,6 +419,138 @@ def world_event_from_payload(payload: object) -> WorldEvent:
         actor_id=str(payload.get("actor_id", "system")),
         actor_name=str(payload.get("actor_name", "System")),
         state_delta={str(key): int(value) for key, value in dict(payload.get("state_delta", {})).items()},
+    )
+
+
+def world_dimension_def_to_payload(dimension: WorldDimensionDef) -> dict[str, object]:
+    return {
+        "key": dimension.key,
+        "label": dimension.label,
+        "description": dimension.description,
+        "direction_of_health": dimension.direction_of_health,
+        "warning_threshold": dimension.warning_threshold,
+        "crisis_threshold": dimension.crisis_threshold,
+        "terminal_threshold": dimension.terminal_threshold,
+    }
+
+
+def world_dimension_def_from_payload(payload: object) -> WorldDimensionDef:
+    if not isinstance(payload, dict):
+        raise TypeError("World dimension payload must be a dict")
+    return WorldDimensionDef(
+        key=str(payload["key"]),
+        label=str(payload["label"]),
+        description=str(payload["description"]),
+        direction_of_health=str(payload["direction_of_health"]),
+        warning_threshold=int(payload["warning_threshold"]) if payload.get("warning_threshold") is not None else None,
+        crisis_threshold=int(payload["crisis_threshold"]) if payload.get("crisis_threshold") is not None else None,
+        terminal_threshold=int(payload["terminal_threshold"]) if payload.get("terminal_threshold") is not None else None,
+    )
+
+
+def action_cost_type_to_payload(cost_type: ActionCostType) -> dict[str, object]:
+    return {
+        "key": cost_type.key,
+        "label": cost_type.label,
+        "description": cost_type.description,
+    }
+
+
+def action_cost_type_from_payload(payload: object) -> ActionCostType:
+    if not isinstance(payload, dict):
+        raise TypeError("Action cost type payload must be a dict")
+    return ActionCostType(
+        key=str(payload["key"]),
+        label=str(payload["label"]),
+        description=str(payload["description"]),
+    )
+
+
+def action_generation_rule_to_payload(rule: ActionGenerationRule) -> dict[str, object]:
+    return {
+        "key": rule.key,
+        "label": rule.label,
+        "description": rule.description,
+        "trigger_dimensions": list(rule.trigger_dimensions),
+        "preferred_upside_dimensions": list(rule.preferred_upside_dimensions),
+        "likely_downside_dimensions": list(rule.likely_downside_dimensions),
+        "allowed_cost_types": list(rule.allowed_cost_types),
+        "minimum_upside_count": rule.minimum_upside_count,
+        "minimum_downside_count": rule.minimum_downside_count,
+        "max_upside_count": rule.max_upside_count,
+        "max_downside_count": rule.max_downside_count,
+        "intensity_range": list(rule.intensity_range),
+        "tags": list(rule.tags),
+    }
+
+
+def action_generation_rule_from_payload(payload: object) -> ActionGenerationRule:
+    if not isinstance(payload, dict):
+        raise TypeError("Action generation rule payload must be a dict")
+    return ActionGenerationRule(
+        key=str(payload["key"]),
+        label=str(payload["label"]),
+        description=str(payload["description"]),
+        trigger_dimensions=tuple(str(item) for item in payload.get("trigger_dimensions", [])),
+        preferred_upside_dimensions=tuple(str(item) for item in payload.get("preferred_upside_dimensions", [])),
+        likely_downside_dimensions=tuple(str(item) for item in payload.get("likely_downside_dimensions", [])),
+        allowed_cost_types=tuple(str(item) for item in payload.get("allowed_cost_types", [])),
+        minimum_upside_count=int(payload.get("minimum_upside_count", 1)),
+        minimum_downside_count=int(payload.get("minimum_downside_count", 1)),
+        max_upside_count=int(payload.get("max_upside_count", 2)),
+        max_downside_count=int(payload.get("max_downside_count", 2)),
+        intensity_range=tuple(int(item) for item in payload.get("intensity_range", (1, 3))),
+        tags=tuple(str(item) for item in payload.get("tags", [])),
+    )
+
+
+def world_action_grammar_to_payload(grammar: WorldActionGrammar) -> dict[str, object]:
+    return {
+        "rules": [action_generation_rule_to_payload(rule) for rule in grammar.rules],
+        "cost_types": [action_cost_type_to_payload(cost_type) for cost_type in grammar.cost_types],
+        "forbidden_pairs": [[left, right] for left, right in grammar.forbidden_pairs],
+        "forbidden_tags": list(grammar.forbidden_tags),
+        "required_tradeoff": grammar.required_tradeoff,
+        "menu_size": grammar.menu_size,
+        "low_commitment_slots": grammar.low_commitment_slots,
+        "medium_commitment_slots": grammar.medium_commitment_slots,
+        "high_commitment_slots": grammar.high_commitment_slots,
+    }
+
+
+def world_action_grammar_from_payload(payload: object) -> WorldActionGrammar:
+    if not isinstance(payload, dict):
+        raise TypeError("World action grammar payload must be a dict")
+    return WorldActionGrammar(
+        rules=tuple(action_generation_rule_from_payload(item) for item in payload.get("rules", [])),
+        cost_types=tuple(action_cost_type_from_payload(item) for item in payload.get("cost_types", [])),
+        forbidden_pairs=tuple((str(left), str(right)) for left, right in payload.get("forbidden_pairs", [])),
+        forbidden_tags=tuple(str(item) for item in payload.get("forbidden_tags", [])),
+        required_tradeoff=bool(payload.get("required_tradeoff", True)),
+        menu_size=int(payload.get("menu_size", 4)),
+        low_commitment_slots=int(payload.get("low_commitment_slots", 1)),
+        medium_commitment_slots=int(payload.get("medium_commitment_slots", 2)),
+        high_commitment_slots=int(payload.get("high_commitment_slots", 1)),
+    )
+
+
+def world_ending_band_to_payload(band: WorldEndingBand) -> dict[str, object]:
+    return {
+        "min_score": band.min_score,
+        "ending_id": band.ending_id,
+        "label": band.label,
+        "description": band.description,
+    }
+
+
+def world_ending_band_from_payload(payload: object) -> WorldEndingBand:
+    if not isinstance(payload, dict):
+        raise TypeError("World ending band payload must be a dict")
+    return WorldEndingBand(
+        min_score=int(payload["min_score"]),
+        ending_id=str(payload["ending_id"]),
+        label=str(payload["label"]),
+        description=str(payload["description"]),
     )
 
 

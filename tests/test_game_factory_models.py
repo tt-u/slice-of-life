@@ -136,3 +136,28 @@ def test_frozen_world_builds_action_generation_context_from_runtime_state() -> N
     assert context.action_grammar == frozen.action_grammar
     assert context.situation.urgent_dimensions[:3] == ("exchange_trust", "community_panic", "liquidity")
     assert "exchange_trust" in context.situation.unstable_dimensions
+
+
+def test_frozen_world_round_trips_through_serialized_payload() -> None:
+    frozen = FLASH_CRASH_SCENARIO.to_frozen_world(
+        allowed_turn_counts=(5, 7),
+        ending_bands=(
+            WorldEndingBand(min_score=70, ending_id="hold-line", label="守住底线", description="核心秩序尚存。"),
+            WorldEndingBand(min_score=0, ending_id="spiral", label="失序坠落", description="局势进入连锁下坠。"),
+        ),
+    )
+
+    payload = frozen.to_payload()
+
+    assert payload["world_id"] == FLASH_CRASH_SCENARIO.id
+    assert payload["selectable_roles"] == list(frozen.selectable_roles)
+    assert payload["allowed_turn_counts"] == [5, 7]
+    assert payload["initial_dimensions"][0] == ["credibility", frozen.initial_dimension_map()["credibility"]]
+    assert payload["dimension_defs"][0]["key"] == frozen.dimension_defs[0].key
+    assert payload["action_grammar"]["rules"][0]["key"] == frozen.action_grammar.rules[0].key
+    assert payload["ending_bands"][0]["label"] == "守住底线"
+
+    restored = FrozenInitialWorld.from_payload(payload)
+
+    assert restored == frozen
+    assert restored.resolve_ending_band(85).label == "守住底线"
