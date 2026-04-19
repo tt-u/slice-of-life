@@ -388,12 +388,13 @@ class CrisisGame:
     ) -> None:
         if scenario is None and frozen_world is None:
             scenario = get_default_scenario()
-        self.scenario = scenario
+        self.scenario = scenario if frozen_world is None else None
         self.seed = seed
         self.random = random.Random(seed)
         self.llm = llm_client or OpenAICompatibleLLM()
         self.frozen_world = frozen_world or scenario.to_frozen_world()
-        self.action_templates = tuple(getattr(scenario, "actions", ())) or synthesize_action_templates_from_frozen_world(self.frozen_world)
+        legacy_actions = tuple(getattr(scenario, "actions", ())) if frozen_world is None and scenario is not None else ()
+        self.action_templates = legacy_actions or synthesize_action_templates_from_frozen_world(self.frozen_world)
         self.action_template_map = {action.id: action for action in self.action_templates}
         self.state = self.frozen_world.instantiate_state(turns_total=turns)
         self.initial_state = self.snapshot_state()

@@ -190,6 +190,29 @@ def test_build_game_accepts_frozen_world_without_legacy_scenario_wrapper() -> No
     ]
 
 
+def test_build_game_prefers_frozen_world_action_grammar_over_legacy_scenario_actions() -> None:
+    llm = FakeLLM()
+    scenario = FrozenBackedScenario()
+    frozen_world = replace(
+        scenario.to_frozen_world(),
+        action_grammar=replace(
+            scenario.to_frozen_world().action_grammar,
+            rules=tuple(
+                replace(rule, key=f"frozen-{rule.key}", label=f"冻结版 {rule.label}")
+                for rule in scenario.to_frozen_world().action_grammar.rules[:4]
+            ),
+        ),
+    )
+
+    world_rule_ids = [rule.key for rule in frozen_world.action_grammar.rules]
+    legacy_action_ids = [action.id for action in scenario.actions]
+    assert world_rule_ids != legacy_action_ids
+
+    game = build_game(turns=6, seed=1, llm_client=llm, scenario=scenario, frozen_world=frozen_world)
+
+    assert [action.id for action in game.action_templates] == world_rule_ids
+
+
 def test_generated_material_scenarios_use_frozen_world_synthesized_action_templates() -> None:
     generated_frozen_world = replace(
         FLASH_CRASH_SCENARIO.to_frozen_world(),
