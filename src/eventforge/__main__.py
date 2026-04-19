@@ -65,20 +65,20 @@ def main() -> None:
 
 
 def print_intro(game) -> None:
-    scenario = game.scenario
-    print(f"# {scenario.title}")
+    world = game.frozen_world
+    print(f"# {world.title}")
     print()
-    print(scenario.premise)
+    print(world.premise)
     print()
-    print(f"你扮演：{scenario.player_role}")
-    print(f"意图：{scenario.objective}")
-    print(f"对手：{scenario.opponent}")
-    print(f"真相：{scenario.player_secret}")
-    if scenario.playable_roles:
-        print(f"可选视角：{' / '.join(scenario.playable_roles)}")
+    print(f"你扮演：{world.player_role}")
+    print(f"意图：{world.objective}")
+    print(f"对手：{world.opponent}")
+    print(f"真相：{world.player_secret}")
+    if world.selectable_roles:
+        print(f"可选视角：{' / '.join(world.selectable_roles)}")
     print()
-    print(f"开局事件：{scenario.opening_event.headline}")
-    print(scenario.opening_event.summary)
+    print(f"开局事件：{world.opening_event.headline}")
+    print(world.opening_event.summary)
     print("开局剖面：" + summarize_initial_world(game.state))
     print()
     print("关键角色：")

@@ -1,7 +1,7 @@
 from dataclasses import replace
 
 from eventforge.engine import action_impact_profile, build_game, run_auto_game, validate_agent_reaction_proposal
-from eventforge.domain import AgentProfile, AgentReactionContext, AgentReactionProposal, AgentRunState, SeedEntity, TurnChoice, ActionCard
+from eventforge.domain import AgentProfile, AgentReactionContext, AgentReactionProposal, AgentRunState, SeedEntity, TurnChoice, ActionCard, FrozenInitialWorld
 from eventforge.scenarios import FLASH_CRASH_SCENARIO
 
 
@@ -158,6 +158,28 @@ def test_build_game_uses_frozen_world_state_and_entities_instead_of_legacy_scena
 
     assert game.initial_state == scenario.to_frozen_world().initial_dimension_map()
     assert [profile.name for profile in game.agent_profiles] == ["Frozen Observer"]
+    assert llm.profile_calls == [
+        {
+            "entity_id": "frozen-observer",
+            "entity_name": "Frozen Observer",
+            "scenario_title": "Frozen Crisis",
+            "world_truth": "冻结世界中的关键事实。",
+        }
+    ]
+
+
+
+def test_build_game_accepts_frozen_world_without_legacy_scenario_wrapper() -> None:
+    llm = FakeLLM()
+    scenario = FrozenBackedScenario()
+    frozen_world = scenario.to_frozen_world()
+
+    game = build_game(turns=6, seed=1, llm_client=llm, frozen_world=frozen_world)
+
+    assert game.frozen_world == frozen_world
+    assert game.initial_state == frozen_world.initial_dimension_map()
+    assert [profile.name for profile in game.agent_profiles] == ["Frozen Observer"]
+    assert game.available_actions()
     assert llm.profile_calls == [
         {
             "entity_id": "frozen-observer",

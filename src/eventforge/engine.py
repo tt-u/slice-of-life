@@ -15,6 +15,7 @@ from .domain import (
     AgentReactionResult,
     AgentRelationshipState,
     AgentRunState,
+    FrozenInitialWorld,
     ScenarioDefinition,
     TurnChoice,
     TurnResolution,
@@ -179,6 +180,89 @@ def format_tradeoff_suffix(action: ActionCard) -> str:
     return f"（+{upside} / -{downside}）"
 
 
+def _default_action_tag(cost_types: tuple[str, ...]) -> str:
+    valid_tags = {"public", "private", "finance", "legal", "delay"}
+    for cost_type in cost_types:
+        if cost_type in valid_tags:
+            return cost_type
+    return "public"
+
+
+def _apply_dimension_to_action_shift(shifts: dict[str, int], dimension_key: str, *, magnitude: int, upside: bool) -> None:
+    signed = magnitude if upside else -magnitude
+    if dimension_key == "pressure":
+        shifts["public_pressure"] += -signed
+    elif dimension_key == "narrative_control":
+        shifts["narrative_shift"] += signed
+    elif dimension_key == "exchange_trust":
+        shifts["exchange_trust_shift"] += signed
+    elif dimension_key == "liquidity":
+        shifts["liquidity_shift"] += signed
+    elif dimension_key == "treasury":
+        shifts["treasury_shift"] += signed
+    elif dimension_key == "control":
+        shifts["control_shift"] += signed
+    elif dimension_key == "volatility":
+        shifts["volatility_shift"] += -signed
+    elif dimension_key == "rumor_level":
+        shifts["kol_trust_shift"] += signed
+    elif dimension_key == "sell_pressure":
+        shifts["whale_trust_shift"] += signed
+    elif dimension_key == "credibility":
+        shifts["narrative_shift"] += max(1, signed // 2) if signed > 0 else min(-1, signed // 2)
+        shifts["exchange_shift"] += max(1, signed // 2) if signed > 0 else min(-1, signed // 2)
+    elif dimension_key == "community_panic":
+        shifts["public_pressure"] += -signed
+        shifts["volatility_shift"] += -(signed // 2)
+    elif dimension_key == "price":
+        shifts["liquidity_shift"] += max(1, signed // 2) if signed > 0 else min(-1, signed // 2)
+        shifts["control_shift"] += max(1, signed // 2) if signed > 0 else min(-1, signed // 2)
+
+
+def synthesize_action_templates_from_frozen_world(frozen_world: FrozenInitialWorld) -> tuple[ActionCard, ...]:
+    grammar = frozen_world.action_grammar
+    if grammar is None:
+        return ()
+    templates: list[ActionCard] = []
+    for rule in grammar.rules:
+        shifts = {
+            "public_pressure": 0,
+            "narrative_shift": 0,
+            "exchange_shift": 0,
+            "liquidity_shift": 0,
+            "treasury_shift": 0,
+            "control_shift": 0,
+            "volatility_shift": 0,
+            "kol_trust_shift": 0,
+            "whale_trust_shift": 0,
+            "exchange_trust_shift": 0,
+        }
+        for dimension_key in rule.preferred_upside_dimensions[: max(1, rule.minimum_upside_count)]:
+            _apply_dimension_to_action_shift(shifts, dimension_key, magnitude=6, upside=True)
+        for dimension_key in rule.likely_downside_dimensions[: max(1, rule.minimum_downside_count)]:
+            _apply_dimension_to_action_shift(shifts, dimension_key, magnitude=5, upside=False)
+        templates.append(
+            ActionCard(
+                id=rule.key,
+                label=rule.label,
+                description=rule.description,
+                tag=_default_action_tag(rule.allowed_cost_types),
+                public_pressure=shifts["public_pressure"],
+                narrative_shift=shifts["narrative_shift"],
+                exchange_shift=shifts["exchange_shift"],
+                liquidity_shift=shifts["liquidity_shift"],
+                treasury_shift=shifts["treasury_shift"],
+                control_shift=shifts["control_shift"],
+                volatility_shift=shifts["volatility_shift"],
+                kol_trust_shift=shifts["kol_trust_shift"],
+                whale_trust_shift=shifts["whale_trust_shift"],
+                exchange_trust_shift=shifts["exchange_trust_shift"],
+                unlocks_truth="audit" in rule.tags or "disclosure" in rule.tags,
+            )
+        )
+    return tuple(templates)
+
+
 ENDING_BANDS = (
     {
         "min_score": 85,
@@ -323,13 +407,23 @@ def validate_agent_reaction_proposal(
 
 
 class CrisisGame:
-    def __init__(self, scenario: ScenarioDefinition, *, turns: int = 6, seed: int = 42, llm_client: OpenAICompatibleLLM | None = None) -> None:
+    def __init__(
+        self,
+        scenario: ScenarioDefinition | None = None,
+        *,
+        frozen_world: FrozenInitialWorld | None = None,
+        turns: int = 6,
+        seed: int = 42,
+        llm_client: OpenAICompatibleLLM | None = None,
+    ) -> None:
+        if scenario is None and frozen_world is None:
+            scenario = get_default_scenario()
         self.scenario = scenario
         self.seed = seed
         self.random = random.Random(seed)
         self.llm = llm_client or OpenAICompatibleLLM()
-        self.frozen_world = scenario.to_frozen_world()
-        self.action_templates = tuple(getattr(scenario, "actions", ()))
+        self.frozen_world = frozen_world or scenario.to_frozen_world()
+        self.action_templates = tuple(getattr(scenario, "actions", ())) or synthesize_action_templates_from_frozen_world(self.frozen_world)
         self.state = self.frozen_world.instantiate_state(turns_total=turns)
         self.initial_state = self.snapshot_state()
         self.agent_profiles = [
@@ -1075,8 +1169,9 @@ def build_game(
     seed: int = 42,
     llm_client: OpenAICompatibleLLM | None = None,
     scenario: ScenarioDefinition | None = None,
+    frozen_world: FrozenInitialWorld | None = None,
 ) -> CrisisGame:
-    return CrisisGame(scenario or get_default_scenario(), turns=turns, seed=seed, llm_client=llm_client)
+    return CrisisGame(scenario=scenario, frozen_world=frozen_world, turns=turns, seed=seed, llm_client=llm_client)
 
 
 def run_auto_game(
@@ -1085,8 +1180,9 @@ def run_auto_game(
     seed: int = 42,
     llm_client: OpenAICompatibleLLM | None = None,
     scenario: ScenarioDefinition | None = None,
+    frozen_world: FrozenInitialWorld | None = None,
 ) -> tuple[CrisisGame, WorldReport]:
-    game = build_game(turns=turns, seed=seed, llm_client=llm_client, scenario=scenario)
+    game = build_game(turns=turns, seed=seed, llm_client=llm_client, scenario=scenario, frozen_world=frozen_world)
     while game.state.turn_index < game.state.turns_total:
         game.begin_turn()
         game.apply_choice(game.auto_choose_action())

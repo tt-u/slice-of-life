@@ -1,10 +1,13 @@
 import os
 import subprocess
 import sys
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
+from types import SimpleNamespace
 
-from eventforge.__main__ import print_role_inspection
-from eventforge.domain import MaterialSeedInspection, ScenarioRoleComparisonCard, ScenarioRoleOverviewCard, ScenarioViewpointCard
+from eventforge.__main__ import print_intro, print_role_inspection
+from eventforge.domain import MaterialSeedInspection, ScenarioRoleComparisonCard, ScenarioRoleOverviewCard, ScenarioViewpointCard, WorldEvent, WorldState
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -39,6 +42,48 @@ def test_module_launcher_accepts_player_role_flag() -> None:
     assert result.returncode == 0
     assert "--player-role" in result.stdout
     assert "--list-player-roles" in result.stdout
+
+
+
+def test_print_intro_uses_frozen_world_metadata_over_legacy_scenario_wrapper() -> None:
+    game = SimpleNamespace(
+        scenario=SimpleNamespace(
+            title="Legacy Demo Title",
+            premise="旧前提",
+            player_role="legacy-role",
+            objective="legacy objective",
+            opponent="legacy opponent",
+            player_secret="legacy secret",
+            playable_roles=("legacy-role",),
+            opening_event=WorldEvent(headline="旧开局", summary="旧摘要", severity=30),
+        ),
+        frozen_world=SimpleNamespace(
+            title="Frozen Crisis",
+            premise="冻结世界前提",
+            player_role="校方",
+            objective="根据冻结世界推进局势",
+            opponent="冻结世界对位",
+            player_secret="冻结世界中的关键事实。",
+            selectable_roles=("校方", "杨景媛"),
+            opening_event=WorldEvent(headline="冻结开局", summary="冻结摘要", severity=80),
+        ),
+        state=WorldState(control=77, pressure=19, credibility=73, narrative_control=64),
+        agent_profiles=(SimpleNamespace(name="Frozen Observer", role="observer", stance="等待冻结世界的信号", trust_in_player=61),),
+    )
+
+    buffer = StringIO()
+    with redirect_stdout(buffer):
+        print_intro(game)
+
+    output = buffer.getvalue()
+
+    assert "Frozen Crisis" in output
+    assert "你扮演：校方" in output
+    assert "意图：根据冻结世界推进局势" in output
+    assert "真相：冻结世界中的关键事实。" in output
+    assert "可选视角：校方 / 杨景媛" in output
+    assert "开局事件：冻结开局" in output
+    assert "Legacy Demo Title" not in output
 
 
 def test_module_launcher_lists_roles_from_material() -> None:
