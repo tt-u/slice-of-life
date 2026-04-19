@@ -42,6 +42,7 @@ STATE_KEYS = (
     "exchange_trust",
     "control",
 )
+GENERATED_ACTION_MAGNITUDE_CAPS = {"low": 4, "medium": 7, "high": 10}
 
 AXIS_LABELS = {
     "credibility": "信誉",
@@ -515,6 +516,11 @@ class CrisisGame:
         downside_magnitude = {axis: 5 for axis in tradeoff["downside_axes"]}
         rationale = f"争取{ '/'.join(tradeoff['upside_axes'][:2]) }，代价是承受{ '/'.join(tradeoff['downside_axes'][:2]) }。"
         description = self._normalize_action_description(base=base, description=item["description"])
+        tags = [base.tag]
+        if base.unlocks_truth:
+            tags.append("audit")
+        if base.id == "freeze_wallet":
+            tags.append("freeze")
         return GeneratedAction(
             id=base.id,
             label=item["label"],
@@ -527,7 +533,7 @@ class CrisisGame:
             cost_types=(base.tag,),
             affected_entities=tuple(entity.id for entity in self.frozen_world.entities[:2]),
             commitment_tier=commitment_tier,
-            tags=(base.tag,),
+            tags=tuple(dict.fromkeys(tags)),
         )
 
     def _normalize_action_description(self, *, base: ActionCard, description: str) -> str:
@@ -610,9 +616,8 @@ class CrisisGame:
     def apply_choice(self, choice: TurnChoice) -> TurnResolution:
         pre_turn_event = self.begin_turn()
         action = choice.action
-        template_action = self._resolve_action_template(action)
         self.state.turn_index += 1
-        self._apply_action_base_effects(template_action)
+        self._apply_action_base_effects(action)
         reactions = self._generate_agent_reactions(action)
         for reaction in reactions:
             self._apply_delta(reaction.state_delta)
@@ -738,20 +743,20 @@ class CrisisGame:
         )
 
     def _score_action(self, action: GeneratedAction) -> int:
-        template = self._resolve_action_template(action)
+        dimension_deltas = self._generated_action_dimension_deltas(action)
         emergency_weight = 20 if self.state.exchange_trust < 45 else 0
         panic_weight = 20 if self.state.community_panic > 65 else 0
-        treasury_penalty = 18 if self.state.treasury < 30 and template.treasury_shift < 0 else 0
+        treasury_penalty = 18 if self.state.treasury < 30 and dimension_deltas.get("treasury", 0) < 0 else 0
         score = (
-            template.control_shift * 5
-            + template.narrative_shift * 4
-            + (template.exchange_shift + template.exchange_trust_shift) * 4
-            + template.liquidity_shift * 3
-            - template.public_pressure * 2
-            - max(0, template.volatility_shift) * 2
+            dimension_deltas.get("control", 0) * 5
+            + dimension_deltas.get("narrative_control", 0) * 4
+            + dimension_deltas.get("exchange_trust", 0) * 4
+            + dimension_deltas.get("liquidity", 0) * 3
+            - dimension_deltas.get("pressure", 0) * 2
+            - dimension_deltas.get("volatility", 0) * 2
             - treasury_penalty
-            + (template.exchange_trust_shift if emergency_weight else 0)
-            + (template.narrative_shift if panic_weight else 0)
+            + (dimension_deltas.get("exchange_trust", 0) if emergency_weight else 0)
+            + (dimension_deltas.get("narrative_control", 0) if panic_weight else 0)
         )
         focus_weights = {item["axis"]: int(item["urgency"]) for item in decision_focus_from_state(self.state)}
         for axis, urgency in focus_weights.items():
@@ -889,22 +894,36 @@ class CrisisGame:
             state_delta={"pressure": 2},
         )
 
-    def _apply_action_base_effects(self, action: ActionCard) -> None:
-        self._apply_delta(
-            {
-                "pressure": action.public_pressure,
-                "narrative_control": action.narrative_shift,
-                "exchange_trust": action.exchange_shift + action.exchange_trust_shift,
-                "liquidity": action.liquidity_shift,
-                "treasury": action.treasury_shift,
-                "control": action.control_shift,
-                "volatility": action.volatility_shift,
-            }
-        )
-        if action.unlocks_truth:
+    def _apply_action_base_effects(self, action: GeneratedAction) -> None:
+        self._apply_delta(self._generated_action_dimension_deltas(action))
+        if {"audit", "disclosure"} & set(action.tags):
             self.state.truth_public = True
-        if action.id == "freeze_wallet":
+        if action.id == "freeze_wallet" or "freeze" in action.tags:
             self.state.flags.add("wallet_frozen")
+
+    def _generated_action_dimension_deltas(self, action: GeneratedAction) -> dict[str, int]:
+        direction_map = {dimension.key: dimension.direction_of_health for dimension in self.frozen_world.resolved_dimension_defs()}
+        deltas: dict[str, int] = {}
+        magnitude_cap = GENERATED_ACTION_MAGNITUDE_CAPS.get(action.commitment_tier, GENERATED_ACTION_MAGNITUDE_CAPS["medium"])
+
+        def apply_signed_delta(dimension_key: str, magnitude: int, *, favorable: bool) -> None:
+            if dimension_key not in self.state.to_dimension_map():
+                return
+            health_direction = direction_map.get(dimension_key, "higher_is_better")
+            bounded_magnitude = min(magnitude_cap, max(0, int(magnitude)))
+            if bounded_magnitude == 0:
+                return
+            if health_direction == "lower_is_better":
+                signed_delta = -bounded_magnitude if favorable else bounded_magnitude
+            else:
+                signed_delta = bounded_magnitude if favorable else -bounded_magnitude
+            deltas[dimension_key] = deltas.get(dimension_key, 0) + signed_delta
+
+        for dimension_key in action.upside_dimensions:
+            apply_signed_delta(dimension_key, action.upside_magnitude.get(dimension_key, 0), favorable=True)
+        for dimension_key in action.downside_dimensions:
+            apply_signed_delta(dimension_key, action.downside_magnitude.get(dimension_key, 0), favorable=False)
+        return deltas
 
     def _generate_agent_reactions(self, action: GeneratedAction) -> list[AgentReaction]:
         reactions: list[AgentReaction] = []

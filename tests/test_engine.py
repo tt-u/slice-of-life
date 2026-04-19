@@ -1,5 +1,6 @@
 from dataclasses import replace
 
+import eventforge.engine as engine_module
 from eventforge.engine import build_game, run_auto_game, validate_agent_reaction_proposal
 from eventforge.domain import AgentProfile, AgentReactionContext, AgentReactionProposal, AgentRunState, GeneratedAction, SeedEntity, TurnChoice, ActionCard, FrozenInitialWorld
 from eventforge.scenarios import FLASH_CRASH_SCENARIO
@@ -372,6 +373,124 @@ def test_apply_choice_returns_distinct_agent_reactions() -> None:
     kol = next(reaction for reaction in resolution.agent_reactions if reaction.actor_name == "AshSignals")
     exchange = next(reaction for reaction in resolution.agent_reactions if reaction.actor_name == "Onyx Exchange")
     assert kol.summary != exchange.summary
+
+
+
+def test_score_action_uses_generated_action_metadata_without_template_lookup() -> None:
+    game = build_game(turns=6, seed=3, llm_client=FakeLLM())
+    game.action_template_map = {}
+    action = GeneratedAction(
+        id="world-authored-audit",
+        label="公开审计框架",
+        description="先公开审计框架和处理边界。",
+        rationale="用控制权和平台信任换取喘息空间，但会抬高即时压力。",
+        upside_dimensions=("control", "exchange_trust"),
+        downside_dimensions=("pressure", "volatility"),
+        upside_magnitude={"control": 9, "exchange_trust": 7},
+        downside_magnitude={"pressure": 6, "volatility": 4},
+        cost_types=("legal",),
+        affected_entities=("exchange-onyx",),
+        commitment_tier="medium",
+        tags=("audit",),
+    )
+
+    score = game._score_action(action)
+
+    assert isinstance(score, int)
+    assert score > 0
+
+
+
+def test_score_action_rewards_reductions_on_lower_is_better_dimensions() -> None:
+    game = build_game(turns=6, seed=3, llm_client=FakeLLM())
+    game.action_template_map = {}
+    original_focus = engine_module.decision_focus_from_state
+    engine_module.decision_focus_from_state = lambda state: []
+    try:
+        action = GeneratedAction(
+            id="steady-the-room",
+            label="稳住场面",
+            description="先压住恐慌和波动，再争取回应窗口。",
+            rationale="降低压力和波动，代价是消耗一点控制空间。",
+            upside_dimensions=("pressure", "volatility"),
+            downside_dimensions=("control",),
+            upside_magnitude={"pressure": 8, "volatility": 6},
+            downside_magnitude={"control": 2},
+            cost_types=("public",),
+            affected_entities=("community-watchers",),
+            commitment_tier="low",
+            tags=("stabilize",),
+        )
+
+        score = game._score_action(action)
+    finally:
+        engine_module.decision_focus_from_state = original_focus
+
+    assert score > 0
+
+
+
+def test_apply_choice_uses_generated_action_metadata_without_template_lookup() -> None:
+    game = build_game(turns=6, seed=3, llm_client=FakeLLM())
+    game.begin_turn()
+    game.action_template_map = {}
+    game._generate_agent_reactions = lambda action: []
+    game._apply_secondary_world_rules = lambda action, reactions: None
+    before = game.snapshot_state()
+    action = GeneratedAction(
+        id="freeze_wallet",
+        label="冻结争议钱包并启动审计",
+        description="先冻结争议钱包，同时启动审计说明。",
+        rationale="提升控制、平台信任与叙事控制，但会推高压力并消耗资源。",
+        upside_dimensions=("control", "exchange_trust", "narrative_control"),
+        downside_dimensions=("pressure", "treasury"),
+        upside_magnitude={"control": 8, "exchange_trust": 6, "narrative_control": 5},
+        downside_magnitude={"pressure": 7, "treasury": 4},
+        cost_types=("legal",),
+        affected_entities=("exchange-onyx",),
+        commitment_tier="high",
+        tags=("audit",),
+    )
+
+    resolution = game.apply_choice(TurnChoice(action=action, reason="test"))
+
+    assert resolution.action_id == "freeze_wallet"
+    assert game.state.control == before["control"] + 8
+    assert game.state.exchange_trust == before["exchange_trust"] + 6
+    assert game.state.narrative_control == before["narrative_control"] + 5
+    assert game.state.pressure == before["pressure"] + 7
+    assert game.state.treasury == before["treasury"] - 4
+    assert game.state.truth_public is True
+    assert "wallet_frozen" in game.state.flags
+
+
+
+def test_apply_choice_clamps_generated_action_magnitudes_by_commitment_tier() -> None:
+    game = build_game(turns=6, seed=3, llm_client=FakeLLM())
+    game.begin_turn()
+    game.action_template_map = {}
+    game._generate_agent_reactions = lambda action: []
+    game._apply_secondary_world_rules = lambda action, reactions: None
+    before = game.snapshot_state()
+    action = GeneratedAction(
+        id="bounded-world-action",
+        label="过载动作",
+        description="尝试用极端动作直接压穿局面。",
+        rationale="大幅推动控制，但会明显抬高压力。",
+        upside_dimensions=("control",),
+        downside_dimensions=("pressure",),
+        upside_magnitude={"control": 99},
+        downside_magnitude={"pressure": 99},
+        cost_types=("public",),
+        affected_entities=("exchange-onyx",),
+        commitment_tier="high",
+        tags=("stabilize",),
+    )
+
+    game.apply_choice(TurnChoice(action=action, reason="test"))
+
+    assert game.state.control == before["control"] + 10
+    assert game.state.pressure == before["pressure"] + 10
 
 
 
