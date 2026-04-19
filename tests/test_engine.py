@@ -433,6 +433,74 @@ def test_apply_choice_updates_agent_run_state_bridge_from_existing_reaction_logi
 
 
 
+def test_validate_agent_reaction_proposal_respects_zero_hook_and_memory_caps() -> None:
+    game = build_game(turns=6, seed=3, llm_client=FakeLLM())
+    base_boundaries = game.frozen_world.reaction_boundaries
+    assert base_boundaries is not None
+    zero_cap_boundaries = base_boundaries.__class__(
+        scalar_axes=base_boundaries.scalar_axes,
+        max_relationship_delta_per_turn=base_boundaries.max_relationship_delta_per_turn,
+        max_dimension_impacts_per_reaction=base_boundaries.max_dimension_impacts_per_reaction,
+        max_dimension_delta_per_reaction=base_boundaries.max_dimension_delta_per_reaction,
+        max_relationship_updates_per_reaction=base_boundaries.max_relationship_updates_per_reaction,
+        max_hooks_per_reaction=0,
+        memory_limit=0,
+        allowed_hook_tags=base_boundaries.allowed_hook_tags,
+    )
+    state = AgentRunState(
+        agent_id="onyx-exchange",
+        agent_name="Onyx Exchange",
+        role="exchange",
+        stance="谨慎观望",
+        current_objective="暂不升级风控",
+        scalar_state={
+            "trust_in_player": 60,
+            "pressure_load": 30,
+            "escalation_drive": 20,
+            "public_alignment": 50,
+        },
+    )
+    context = AgentReactionContext(
+        world_id=game.frozen_world.world_id,
+        world_title=game.frozen_world.title,
+        turn_index=2,
+        turns_total=6,
+        player_role=game.frozen_world.player_role,
+        player_objective=game.frozen_world.objective,
+        chosen_action_id="statement",
+        chosen_action_label="发布证据时间线",
+        chosen_action_summary="公开时间线，试图换回叙事控制，但会提升制度压力。",
+        current_dimensions=game.state.to_dimension_map(),
+        urgent_dimensions=("exchange_trust",),
+        unstable_dimensions=("exchange_trust",),
+        dominant_tensions=("平台风控",),
+        acting_agent=state,
+        relevant_entities=("project-founder",),
+        recent_turn_summaries=("上一回合社区持续质疑",),
+        boundaries=zero_cap_boundaries,
+    )
+    proposal = AgentReactionProposal(
+        summary="平台决定先给窗口，但会保留更严厉的后手。",
+        stance="暂时配合",
+        updated_objective="争取更多补充材料",
+        scalar_deltas={"trust_in_player": 8},
+        relationship_deltas={},
+        dimension_impacts={"exchange_trust": 5},
+        follow_on_hooks=("institutional_freeze",),
+    )
+
+    updated_state, result = validate_agent_reaction_proposal(
+        context=context,
+        proposal=proposal,
+        known_entities={"project-founder"},
+    )
+
+    assert result.triggered_hooks == ()
+    assert updated_state.triggered_hooks == ()
+    assert updated_state.memories == ()
+
+
+
 def test_run_auto_game_returns_shareable_world_report_with_ending_score() -> None:
     game, report = run_auto_game(turns=10, seed=11, llm_client=FakeLLM())
 

@@ -360,13 +360,15 @@ def validate_agent_reaction_proposal(
         )
 
     allowed_hooks = set(boundaries.allowed_hook_tags)
+    max_hooks = max(0, boundaries.max_hooks_per_reaction)
     triggered_hooks: list[str] = []
-    for hook_tag in proposal.follow_on_hooks:
-        if hook_tag not in allowed_hooks or hook_tag in triggered_hooks:
-            continue
-        triggered_hooks.append(hook_tag)
-        if len(triggered_hooks) >= boundaries.max_hooks_per_reaction:
-            break
+    if max_hooks > 0:
+        for hook_tag in proposal.follow_on_hooks:
+            if hook_tag not in allowed_hooks or hook_tag in triggered_hooks:
+                continue
+            triggered_hooks.append(hook_tag)
+            if len(triggered_hooks) >= max_hooks:
+                break
 
     salience = min(100, max(0, sum(abs(delta) for delta in applied_scalar_deltas.values())))
     valence = max(-100, min(100, sum(applied_dimension_impacts.values()) - sum(abs(delta) for delta in applied_relationship_deltas.get(next(iter(applied_relationship_deltas), ""), {}).values())))
@@ -377,7 +379,8 @@ def validate_agent_reaction_proposal(
         salience=salience,
         valence=valence,
     )
-    next_memories = (*context.acting_agent.memories, memory_entry)[-boundaries.memory_limit :]
+    memory_limit = max(0, boundaries.memory_limit)
+    next_memories = (*context.acting_agent.memories, memory_entry)[-memory_limit:] if memory_limit > 0 else ()
     next_triggered_hooks = tuple(dict.fromkeys((*context.acting_agent.triggered_hooks, *triggered_hooks)))
 
     updated_state = AgentRunState(
