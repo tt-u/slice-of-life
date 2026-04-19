@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import sys
@@ -7,7 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from eventforge.__main__ import print_intro, print_role_inspection, print_turn_header
-from eventforge.domain import MaterialSeedInspection, ScenarioRoleComparisonCard, ScenarioRoleOverviewCard, ScenarioViewpointCard, WorldDimensionDef, WorldEvent, WorldState
+from eventforge.domain import FrozenInitialWorld, MaterialResearchPack, MaterialSeedInspection, ScenarioRoleComparisonCard, ScenarioRoleOverviewCard, ScenarioViewpointCard, WorldDimensionDef, WorldEvent, WorldState
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -20,6 +21,23 @@ def test_module_launcher_requires_llm_configuration() -> None:
     env.pop("OPENAI_MODEL", None)
     result = subprocess.run(
         [sys.executable, "-m", "eventforge", "--mode", "auto", "--turns", "1"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert result.returncode != 0
+    assert "OPENAI_API_KEY" in result.stderr or "OPENAI_API_KEY" in result.stdout
+
+
+def test_module_launcher_without_args_keeps_default_play_behavior() -> None:
+    env = dict(os.environ)
+    env.pop("OPENAI_API_KEY", None)
+    env.pop("OPENAI_BASE_URL", None)
+    env.pop("OPENAI_MODEL", None)
+    result = subprocess.run(
+        [sys.executable, "-m", "eventforge"],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -392,3 +410,150 @@ def test_print_role_inspection_outputs_pairwise_role_comparisons(capsys) -> None
     assert "任意视角对照：" in output
     assert "- [primary] 创作者 → 平台 | 当前 控制权 26 / 压力 90 / 公信力 28 / 叙事控制 46 | 对比 控制权 60 / 压力 78 / 公信力 45 / 叙事控制 31" in output
     assert "- 平台 → 品牌方 | 当前 控制权 60 / 压力 78 / 公信力 45 / 叙事控制 31 | 对比 控制权 47 / 压力 71 / 公信力 42 / 叙事控制 35 | 控制权 -13 / 压力 -7 / 叙事控制 +4" in output
+
+
+def test_module_launcher_help_includes_game_factory_subcommands() -> None:
+    result = subprocess.run(
+        [sys.executable, "-m", "eventforge", "--help"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env=dict(os.environ),
+    )
+
+    assert result.returncode == 0
+    assert "play" in result.stdout
+    assert "research-case" in result.stdout
+    assert "freeze-world" in result.stdout
+    assert "inspect-world" in result.stdout
+    assert "--world-file" in result.stdout
+
+
+def test_module_launcher_research_case_writes_anchor_pack_without_llm_config(tmp_path) -> None:
+    output_path = tmp_path / "wuhan-pack.json"
+    env = dict(os.environ)
+    env.pop("OPENAI_API_KEY", None)
+    env.pop("OPENAI_BASE_URL", None)
+    env.pop("OPENAI_MODEL", None)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "eventforge",
+            "research-case",
+            "--case",
+            "wuhan-university-yang-jingyuan",
+            "--output",
+            str(output_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert result.returncode == 0
+    assert output_path.exists()
+    restored = MaterialResearchPack.from_payload(json.loads(output_path.read_text(encoding="utf-8")))
+    assert restored.case_id == "wuhan-university-yang-jingyuan"
+    assert restored.candidate_viewpoints == ("校方", "杨景媛")
+    assert "研究案例已写入" in result.stdout
+    assert "武汉大学杨景媛事件" in result.stdout
+
+
+def test_module_launcher_freeze_and_inspect_world_from_anchor_case_without_llm_config(tmp_path) -> None:
+    output_path = tmp_path / "wuhan-world.json"
+    env = dict(os.environ)
+    env.pop("OPENAI_API_KEY", None)
+    env.pop("OPENAI_BASE_URL", None)
+    env.pop("OPENAI_MODEL", None)
+
+    freeze_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "eventforge",
+            "freeze-world",
+            "--case",
+            "wuhan-university-yang-jingyuan",
+            "--player-role",
+            "杨景媛",
+            "--output",
+            str(output_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert freeze_result.returncode == 0
+    assert output_path.exists()
+    frozen_world = FrozenInitialWorld.from_payload(json.loads(output_path.read_text(encoding="utf-8")))
+    assert frozen_world.world_id == "wuhan-university-yang-jingyuan-yang-jingyuan"
+    assert frozen_world.player_role == "杨景媛"
+    assert frozen_world.allowed_turn_counts == (4, 6, 8, 10)
+    assert "冻结世界已写入" in freeze_result.stdout
+
+    inspect_result = subprocess.run(
+        [sys.executable, "-m", "eventforge", "inspect-world", "--world-file", str(output_path)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert inspect_result.returncode == 0
+    assert "# 冻结世界检查：武汉大学杨景媛事件" in inspect_result.stdout
+    assert "玩家视角：杨景媛" in inspect_result.stdout
+    assert "允许回合：4 / 6 / 8 / 10" in inspect_result.stdout
+    assert "保住个人学位" in inspect_result.stdout
+
+
+def test_module_launcher_rejects_mismatched_player_role_for_world_file(tmp_path) -> None:
+    output_path = tmp_path / "wuhan-world.json"
+    env = dict(os.environ)
+    env.pop("OPENAI_API_KEY", None)
+    env.pop("OPENAI_BASE_URL", None)
+    env.pop("OPENAI_MODEL", None)
+
+    freeze_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "eventforge",
+            "freeze-world",
+            "--case",
+            "wuhan-university-yang-jingyuan",
+            "--player-role",
+            "校方",
+            "--output",
+            str(output_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    assert freeze_result.returncode == 0
+
+    play_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "eventforge",
+            "play",
+            "--world-file",
+            str(output_path),
+            "--player-role",
+            "杨景媛",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert play_result.returncode != 0
+    assert "already frozen for role 校方" in play_result.stderr
