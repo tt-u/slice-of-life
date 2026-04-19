@@ -7,6 +7,7 @@ from typing import Iterable
 
 from .domain import (
     ActionCard,
+    ActionGenerationRule,
     AgentMemoryEntry,
     AgentProfile,
     AgentReaction,
@@ -164,9 +165,22 @@ def decision_focus_from_state(
 
 def format_tradeoff_suffix(action: ActionCard, *, axis_labels: dict[str, str] | None = None) -> str:
     tradeoff = action_tradeoff_profile(action)
+    return format_tradeoff_suffix_from_axes(
+        upside_axes=tradeoff["upside_axes"],
+        downside_axes=tradeoff["downside_axes"],
+        axis_labels=axis_labels,
+    )
+
+
+def format_tradeoff_suffix_from_axes(
+    *,
+    upside_axes: list[str] | tuple[str, ...],
+    downside_axes: list[str] | tuple[str, ...],
+    axis_labels: dict[str, str] | None = None,
+) -> str:
     labels = axis_labels or {}
-    upside = "/".join(labels.get(axis, axis) for axis in tradeoff["upside_axes"][:2])
-    downside = "/".join(labels.get(axis, axis) for axis in tradeoff["downside_axes"][:2])
+    upside = "/".join(labels.get(axis, axis) for axis in list(upside_axes)[:2])
+    downside = "/".join(labels.get(axis, axis) for axis in list(downside_axes)[:2])
     return f"（+{upside} / -{downside}）"
 
 
@@ -174,6 +188,15 @@ def _render_tradeoff_phrase(axes: list[str], *, axis_labels: dict[str, str], fal
     if not axes:
         return fallback
     return "/".join(axis_labels.get(axis, axis) for axis in axes[:2])
+
+
+def _intensity_range_to_commitment_tier(intensity_range: tuple[int, int]) -> str:
+    upper_bound = max(int(intensity_range[0]), int(intensity_range[-1]))
+    if upper_bound <= 1:
+        return "low"
+    if upper_bound <= 2:
+        return "medium"
+    return "high"
 
 
 def _dimension_label_map(frozen_world: FrozenInitialWorld) -> dict[str, str]:
@@ -441,6 +464,46 @@ class CrisisGame:
         self.pending_event = event
         return event
 
+    def _action_generation_rule(self, action_id: str) -> ActionGenerationRule | None:
+        grammar = self.frozen_world.action_grammar
+        if grammar is None:
+            return None
+        return next((rule for rule in grammar.rules if rule.key == action_id), None)
+
+    def _template_tradeoff_profile(self, action: ActionCard) -> dict[str, list[str]]:
+        rule = self._action_generation_rule(action.id)
+        if rule is None:
+            return action_tradeoff_profile(action)
+        upside_axes = list(dict.fromkeys(rule.preferred_upside_dimensions[: max(1, rule.max_upside_count)]))
+        downside_axes = list(dict.fromkeys(rule.likely_downside_dimensions[: max(1, rule.max_downside_count)]))
+        if not upside_axes:
+            upside_axes.append("control")
+        if not downside_axes:
+            downside_axes.append("pressure")
+        return {"upside_axes": upside_axes, "downside_axes": downside_axes}
+
+    def _template_commitment_tier(self, action: ActionCard) -> str:
+        rule = self._action_generation_rule(action.id)
+        if rule is not None:
+            return _intensity_range_to_commitment_tier(rule.intensity_range)
+        impact_tier = str(action_impact_profile(action)["impact_tier"])
+        return "low" if impact_tier == "low" else "medium" if impact_tier == "medium" else "high"
+
+    def _template_cost_types(self, action: ActionCard) -> tuple[str, ...]:
+        rule = self._action_generation_rule(action.id)
+        if rule is not None and rule.allowed_cost_types:
+            return tuple(dict.fromkeys(rule.allowed_cost_types))
+        return (action.tag,)
+
+    def _template_tags(self, action: ActionCard) -> tuple[str, ...]:
+        rule = self._action_generation_rule(action.id)
+        tags = list(rule.tags) if rule is not None and rule.tags else [action.tag]
+        if action.unlocks_truth and not ({"audit", "disclosure"} & set(tags)):
+            tags.append("audit")
+        if action.id == "freeze_wallet" and "freeze" not in tags:
+            tags.append("freeze")
+        return tuple(dict.fromkeys(tags))
+
     def available_actions(self) -> tuple[GeneratedAction, ...]:
         if self.pending_actions is not None:
             return self.pending_actions
@@ -456,14 +519,15 @@ class CrisisGame:
         )
         for action in template_pool:
             profile = action_impact_profile(action)
-            tradeoff = action_tradeoff_profile(action)
+            commitment_tier = self._template_commitment_tier(action)
+            tradeoff = self._template_tradeoff_profile(action)
             templates.append(
                 {
                     "id": action.id,
                     "label": action.label,
                     "description": action.description,
                     "impact_cost": profile["impact_cost"],
-                    "impact_tier": profile["impact_tier"],
+                    "impact_tier": commitment_tier,
                     "upside_axes": tradeoff["upside_axes"],
                     "downside_axes": tradeoff["downside_axes"],
                 }
@@ -510,9 +574,8 @@ class CrisisGame:
         return self.pending_actions
 
     def _build_generated_action(self, *, base: ActionCard, item: dict[str, str]) -> GeneratedAction:
-        tradeoff = action_tradeoff_profile(base)
-        impact_tier = str(action_impact_profile(base)["impact_tier"])
-        commitment_tier = "low" if impact_tier == "low" else "medium" if impact_tier == "medium" else "high"
+        tradeoff = self._template_tradeoff_profile(base)
+        commitment_tier = self._template_commitment_tier(base)
         upside_magnitude = {axis: 6 for axis in tradeoff["upside_axes"]}
         downside_magnitude = {axis: 5 for axis in tradeoff["downside_axes"]}
         axis_labels = _dimension_label_map(self.frozen_world)
@@ -521,11 +584,7 @@ class CrisisGame:
             f"代价是承受{_render_tradeoff_phrase(tradeoff['downside_axes'], axis_labels=axis_labels, fallback='额外压力')}。"
         )
         description = self._normalize_action_description(base=base, description=item["description"])
-        tags = [base.tag]
-        if base.unlocks_truth:
-            tags.append("audit")
-        if base.id == "freeze_wallet":
-            tags.append("freeze")
+        tags = self._template_tags(base)
         return GeneratedAction(
             id=base.id,
             label=item["label"],
@@ -535,15 +594,20 @@ class CrisisGame:
             downside_dimensions=tuple(tradeoff["downside_axes"]),
             upside_magnitude=upside_magnitude,
             downside_magnitude=downside_magnitude,
-            cost_types=(base.tag,),
+            cost_types=self._template_cost_types(base),
             affected_entities=tuple(entity.id for entity in self.frozen_world.entities[:2]),
             commitment_tier=commitment_tier,
-            tags=tuple(dict.fromkeys(tags)),
+            tags=tags,
         )
 
     def _normalize_action_description(self, *, base: ActionCard, description: str) -> str:
         clean = description.strip()
-        suffix = format_tradeoff_suffix(base, axis_labels=_dimension_label_map(self.frozen_world))
+        tradeoff = self._template_tradeoff_profile(base)
+        suffix = format_tradeoff_suffix_from_axes(
+            upside_axes=tradeoff["upside_axes"],
+            downside_axes=tradeoff["downside_axes"],
+            axis_labels=_dimension_label_map(self.frozen_world),
+        )
         if suffix in clean:
             return clean
         if re.search(r"（[^）]*\+[^）]*-[^）]*）\s*$", clean):
@@ -569,7 +633,7 @@ class CrisisGame:
         def add_candidate(candidate_id: str) -> bool:
             if candidate_id in selected:
                 return False
-            tier = str(action_impact_profile(template_map[candidate_id])["impact_tier"])
+            tier = self._template_commitment_tier(template_map[candidate_id])
             if tier == "extreme" and selected_tiers.count("extreme") >= 1:
                 return False
             selected.append(candidate_id)
@@ -581,7 +645,7 @@ class CrisisGame:
                 (
                     template_id
                     for template_id in ordered_ids
-                    if str(action_impact_profile(template_map[template_id])["impact_tier"]) == required_tier
+                    if self._template_commitment_tier(template_map[template_id]) == required_tier
                 ),
                 None,
             )
@@ -589,7 +653,7 @@ class CrisisGame:
                 (
                     action.id
                     for action in template_pool
-                    if str(action_impact_profile(action)["impact_tier"]) == required_tier and action.id not in selected
+                    if self._template_commitment_tier(action) == required_tier and action.id not in selected
                 ),
                 None,
             )

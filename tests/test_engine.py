@@ -342,6 +342,70 @@ def test_generated_choice_copy_gets_explicit_tradeoff_metadata() -> None:
     assert set(action.downside_magnitude) == set(action.downside_dimensions)
 
 
+def test_generated_choice_copy_prefers_world_authored_rule_metadata_over_legacy_template_bridge() -> None:
+    frozen_world = FLASH_CRASH_SCENARIO.to_frozen_world()
+    custom_rules = tuple(
+        replace(
+            rule,
+            preferred_upside_dimensions=("credibility", "control"),
+            likely_downside_dimensions=("pressure", "treasury"),
+            allowed_cost_types=("legal", "finance"),
+            max_upside_count=2,
+            max_downside_count=2,
+            intensity_range=(7, 9),
+            tags=("audit", "freeze"),
+        )
+        if rule.key == "statement"
+        else rule
+        for rule in frozen_world.action_grammar.rules
+    )
+    game = build_game(
+        turns=6,
+        seed=3,
+        llm_client=FakeLLM(),
+        frozen_world=replace(
+            frozen_world,
+            action_grammar=replace(frozen_world.action_grammar, rules=custom_rules),
+        ),
+    )
+    game.begin_turn()
+
+    action = next(action for action in game.available_actions() if action.id == "statement")
+
+    assert action.upside_dimensions == ("credibility", "control")
+    assert action.downside_dimensions == ("pressure", "treasury")
+    assert action.cost_types == ("legal", "finance")
+    assert action.commitment_tier == "high"
+    assert "audit" in action.tags
+    assert "freeze" in action.tags
+
+
+def test_world_authored_action_tags_drive_base_effect_hooks_without_legacy_action_ids() -> None:
+    frozen_world = FLASH_CRASH_SCENARIO.to_frozen_world()
+    custom_rules = tuple(
+        replace(rule, tags=("audit", "freeze")) if rule.key == "statement" else rule
+        for rule in frozen_world.action_grammar.rules
+    )
+    game = build_game(
+        turns=6,
+        seed=3,
+        llm_client=FakeLLM(),
+        frozen_world=replace(
+            frozen_world,
+            action_grammar=replace(frozen_world.action_grammar, rules=custom_rules),
+        ),
+    )
+    game.begin_turn()
+    game._generate_agent_reactions = lambda action: []
+    game._apply_secondary_world_rules = lambda action, reactions: None
+
+    action = next(action for action in game.available_actions() if action.id == "statement")
+    game.apply_choice(TurnChoice(action=action, reason="test"))
+
+    assert game.state.truth_public is True
+    assert "wallet_frozen" in game.state.flags
+
+
 def test_generated_choice_copy_does_not_duplicate_existing_tradeoff_suffix() -> None:
     game = build_game(turns=6, seed=3, llm_client=FakeLLM())
 
