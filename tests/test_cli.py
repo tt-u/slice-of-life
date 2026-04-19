@@ -6,8 +6,8 @@ from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
 
-from eventforge.__main__ import print_intro, print_role_inspection
-from eventforge.domain import MaterialSeedInspection, ScenarioRoleComparisonCard, ScenarioRoleOverviewCard, ScenarioViewpointCard, WorldEvent, WorldState
+from eventforge.__main__ import print_intro, print_role_inspection, print_turn_header
+from eventforge.domain import MaterialSeedInspection, ScenarioRoleComparisonCard, ScenarioRoleOverviewCard, ScenarioViewpointCard, WorldDimensionDef, WorldEvent, WorldState
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -66,6 +66,26 @@ def test_print_intro_uses_frozen_world_metadata_over_legacy_scenario_wrapper() -
             player_secret="冻结世界中的关键事实。",
             selectable_roles=("校方", "杨景媛"),
             opening_event=WorldEvent(headline="冻结开局", summary="冻结摘要", severity=80),
+            resolved_dimension_defs=lambda: (
+                WorldDimensionDef(
+                    key="control",
+                    label="控制权",
+                    description="玩家可调度局面资源的能力。",
+                    direction_of_health="higher_is_better",
+                ),
+                WorldDimensionDef(
+                    key="pressure",
+                    label="程序压力",
+                    description="程序争议持续堆积的压力。",
+                    direction_of_health="lower_is_better",
+                ),
+                WorldDimensionDef(
+                    key="credibility",
+                    label="公信力",
+                    description="公众对叙事的信任。",
+                    direction_of_health="higher_is_better",
+                ),
+            ),
         ),
         state=WorldState(control=77, pressure=19, credibility=73, narrative_control=64),
         agent_profiles=(SimpleNamespace(name="Frozen Observer", role="observer", stance="等待冻结世界的信号", trust_in_player=61),),
@@ -83,7 +103,104 @@ def test_print_intro_uses_frozen_world_metadata_over_legacy_scenario_wrapper() -
     assert "真相：冻结世界中的关键事实。" in output
     assert "可选视角：校方 / 杨景媛" in output
     assert "开局事件：冻结开局" in output
+    assert "开局剖面：控制权 77 / 程序压力 19 / 公信力 73" in output
     assert "Legacy Demo Title" not in output
+
+
+def test_print_turn_header_uses_frozen_world_dimension_labels_instead_of_flash_crash_defaults() -> None:
+    game = SimpleNamespace(
+        frozen_world=SimpleNamespace(
+            resolved_dimension_defs=lambda: (
+                WorldDimensionDef(
+                    key="control",
+                    label="控制权",
+                    description="玩家可调度局面资源的能力。",
+                    direction_of_health="higher_is_better",
+                ),
+                WorldDimensionDef(
+                    key="pressure",
+                    label="程序压力",
+                    description="程序争议持续堆积的压力。",
+                    direction_of_health="lower_is_better",
+                ),
+                WorldDimensionDef(
+                    key="credibility",
+                    label="公信力",
+                    description="公众对叙事的信任。",
+                    direction_of_health="higher_is_better",
+                ),
+                WorldDimensionDef(
+                    key="narrative_control",
+                    label="叙事主动权",
+                    description="当前叙事节奏的掌控度。",
+                    direction_of_health="higher_is_better",
+                ),
+            ),
+        ),
+        state=WorldState(turn_index=1, turns_total=6, control=77, pressure=19, credibility=73, narrative_control=64),
+    )
+    event = WorldEvent(headline="校内舆情再起", summary="新一轮程序争议推动校内讨论升温。", severity=66, actor_name="学生群体")
+
+    buffer = StringIO()
+    with redirect_stdout(buffer):
+        print_turn_header(game, event)
+
+    output = buffer.getvalue()
+
+    assert "## 回合 2/6" in output
+    assert "回合前事件：学生群体 / 校内舆情再起" in output
+    assert "控制权 77 | 程序压力 19 | 公信力 73 | 叙事主动权 64" in output
+    assert "社区恐慌" not in output
+    assert "交易所信任" not in output
+
+
+def test_print_turn_header_preserves_legacy_flash_crash_snapshot_without_dimension_defs() -> None:
+    game = SimpleNamespace(
+        frozen_world=SimpleNamespace(resolved_dimension_defs=lambda: ()),
+        state=WorldState(
+            turn_index=1,
+            turns_total=6,
+            control=77,
+            narrative_control=64,
+            community_panic=72,
+            exchange_trust=44,
+            price=43,
+            treasury=58,
+        ),
+    )
+    event = WorldEvent(headline="市场继续波动", summary="市场仍然高度敏感。", severity=50, actor_name="System")
+
+    buffer = StringIO()
+    with redirect_stdout(buffer):
+        print_turn_header(game, event)
+
+    output = buffer.getvalue()
+
+    assert "控制权 77 | 叙事控制 64 | 社区恐慌 72 | 交易所信任 44 | 币价 43 | 国库 58" in output
+
+
+def test_print_turn_header_preserves_legacy_snapshot_without_frozen_world_attribute() -> None:
+    game = SimpleNamespace(
+        state=WorldState(
+            turn_index=1,
+            turns_total=6,
+            control=77,
+            narrative_control=64,
+            community_panic=72,
+            exchange_trust=44,
+            price=43,
+            treasury=58,
+        ),
+    )
+    event = WorldEvent(headline="市场继续波动", summary="市场仍然高度敏感。", severity=50, actor_name="System")
+
+    buffer = StringIO()
+    with redirect_stdout(buffer):
+        print_turn_header(game, event)
+
+    output = buffer.getvalue()
+
+    assert "控制权 77 | 叙事控制 64 | 社区恐慌 72 | 交易所信任 44 | 币价 43 | 国库 58" in output
 
 
 def test_module_launcher_lists_roles_from_material() -> None:

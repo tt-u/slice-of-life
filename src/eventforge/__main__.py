@@ -79,7 +79,7 @@ def print_intro(game) -> None:
     print()
     print(f"开局事件：{world.opening_event.headline}")
     print(world.opening_event.summary)
-    print("开局剖面：" + summarize_initial_world(game.state))
+    print("开局剖面：" + summarize_initial_world(game))
     print()
     print("关键角色：")
     for profile in game.agent_profiles:
@@ -166,11 +166,42 @@ def format_selected_role_comparison_line(card) -> str:
     )
 
 
-def summarize_initial_world(state) -> str:
-    return (
-        f"控制权 {state.control} / 压力 {state.pressure} / 公信力 {state.credibility} / "
-        f"叙事控制 {state.narrative_control}"
+def summarize_initial_world(game) -> str:
+    return format_dimension_snapshot(
+        game,
+        separator=" / ",
+        fallback_keys=("control", "pressure", "credibility", "narrative_control"),
     )
+
+
+def format_dimension_snapshot(
+    game,
+    *,
+    separator: str = " | ",
+    limit: int | None = None,
+    fallback_keys: tuple[str, ...] = ("control", "pressure", "credibility", "narrative_control"),
+) -> str:
+    frozen_world = getattr(game, "frozen_world", None)
+    dimension_defs = getattr(frozen_world, "resolved_dimension_defs", lambda: ())()
+    state = game.state
+    if not dimension_defs:
+        fallback_labels = {
+            "control": "控制权",
+            "pressure": "压力",
+            "credibility": "公信力",
+            "narrative_control": "叙事控制",
+            "community_panic": "社区恐慌",
+            "exchange_trust": "交易所信任",
+            "price": "币价",
+            "treasury": "国库",
+        }
+        parts = [f"{fallback_labels.get(key, key)} {getattr(state, key)}" for key in fallback_keys]
+        return separator.join(parts[:limit] if limit is not None else parts)
+
+    parts = [f"{dimension.label} {getattr(state, dimension.key)}" for dimension in dimension_defs]
+    if limit is not None:
+        parts = parts[:limit]
+    return separator.join(parts)
 
 
 def summarize_focus_metrics(card) -> str:
@@ -191,8 +222,12 @@ def print_turn_header(game, pre_turn_event) -> None:
     print(f"回合前事件：{pre_turn_event.actor_name} / {pre_turn_event.headline}")
     print(pre_turn_event.summary)
     print(
-        f"控制权 {state.control} | 叙事控制 {state.narrative_control} | 社区恐慌 {state.community_panic} | "
-        f"交易所信任 {state.exchange_trust} | 币价 {state.price} | 国库 {state.treasury}"
+        format_dimension_snapshot(
+            game,
+            separator=" | ",
+            limit=6,
+            fallback_keys=("control", "narrative_control", "community_panic", "exchange_trust", "price", "treasury"),
+        )
     )
 
 
