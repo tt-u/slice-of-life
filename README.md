@@ -14,7 +14,7 @@ The historical flash-crash scenario remains in the repo only as sample/regressio
 
 ## Architecture notes
 
-Current implementation-grounded architecture docs live under [`docs/plans/`](./docs/plans/README.md). Start there for the active action/runtime contracts and the migration audit; older draft plans in that directory are historical context only.
+Current implementation-grounded architecture docs live under [`docs/plans/`](./docs/plans/README.md). Start there for the active action/runtime contracts and the migration audit; superseded draft plans have been consolidated or removed so that directory stays authoritative.
 
 ## Requirements
 

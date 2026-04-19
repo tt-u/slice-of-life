@@ -26,26 +26,27 @@ The architectural rule is:
 
 ## Audit summary
 
-The repo is **mid-migration**, not fully demo-bound anymore.
+The repo is still **mid-migration**, but the center of gravity is no longer the flash-crash demo.
 
-Good news already landed:
+Important migration wins already landed:
 
-- `MaterialResearchPack`, `FrozenInitialWorld`, `WorldDimensionDef`, `WorldActionGrammar`, `ActionGenerationContext`, `GeneratedAction`, and `WorldEndingBand` now exist in `src/eventforge/domain.py`.
-- `ScenarioDefinition.to_material_research_pack(...)` and `.to_frozen_world(...)` already provide a bridge from legacy scenarios into the new artifacts.
-- `FrozenInitialWorld.build_action_generation_context(...)` already provides a runtime bridge from frozen world + live state into structured action-generation input.
-- tests for these bridge artifacts already exist and pass.
+- stored `MaterialResearchPack` and `FrozenInitialWorld` artifacts are first-class and have committed anchor-case fixtures
+- runtime can boot directly from a supplied `FrozenInitialWorld`
+- generated actions now drive the live choice surface, with frozen-world action grammar preferred over legacy scenario actions
+- ending resolution already comes from `FrozenInitialWorld.resolve_ending_band(...)`
+- agent run-state / reaction-boundary schemas exist and are validated at runtime
+- flash-crash is isolated as sample/regression content instead of package identity
 
-But the runtime center is still demo-shaped:
+The highest-leverage remaining cleanup is narrower now:
 
-- `CrisisGame` still boots from `ScenarioDefinition` + `ActionCard` instead of a stored `FrozenInitialWorld`
-- `WorldState` is still a fixed flash-crash metric schema
-- `ActionCard` still encodes crypto/demo-specific effect fields
-- `engine.py` still contains global metric labels, ending bands, action heuristics, and role-bucket reaction logic that assume the flash-crash worldview
-- `FLASH_CRASH_SCENARIO` still acts like the default product entrypoint rather than a sample world pack
+- `WorldState`, `STATE_KEYS`, and `AXIS_LABELS` are still fixed-schema runtime bridges
+- `ActionCard` still survives underneath generated actions as a compatibility template layer
+- agent reactions still bridge from legacy role-bucket logic before validation
+- the no-argument CLI path still falls back to sample content for regression convenience
 
-So the repo is currently in this transition state:
+So the current transition state is:
 
-> **new architecture objects exist, but old runtime assumptions still dominate execution**.
+> **the game-factory artifact flow is real, but a few legacy runtime bridges still need to be retired or demoted further**.
 
 ---
 
@@ -61,16 +62,16 @@ So the repo is currently in this transition state:
 | `WorldActionGrammar` / `ActionGenerationRule` / `ActionCostType` | World-authored action grammar | **keep** | Core to generated-action architecture. |
 | `ActionGenerationContext` / `GeneratedAction` / `TurnSituation` | Runtime action-generation contract | **keep** | Core to item 5. |
 | `WorldEndingBand` | World-local ending model | **keep** | Core to item 12; already replaces global ending constants conceptually. |
-| `ScenarioDefinition` | Legacy scenario wrapper | **bridge temporarily** | Useful only as a migration adapter from old sample content to new artifacts. Runtime should stop depending on it directly. |
+| `ScenarioDefinition` | Legacy scenario wrapper | **bridge temporarily** | Still useful as a compatibility adapter and sample-content carrier, but frozen worlds should remain the authoritative runtime contract. |
 | `ScenarioBlueprint` | Worldgen output bridge | **bridge temporarily** | Acceptable while research/inspection/freeze flow is still being built. |
 | `SeedEntity` | Shared entity card type | **keep for now** | Still useful across research/frozen-world/runtime, though it may later split into research-card vs runtime-agent seed if needed. |
-| `AgentProfile` | Legacy per-agent runtime prompt profile | **bridge temporarily** | Acceptable until item 6 introduces explicit agent run-state / reaction schema in code. |
-| `AgentReaction` | Legacy reaction output snapshot | **bridge temporarily** | Can survive briefly, but should eventually be aligned to the world-authored agent evolution schema. |
+| `AgentProfile` | Legacy per-agent runtime prompt profile | **bridge temporarily** | Agent run-state now exists, but profile generation still bridges prompt setup and should eventually be demoted further. |
+| `AgentReaction` | Legacy reaction output snapshot | **bridge temporarily** | Runtime validation now exists, but the outward reaction shape is still a bridge around validated proposals/results. |
 | `WorldState` | Fixed mutable runtime state with 12 baked-in axes | **replace** | This is the biggest remaining demo-shaped domain object. It hardcodes one worldview into the engine. |
 | `WORLD_STATE_DIMENSION_KEYS` | Global fixed axis registry | **remove after migration** | Only exists because `WorldState` is fixed-schema. |
-| `ActionCard` | Legacy action template/effect object with demo-specific delta fields | **replace** | Blocks generic action generation because its fields encode one crisis genre. |
-| `TurnChoice` | Chosen `ActionCard` wrapper | **replace or refit** | Runtime should choose/generated-action instances, not legacy demo cards. |
-| `WorldReport` | End-of-run summary object | **keep/refit** | Structurally fine, but should derive ending labels from the frozen world, not global engine constants. |
+| `ActionCard` | Legacy action template/effect object with demo-specific delta fields | **replace** | No longer the player-facing action currency, but still survives as an internal compatibility template layer. |
+| `TurnChoice` | Chosen runtime action wrapper | **refit mostly done** | It now carries `GeneratedAction`; remaining cleanup is removing residual legacy assumptions around the bridge layer. |
+| `WorldReport` | End-of-run summary object | **keep/refit mostly done** | Structurally fine and already world-owned for ending resolution; remaining work is cleanup, not contract replacement. |
 | `InitialWorldValidation` | Validation result | **keep** | Compatible with the research/frozen-world pipeline. |
 
 ### 2) `src/eventforge/engine.py`
@@ -79,15 +80,15 @@ So the repo is currently in this transition state:
 |---|---|---|---|
 | `STATE_KEYS` | Global engine metric registry | **remove after migration** | Duplicates the fixed-schema problem from `WorldState`. |
 | `AXIS_LABELS` | Global flash-crash-oriented labels | **replace** | Dimension labels belong to each frozen world. |
-| `ENDING_BANDS` | Global ending labels | **remove after migration** | Ending labels must be world-local. |
-| `action_tradeoff_profile(...)` | Infers tradeoff from `ActionCard` delta fields | **replace** | Works only because action semantics are globally hardcoded. Runtime should consume explicit generated-action upside/downside fields. |
+| `ENDING_BANDS` | Global ending labels | **already removed / retired from runtime contract** | Ending labels now resolve through each frozen world. |
+| `action_tradeoff_profile(...)` | Bridge helper from compatibility templates into generated tradeoff metadata | **remove after migration** | Player-facing runtime now consumes `GeneratedAction`, but this helper still exists underneath the compatibility bridge. |
 | `decision_focus_from_state(...)` | Urgency heuristic tied to fixed axes | **replace** | Should be driven by frozen-world dimension definitions and live world state, not hardcoded axis rules. |
 | `format_tradeoff_suffix(...)` | Legacy tradeoff display helper | **refit** | Keep the UX idea, but base it on `GeneratedAction` explicit upside/downside metadata. |
-| `CrisisGame.__init__` scenario boot path | Starts from `ScenarioDefinition`, copies `initial_world`, synthesizes `frozen_world` as secondary | **replace** | Runtime should load a `FrozenInitialWorld` first-class and instantiate mutable run state from it. |
-| `available_actions()` | Samples/rewrites legacy `ActionCard` templates | **replace** | Core blocker for item 5 and item 7. |
+| `CrisisGame.__init__` scenario boot path | Can boot from a supplied `FrozenInitialWorld`, with legacy scenario fallback still present | **bridge temporarily** | The frozen-world-first path exists; remaining cleanup is reducing dependence on the fallback path. |
+| `available_actions()` | Returns `GeneratedAction`, still sometimes synthesized from legacy templates | **bridge temporarily** | Major migration win already landed; remaining work is deleting the underlying `ActionCard` bridge. |
 | pre-turn event generation / secondary world rules | Strongly tuned to flash-crash dynamics | **replace/refactor** | Runtime world updates must stop assuming the sample world's metric meanings. |
 | `_generate_agent_reactions(...)` and role-bucket helpers | Partly action-conditioned, but still dominated by narrow role buckets and fixed trust/control heuristics | **replace** | Core blocker for item 6. |
-| report/ending resolution path | Still carries legacy global-engine worldview | **replace/refit** | Must resolve labels through `FrozenInitialWorld.resolve_ending_band(...)`. |
+| report/ending resolution path | Resolves ending labels through the frozen world | **refit mostly done** | Remaining cleanup is around fixed-state scoring/report assumptions, not world ownership of ending labels. |
 
 ### 3) `src/eventforge/scenarios.py`
 
@@ -95,22 +96,22 @@ So the repo is currently in this transition state:
 |---|---|---|---|
 | `FLASH_CRASH_SCENARIO` | Demo/sample scenario definition | **isolate as sample content** | Keep for regression and as an example frozen-world migration source. Do not let it define core engine interfaces. |
 | `INITIAL_WORLD_STATE` | Demo world state fixture | **isolate as sample content** | Same as above. |
-| `get_default_scenario()` | Default app entry | **replace** | Product flow should become research case -> inspect/freeze/select role/select turns/play. A hardcoded default scenario should not be the product center. |
+| `get_default_scenario()` | Sample-content fallback for no-argument play and regression coverage | **demote / keep temporarily** | Acceptable as a compatibility fallback, but should stay explicitly secondary to frozen-world-first flows. |
 
 ### 4) CLI and entrypoints (`src/eventforge/__main__.py`, `play.py`)
 
 | Area | Current role | Status | Why |
 |---|---|---|---|
-| demo-centric play entry | Assumes one default scenario/demo flow | **replace** | Blocks item 13. CLI must become world-centric rather than sample-centric. |
-| sample-friendly fallback behavior | Useful for smoke tests | **keep temporarily** | Acceptable only as a regression mode after the main flow becomes frozen-world-first. |
+| world-centric command flow (`research-case` / `freeze-world` / `inspect-world` / `play`) | Main game-factory CLI surface | **keep** | This is now the primary product-facing path. |
+| no-argument sample fallback | Regression-friendly shortcut | **keep temporarily** | Acceptable only as a secondary compatibility path while the repo still carries sample content. |
 
 ### 5) Tests
 
 | Area | Current role | Status | Why |
 |---|---|---|---|
 | `tests/test_game_factory_models.py` | New architecture bridge tests | **keep and extend** | Best current proof that the migration objects are real. |
-| `tests/test_engine.py` | Legacy runtime behavior tests | **split** | Keep sample-regression coverage, but stop treating demo behavior as the architecture contract. |
-| CLI/demo tests | Mixed | **refactor later** | Should follow the CLI redesign once world-centric flow lands. |
+| `tests/test_engine.py` | Mixed migration coverage | **keep and continue separating** | It now covers frozen-world precedence, generated actions, ending ownership, and remaining bridge behavior. |
+| CLI tests | Frozen-world flow plus fallback coverage | **keep and extend** | The command router is now world-centric; remaining work is reducing fallback/demo emphasis where possible. |
 
 ---
 
@@ -119,51 +120,52 @@ So the repo is currently in this transition state:
 This section maps the audit to the approved todo order.
 
 ### Todo 3 — research-pack dataclasses and serialization
-**Prerequisite status:** mostly unblocked.
+**Prerequisite status:** landed for the current anchor-case flow.
 
 What is already good:
 - `MaterialResearchPack` exists.
+- deterministic anchor-case `research-case` flows already persist reusable JSON artifacts without LLM credentials.
 
 What still matters:
-- serialization should target the research pack directly rather than depending on `ScenarioDefinition` as the only creation path.
+- enrich packs further only when a new case truly needs more research structure; do not reopen generic design churn here.
 
 ### Todo 4 — frozen-world dataclasses and serialization
-**Prerequisite status:** mostly unblocked.
+**Prerequisite status:** landed for the current anchor-case flow.
 
 What is already good:
 - `FrozenInitialWorld`, `WorldEndingBand`, `WorldDimensionDef`, and `WorldActionGrammar` exist.
+- `freeze-world` / `inspect-world` already treat frozen worlds as primary stored contracts.
 
 What still matters:
-- persistence should treat frozen worlds as primary artifacts, not as a derivative hidden behind `ScenarioDefinition`.
+- continue removing runtime assumptions that still depend on fixed `WorldState` bridges rather than fully world-local dimension semantics.
 
 ### Todo 5 — generated-action schema + action generation context
-**Prerequisite status:** partially unblocked, but legacy runtime still fights it.
+**Prerequisite status:** mostly landed; bridge cleanup remains.
 
 Primary blocker:
-- `ActionCard` remains the live runtime action currency.
+- `ActionCard` still survives underneath generated actions as a compatibility template layer.
 
 Required outcome:
-- generated actions become the runtime action currency
+- generated actions remain the runtime action currency
 - `ActionCard` becomes sample-only bridge material or disappears
 
 ### Todo 6 — agent run-state / reaction schema in code
-**Prerequisite status:** design unblocked, runtime integration still blocked.
+**Prerequisite status:** landed as a validated first-pass bridge; deeper cleanup remains.
 
 Primary blocker:
-- `engine.py` still uses bucket-first trust/stance updates attached to legacy `AgentProfile` and `ActionCard` flows.
+- `engine.py` still derives reaction proposals from legacy role-bucket logic before passing them through the validator.
 
 Required outcome:
-- persistent per-agent run state becomes explicit
+- persistent per-agent run state remains explicit
 - reaction proposals and validation boundaries are driven by the new schema, not demo role buckets
 
 ### Todo 7 — runtime loop consumes frozen worlds instead of implicit regeneration/demo assumptions
-**Prerequisite status:** currently the main execution blocker.
+**Prerequisite status:** no longer the main execution blocker; the loop is live, but bridge cleanup remains.
 
 Primary blockers:
-- `CrisisGame` starts from `ScenarioDefinition`
-- mutable state still centers on fixed `WorldState`
-- action selection still centers on `ActionCard`
-- endings/reporting still retain global-engine assumptions
+- fixed-schema `WorldState` / `STATE_KEYS` / `AXIS_LABELS` still shape parts of runtime evaluation and display
+- sample fallback behavior still exists for no-argument play
+- some internal action/reaction bridge code still leans on legacy template semantics
 
 ---
 
@@ -172,14 +174,14 @@ Primary blockers:
 ### Replace first
 These changes unblock the rest of the roadmap and should happen before broad anchor-world work:
 
-1. **runtime entry contract**
-   - replace `ScenarioDefinition`-first runtime boot with `FrozenInitialWorld`-first boot
-2. **runtime action currency**
-   - replace `ActionCard` in the live turn loop with the generated-action schema
-3. **agent evolution state**
-   - replace bucket-first reaction updates with explicit run-state + validated bounded updates
-4. **ending resolution path**
-   - remove global ending band dependence in `engine.py`
+1. **fixed-schema runtime state cleanup**
+   - reduce or remove `WorldState`, `STATE_KEYS`, and `AXIS_LABELS` so world-local dimensions own more of runtime semantics
+2. **action bridge cleanup**
+   - delete the remaining `ActionCard` compatibility layer underneath generated actions
+3. **reaction bridge cleanup**
+   - replace bucket-first proposal generation with a more world-local reaction path on top of the validated run-state contract
+4. **sample fallback demotion**
+   - keep flash-crash only as explicit sample/regression content, not the easiest accidental entry path
 
 ### Keep as compatibility bridges for now
 These are acceptable until the corresponding roadmap item lands:
@@ -232,18 +234,18 @@ No return to a fixed reaction table; no unbounded freeform jumps either.
 
 ## Final judgment
 
-The architecture is no longer blocked by missing concepts; it is blocked by **legacy runtime center-of-gravity**.
+The architecture is no longer blocked by missing concepts; it is blocked by **a shrinking set of legacy runtime bridges**.
 
 That means:
 
 - **research-pack and frozen-world work should continue**
-- **flash-crash content should stay**
-- but the next major implementation effort must move execution authority away from:
+- **flash-crash content should stay only as explicit sample/regression content**
+- but the next major implementation effort should keep moving execution authority away from:
   - `WorldState` fixed schema
   - `ActionCard`
-  - `ScenarioDefinition` as the runtime entry contract
-  - `engine.py` global endings/axis heuristics/role buckets
+  - bucket-first reaction proposal logic
+  - sample-first fallback paths that are easier to reach than world-file flows
 
 In short:
 
-> the repo already contains the right replacement pieces; the next work is to make runtime obey them and demote the old demo objects to bridge/sample status.
+> the repo already contains the right replacement pieces; the next work is to retire or demote the remaining bridge layers until frozen worlds and world-local runtime contracts fully own play.
