@@ -211,5 +211,12 @@ FLASH_CRASH_SCENARIO = ScenarioDefinition(
 )
 
 
+SAMPLE_SCENARIOS: tuple[ScenarioDefinition, ...] = (FLASH_CRASH_SCENARIO,)
+
+
+def list_sample_scenarios() -> tuple[ScenarioDefinition, ...]:
+    return SAMPLE_SCENARIOS
+
+
 def get_default_scenario() -> ScenarioDefinition:
-    return FLASH_CRASH_SCENARIO
+    return SAMPLE_SCENARIOS[0]

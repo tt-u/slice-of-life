@@ -1,4 +1,4 @@
-"""Flash Crash Demo package."""
+"""Slice-of-life game factory package."""
 
 from .engine import build_game, run_auto_game
 
