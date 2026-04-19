@@ -1,6 +1,6 @@
 # Game Factory Architecture Audit — Replace vs Isolate Map
 
-> Item advanced in this pass: **Todo 2 — audit current flash-crash/demo-shaped domain objects and map what must be replaced vs isolated**.
+> Item advanced in this pass: **retire the duplicate engine-level `STATE_KEYS` bridge so runtime snapshots and reports read directly from `WorldState` dimension maps**.
 >
 > This document is implementation-grounded. It is not a product-ideation draft. It records the current code surface in `slice-of-life`, identifies which objects are still demo-shaped, and assigns each one to one of four buckets:
 >
@@ -40,7 +40,7 @@ Important migration wins already landed:
 
 The highest-leverage remaining cleanup is narrower now:
 
-- `WorldState`, `STATE_KEYS`, and `AXIS_LABELS` are still fixed-schema runtime bridges
+- `WorldState`, `WORLD_STATE_DIMENSION_KEYS`, and `AXIS_LABELS` are still fixed-schema runtime bridges
 - `ActionCard` still survives underneath generated actions as a compatibility template layer
 - agent reactions still bridge from legacy role-bucket logic before validation
 - the no-argument CLI path still falls back to sample content for regression convenience
@@ -79,7 +79,7 @@ So the current transition state is:
 
 | Symbol / area | Current role | Status | Why |
 |---|---|---|---|
-| `STATE_KEYS` | Global engine metric registry | **remove after migration** | Duplicates the fixed-schema problem from `WorldState`. |
+| `STATE_KEYS` | Engine-global duplicate metric registry | **removed** | Runtime snapshots/reports now read `WorldState.to_dimension_map()` directly instead of shadowing dimension keys in `engine.py`. |
 | `AXIS_LABELS` | Global flash-crash-oriented labels | **replace** | Dimension labels belong to each frozen world. |
 | `ENDING_BANDS` | Global ending labels | **already removed / retired from runtime contract** | Ending labels now resolve through each frozen world. |
 | `action_tradeoff_profile(...)` | Bridge helper from compatibility templates into generated tradeoff metadata | **remove after migration** | Player-facing runtime now consumes `GeneratedAction`, but this helper still exists underneath the compatibility bridge. |
@@ -164,7 +164,7 @@ Required outcome:
 **Prerequisite status:** no longer the main execution blocker; the loop is live, but bridge cleanup remains.
 
 Primary blockers:
-- fixed-schema `WorldState` / `STATE_KEYS` / `AXIS_LABELS` still shape parts of runtime evaluation and display
+- fixed-schema `WorldState` / `WORLD_STATE_DIMENSION_KEYS` / `AXIS_LABELS` still shape parts of runtime evaluation and display
 - sample fallback behavior still exists for no-argument play
 - some internal action/reaction bridge code still leans on legacy template semantics
 
@@ -176,7 +176,7 @@ Primary blockers:
 These changes unblock the rest of the roadmap and should happen before broad anchor-world work:
 
 1. **fixed-schema runtime state cleanup**
-   - reduce or remove `WorldState`, `STATE_KEYS`, and `AXIS_LABELS` so world-local dimensions own more of runtime semantics
+   - reduce or remove `WorldState`, `WORLD_STATE_DIMENSION_KEYS`, and `AXIS_LABELS` so world-local dimensions own more of runtime semantics
 2. **action bridge cleanup**
    - delete the remaining `ActionCard` compatibility layer underneath generated actions
 3. **reaction bridge cleanup**
@@ -205,10 +205,8 @@ These should survive, but in a clearly demoted role:
 These should disappear once runtime no longer depends on demo-shaped globals:
 
 1. `WORLD_STATE_DIMENSION_KEYS`
-2. `STATE_KEYS`
-3. engine-global `AXIS_LABELS`
-4. engine-global `ENDING_BANDS`
-5. all `ActionCard`-specific impact inference helpers that only exist to reinterpret hardcoded demo deltas
+2. engine-global `AXIS_LABELS`
+3. all `ActionCard`-specific impact inference helpers that only exist to reinterpret hardcoded demo deltas
 
 ---
 

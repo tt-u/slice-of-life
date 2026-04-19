@@ -260,6 +260,32 @@ def test_runtime_prompts_and_report_use_frozen_world_metadata() -> None:
 
 
 
+def test_snapshot_state_reads_world_dimensions_from_state_not_engine_global(monkeypatch) -> None:
+    game = build_game(turns=6, seed=1, llm_client=FakeLLM())
+    monkeypatch.setattr(engine_module, "STATE_KEYS", ("bogus",), raising=False)
+
+    assert game.snapshot_state() == game.state.to_dimension_map()
+
+
+
+def test_world_report_diff_uses_state_dimension_map_not_engine_global(monkeypatch) -> None:
+    llm = FakeLLM()
+    game = build_game(turns=6, seed=1, llm_client=llm)
+    game.begin_turn()
+    action = game.available_actions()[0]
+    game.apply_choice(TurnChoice(action=action, reason="test"))
+    monkeypatch.setattr(engine_module, "STATE_KEYS", ("bogus",), raising=False)
+
+    report = game.build_world_report()
+
+    assert report.initial_state == game.initial_state
+    assert report.final_state == game.state.to_dimension_map()
+    assert report.diff == {
+        key: report.final_state[key] - report.initial_state[key] for key in report.final_state
+    }
+
+
+
 def test_begin_turn_creates_agent_driven_event_and_updates_state() -> None:
     game = build_game(turns=6, seed=7, llm_client=FakeLLM())
 

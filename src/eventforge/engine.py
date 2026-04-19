@@ -29,20 +29,6 @@ from .domain import (
 from .llm import OpenAICompatibleLLM
 from .scenarios import get_default_scenario
 
-STATE_KEYS = (
-    "credibility",
-    "treasury",
-    "pressure",
-    "price",
-    "liquidity",
-    "sell_pressure",
-    "volatility",
-    "community_panic",
-    "rumor_level",
-    "narrative_control",
-    "exchange_trust",
-    "control",
-)
 GENERATED_ACTION_MAGNITUDE_CAPS = {"low": 4, "medium": 7, "high": 10}
 
 IMPACT_MODEL = {
@@ -426,7 +412,7 @@ class CrisisGame:
         self.pending_actions: tuple[GeneratedAction, ...] | None = None
 
     def snapshot_state(self) -> dict[str, int]:
-        return {key: getattr(self.state, key) for key in STATE_KEYS}
+        return self.state.to_dimension_map()
 
     def _build_initial_agent_run_state(self, profile: AgentProfile) -> AgentRunState:
         public_alignment = max(0, min(100, profile.trust_in_player))
@@ -669,7 +655,7 @@ class CrisisGame:
 
     def build_world_report(self) -> WorldReport:
         final_state = self.snapshot_state()
-        diff = {key: final_state[key] - self.initial_state[key] for key in STATE_KEYS}
+        diff = {key: final_state[key] - self.initial_state[key] for key in final_state}
         timeline = self.timeline_lines()
         summary, share_text = self.llm.summarize_world_state(
             scenario_title=self.frozen_world.title,
