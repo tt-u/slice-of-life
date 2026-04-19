@@ -1,5 +1,6 @@
 from eventforge.domain import ScenarioBlueprint, SeedEntity, WorldEvent, WorldState
 from eventforge.engine import build_game
+from eventforge.scenarios import FLASH_CRASH_SCENARIO
 from eventforge.worldgen import (
     build_scenario_from_material,
     inspect_material_seed,
@@ -141,6 +142,21 @@ def test_build_game_uses_generated_initial_world() -> None:
 
     assert game.initial_state["pressure"] == scenario.initial_world.pressure
     assert game.initial_state["control"] == scenario.initial_world.control
+
+
+def test_generated_material_scenarios_do_not_inherit_flash_crash_actions() -> None:
+    scenario = build_scenario_from_material(
+        source_material="高校争议材料",
+        llm_client=FakeWorldgenLLM(entity_count=8),
+        entity_cap=8,
+    )
+
+    frozen_world = scenario.to_frozen_world()
+    flash_crash_ids = {action.id for action in FLASH_CRASH_SCENARIO.actions}
+
+    assert scenario.actions == ()
+    assert len(frozen_world.action_grammar.rules) == 4
+    assert {rule.key for rule in frozen_world.action_grammar.rules}.isdisjoint(flash_crash_ids)
 
 
 def test_build_scenario_normalizes_player_role_and_neutralizes_polarized_groups() -> None:

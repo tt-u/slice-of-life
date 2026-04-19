@@ -13,9 +13,10 @@ from .domain import (
     ScenarioViewpointCard,
     SeedEntity,
     WorldState,
+    default_world_dimension_defs,
+    dimension_driven_world_action_grammar,
 )
 from .llm import OpenAICompatibleLLM
-from .scenarios import FLASH_CRASH_SCENARIO
 
 SUPPORTED_ROLES = ("kol", "whale", "market_maker", "community", "exchange")
 MAX_ENTITY_CAP = 24
@@ -192,6 +193,13 @@ def build_scenario_from_material(
         blueprint.opening_event,
         severity=_opening_event_severity(initial_world),
     )
+    dimension_defs = default_world_dimension_defs(initial_world.to_dimension_map())
+    action_grammar = dimension_driven_world_action_grammar(
+        initial_world.to_dimension_map(),
+        dimension_defs,
+        player_role=resolved_player_role,
+        objective=blueprint.objective,
+    )
     return ScenarioDefinition(
         id=_slugify(blueprint.title) or "generated-scenario",
         title=blueprint.title,
@@ -204,9 +212,10 @@ def build_scenario_from_material(
         truth=blueprint.truth,
         opening_event=opening_event,
         seed_entities=entities,
-        actions=FLASH_CRASH_SCENARIO.actions,
+        actions=(),
         initial_world=initial_world,
         playable_roles=playable_roles,
+        action_grammar=action_grammar,
     )
 
 

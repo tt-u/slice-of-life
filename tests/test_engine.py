@@ -190,8 +190,35 @@ def test_build_game_accepts_frozen_world_without_legacy_scenario_wrapper() -> No
     ]
 
 
+def test_generated_material_scenarios_use_frozen_world_synthesized_action_templates() -> None:
+    generated_frozen_world = replace(
+        FLASH_CRASH_SCENARIO.to_frozen_world(),
+        title="校园争议冻结世界",
+        player_role="校方",
+        objective="稳住校内外冲突升级",
+        action_grammar=replace(
+            FLASH_CRASH_SCENARIO.to_frozen_world().action_grammar,
+            rules=tuple(
+                replace(rule, key=f"world-rule-{index}", label=f"世界规则 {index}")
+                for index, rule in enumerate(FLASH_CRASH_SCENARIO.to_frozen_world().action_grammar.rules[:4], start=1)
+            ),
+        ),
+    )
+
+    class GeneratedMaterialScenario:
+        actions = ()
+
+        def to_frozen_world(self):
+            return generated_frozen_world
+
+    llm = FakeLLM()
+    game = build_game(turns=6, seed=1, llm_client=llm, scenario=GeneratedMaterialScenario())
+
+    assert [action.id for action in game.action_templates] == [f"world-rule-{index}" for index in range(1, 5)]
+
 
 def test_runtime_prompts_and_report_use_frozen_world_metadata() -> None:
+
     llm = FakeLLM()
     scenario = FrozenBackedScenario()
     game = build_game(turns=6, seed=3, llm_client=llm, scenario=scenario)

@@ -974,6 +974,7 @@ class ScenarioDefinition:
     actions: tuple[ActionCard, ...]
     initial_world: WorldState
     playable_roles: tuple[str, ...] = ()
+    action_grammar: WorldActionGrammar | None = None
 
     def selectable_roles(self) -> tuple[str, ...]:
         return self.playable_roles or (self.player_role,)
@@ -1026,7 +1027,7 @@ class ScenarioDefinition:
             entities=self.seed_entities,
             ending_bands=resolved_bands,
             dimension_defs=resolved_dimension_defs,
-            action_grammar=action_grammar or default_world_action_grammar(self.actions),
+            action_grammar=action_grammar or self.action_grammar or default_world_action_grammar(self.actions),
             reaction_boundaries=reaction_boundaries or default_agent_reaction_boundaries(),
         )
 
@@ -1106,16 +1107,7 @@ def default_world_dimension_defs(initial_dimensions: dict[str, int]) -> tuple[Wo
 
 
 def default_world_action_grammar(actions: tuple[ActionCard, ...]) -> WorldActionGrammar:
-    cost_types = tuple(
-        ActionCostType(key=key, label=label, description=description)
-        for key, label, description in (
-            ("public", "公开代价", "带来公开关注、质疑或舆论压力。"),
-            ("private", "私下协调代价", "需要消耗私下协调空间或关系信用。"),
-            ("finance", "资源代价", "需要消耗预算、现金或资产缓冲。"),
-            ("legal", "制度代价", "需要承担程序、审计或制度约束。"),
-            ("delay", "时机代价", "通过拖延换取喘息，但损失先手。"),
-        )
-    )
+    cost_types = _default_action_cost_types()
     rules = tuple(
         ActionGenerationRule(
             key=action.id,
@@ -1139,6 +1131,107 @@ def default_world_action_grammar(actions: tuple[ActionCard, ...]) -> WorldAction
         cost_types=cost_types,
         menu_size=min(4, len(actions)) if actions else 4,
     )
+
+
+def dimension_driven_world_action_grammar(
+    initial_dimensions: dict[str, int],
+    dimension_defs: tuple[WorldDimensionDef, ...],
+    *,
+    player_role: str,
+    objective: str,
+) -> WorldActionGrammar:
+    resolved_dimension_defs = dimension_defs or default_world_dimension_defs(initial_dimensions)
+    dimension_by_key = {dimension.key: dimension for dimension in resolved_dimension_defs}
+    prioritized_keys = list(infer_urgent_dimensions(initial_dimensions, resolved_dimension_defs))
+    for fallback_key in ("control", "credibility", "pressure", "narrative_control", *initial_dimensions.keys()):
+        if fallback_key in initial_dimensions and fallback_key not in prioritized_keys:
+            prioritized_keys.append(fallback_key)
+
+    selected_keys = prioritized_keys[:4]
+    rules: list[ActionGenerationRule] = []
+    objective_snippet = objective[:18] if objective else "稳住局势"
+    for index, dimension_key in enumerate(selected_keys, start=1):
+        dimension = dimension_by_key.get(dimension_key)
+        if dimension is None:
+            continue
+        downside_dimensions = _dimension_focus_downside_dimensions(dimension_key, initial_dimensions)
+        rules.append(
+            ActionGenerationRule(
+                key=f"{dimension_key}-focus-{index}",
+                label=f"{_dimension_focus_label_prefix(dimension)}{dimension.label}",
+                description=f"以{player_role}视角优先处理{dimension.label}，推进“{objective_snippet}”，但会挤占其他操作空间。",
+                trigger_dimensions=tuple(dict.fromkeys((dimension_key, *downside_dimensions))),
+                preferred_upside_dimensions=(dimension_key,),
+                likely_downside_dimensions=downside_dimensions,
+                allowed_cost_types=_dimension_focus_cost_types(dimension_key),
+                minimum_upside_count=1,
+                minimum_downside_count=max(1, len(downside_dimensions)),
+                max_upside_count=1,
+                max_downside_count=max(1, len(downside_dimensions)),
+                intensity_range=(1, 3),
+                tags=("world-generated", dimension_key),
+            )
+        )
+    return WorldActionGrammar(
+        rules=tuple(rules),
+        cost_types=_default_action_cost_types(),
+        menu_size=min(4, len(rules)) if rules else 4,
+    )
+
+
+def _default_action_cost_types() -> tuple[ActionCostType, ...]:
+    return tuple(
+        ActionCostType(key=key, label=label, description=description)
+        for key, label, description in (
+            ("public", "公开代价", "带来公开关注、质疑或舆论压力。"),
+            ("private", "私下协调代价", "需要消耗私下协调空间或关系信用。"),
+            ("finance", "资源代价", "需要消耗预算、现金或资产缓冲。"),
+            ("legal", "制度代价", "需要承担程序、审计或制度约束。"),
+            ("delay", "时机代价", "通过拖延换取喘息，但损失先手。"),
+        )
+    )
+
+
+def _dimension_focus_label_prefix(dimension: WorldDimensionDef) -> str:
+    if dimension.direction_of_health == "lower_is_better":
+        return "压低"
+    if dimension.direction_of_health == "higher_is_better":
+        return "补强"
+    return "调节"
+
+
+def _dimension_focus_downside_dimensions(dimension_key: str, initial_dimensions: dict[str, int]) -> tuple[str, ...]:
+    fallback_map = {
+        "credibility": ("pressure", "control"),
+        "pressure": ("credibility", "control"),
+        "narrative_control": ("credibility", "pressure"),
+        "control": ("credibility", "pressure"),
+        "treasury": ("pressure", "credibility"),
+        "liquidity": ("treasury", "control"),
+        "price": ("liquidity", "credibility"),
+        "exchange_trust": ("control", "pressure"),
+        "community_panic": ("credibility", "control"),
+        "rumor_level": ("credibility", "control"),
+        "sell_pressure": ("treasury", "credibility"),
+        "volatility": ("control", "treasury"),
+    }
+    resolved = tuple(
+        key for key in fallback_map.get(dimension_key, ("pressure", "control")) if key in initial_dimensions and key != dimension_key
+    )
+    if resolved:
+        return resolved[:2]
+    fallback = tuple(key for key in initial_dimensions if key != dimension_key)
+    return fallback[:1] or (dimension_key,)
+
+
+def _dimension_focus_cost_types(dimension_key: str) -> tuple[str, ...]:
+    if dimension_key in {"credibility", "narrative_control", "community_panic", "rumor_level"}:
+        return ("public", "delay")
+    if dimension_key in {"control"}:
+        return ("private", "legal")
+    if dimension_key in {"treasury", "liquidity", "price", "sell_pressure", "volatility", "exchange_trust"}:
+        return ("finance", "private")
+    return ("private", "public")
 
 
 def infer_urgent_dimensions(dimensions: dict[str, int], dimension_defs: tuple[WorldDimensionDef, ...]) -> tuple[str, ...]:
