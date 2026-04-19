@@ -186,6 +186,254 @@ class GeneratedAction:
 
 
 @dataclass(frozen=True, slots=True)
+class AgentStateAxisDef:
+    key: str
+    label: str
+    description: str
+    min_value: int = 0
+    max_value: int = 100
+    max_delta_per_turn: int = 20
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "key": self.key,
+            "label": self.label,
+            "description": self.description,
+            "min_value": self.min_value,
+            "max_value": self.max_value,
+            "max_delta_per_turn": self.max_delta_per_turn,
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "AgentStateAxisDef":
+        if not isinstance(payload, dict):
+            raise TypeError("Agent state axis payload must be a dict")
+        return cls(
+            key=str(payload["key"]),
+            label=str(payload["label"]),
+            description=str(payload["description"]),
+            min_value=int(payload.get("min_value", 0)),
+            max_value=int(payload.get("max_value", 100)),
+            max_delta_per_turn=int(payload.get("max_delta_per_turn", 20)),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class AgentRelationshipState:
+    target_entity_id: str
+    alignment: int
+    strain: int
+    dependency: int
+    visibility: int = 50
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "target_entity_id": self.target_entity_id,
+            "alignment": self.alignment,
+            "strain": self.strain,
+            "dependency": self.dependency,
+            "visibility": self.visibility,
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "AgentRelationshipState":
+        if not isinstance(payload, dict):
+            raise TypeError("Agent relationship payload must be a dict")
+        return cls(
+            target_entity_id=str(payload["target_entity_id"]),
+            alignment=int(payload["alignment"]),
+            strain=int(payload["strain"]),
+            dependency=int(payload["dependency"]),
+            visibility=int(payload.get("visibility", 50)),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class AgentMemoryEntry:
+    turn_index: int
+    action_id: str
+    summary: str
+    salience: int
+    valence: int
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "turn_index": self.turn_index,
+            "action_id": self.action_id,
+            "summary": self.summary,
+            "salience": self.salience,
+            "valence": self.valence,
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "AgentMemoryEntry":
+        if not isinstance(payload, dict):
+            raise TypeError("Agent memory payload must be a dict")
+        return cls(
+            turn_index=int(payload["turn_index"]),
+            action_id=str(payload["action_id"]),
+            summary=str(payload["summary"]),
+            salience=int(payload["salience"]),
+            valence=int(payload["valence"]),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class AgentRunState:
+    agent_id: str
+    agent_name: str
+    role: str
+    stance: str
+    current_objective: str
+    scalar_state: dict[str, int]
+    relationships: tuple[AgentRelationshipState, ...] = ()
+    memories: tuple[AgentMemoryEntry, ...] = ()
+    triggered_hooks: tuple[str, ...] = ()
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "agent_id": self.agent_id,
+            "agent_name": self.agent_name,
+            "role": self.role,
+            "stance": self.stance,
+            "current_objective": self.current_objective,
+            "scalar_state": dict(self.scalar_state),
+            "relationships": [relationship.to_payload() for relationship in self.relationships],
+            "memories": [memory.to_payload() for memory in self.memories],
+            "triggered_hooks": list(self.triggered_hooks),
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "AgentRunState":
+        if not isinstance(payload, dict):
+            raise TypeError("Agent run-state payload must be a dict")
+        return cls(
+            agent_id=str(payload["agent_id"]),
+            agent_name=str(payload["agent_name"]),
+            role=str(payload["role"]),
+            stance=str(payload["stance"]),
+            current_objective=str(payload["current_objective"]),
+            scalar_state={str(key): int(value) for key, value in dict(payload.get("scalar_state", {})).items()},
+            relationships=tuple(AgentRelationshipState.from_payload(item) for item in payload.get("relationships", [])),
+            memories=tuple(AgentMemoryEntry.from_payload(item) for item in payload.get("memories", [])),
+            triggered_hooks=tuple(str(item) for item in payload.get("triggered_hooks", [])),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class AgentReactionBoundaries:
+    scalar_axes: tuple[AgentStateAxisDef, ...]
+    max_relationship_delta_per_turn: int = 18
+    max_dimension_impacts_per_reaction: int = 2
+    max_dimension_delta_per_reaction: int = 12
+    max_relationship_updates_per_reaction: int = 2
+    max_hooks_per_reaction: int = 1
+    memory_limit: int = 3
+    allowed_hook_tags: tuple[str, ...] = ()
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "scalar_axes": [axis.to_payload() for axis in self.scalar_axes],
+            "max_relationship_delta_per_turn": self.max_relationship_delta_per_turn,
+            "max_dimension_impacts_per_reaction": self.max_dimension_impacts_per_reaction,
+            "max_dimension_delta_per_reaction": self.max_dimension_delta_per_reaction,
+            "max_relationship_updates_per_reaction": self.max_relationship_updates_per_reaction,
+            "max_hooks_per_reaction": self.max_hooks_per_reaction,
+            "memory_limit": self.memory_limit,
+            "allowed_hook_tags": list(self.allowed_hook_tags),
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "AgentReactionBoundaries":
+        if not isinstance(payload, dict):
+            raise TypeError("Agent reaction boundaries payload must be a dict")
+        return cls(
+            scalar_axes=tuple(AgentStateAxisDef.from_payload(item) for item in payload.get("scalar_axes", [])),
+            max_relationship_delta_per_turn=int(payload.get("max_relationship_delta_per_turn", 18)),
+            max_dimension_impacts_per_reaction=int(payload.get("max_dimension_impacts_per_reaction", 2)),
+            max_dimension_delta_per_reaction=int(payload.get("max_dimension_delta_per_reaction", 12)),
+            max_relationship_updates_per_reaction=int(payload.get("max_relationship_updates_per_reaction", 2)),
+            max_hooks_per_reaction=int(payload.get("max_hooks_per_reaction", 1)),
+            memory_limit=int(payload.get("memory_limit", 3)),
+            allowed_hook_tags=tuple(str(item) for item in payload.get("allowed_hook_tags", [])),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class AgentReactionContext:
+    world_id: str
+    world_title: str
+    turn_index: int
+    turns_total: int
+    player_role: str
+    player_objective: str
+    chosen_action_id: str
+    chosen_action_label: str
+    chosen_action_summary: str
+    current_dimensions: dict[str, int]
+    urgent_dimensions: tuple[str, ...]
+    unstable_dimensions: tuple[str, ...]
+    dominant_tensions: tuple[str, ...]
+    acting_agent: AgentRunState
+    relevant_entities: tuple[str, ...]
+    recent_turn_summaries: tuple[str, ...]
+    boundaries: AgentReactionBoundaries
+
+
+@dataclass(frozen=True, slots=True)
+class AgentReactionProposal:
+    summary: str
+    stance: str
+    updated_objective: str
+    scalar_deltas: dict[str, int]
+    relationship_deltas: dict[str, dict[str, int]]
+    dimension_impacts: dict[str, int]
+    follow_on_hooks: tuple[str, ...] = ()
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "summary": self.summary,
+            "stance": self.stance,
+            "updated_objective": self.updated_objective,
+            "scalar_deltas": dict(self.scalar_deltas),
+            "relationship_deltas": {str(key): dict(value) for key, value in self.relationship_deltas.items()},
+            "dimension_impacts": dict(self.dimension_impacts),
+            "follow_on_hooks": list(self.follow_on_hooks),
+        }
+
+    @classmethod
+    def from_payload(cls, payload: object) -> "AgentReactionProposal":
+        if not isinstance(payload, dict):
+            raise TypeError("Agent reaction proposal payload must be a dict")
+        return cls(
+            summary=str(payload["summary"]),
+            stance=str(payload["stance"]),
+            updated_objective=str(payload["updated_objective"]),
+            scalar_deltas={str(key): int(value) for key, value in dict(payload.get("scalar_deltas", {})).items()},
+            relationship_deltas={
+                str(target): {str(field_name): int(delta) for field_name, delta in dict(fields).items()}
+                for target, fields in dict(payload.get("relationship_deltas", {})).items()
+            },
+            dimension_impacts={str(key): int(value) for key, value in dict(payload.get("dimension_impacts", {})).items()},
+            follow_on_hooks=tuple(str(item) for item in payload.get("follow_on_hooks", [])),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class AgentReactionResult:
+    agent_id: str
+    agent_name: str
+    role: str
+    summary: str
+    stance: str
+    objective: str
+    applied_scalar_deltas: dict[str, int]
+    applied_relationship_deltas: dict[str, dict[str, int]]
+    applied_dimension_impacts: dict[str, int]
+    triggered_hooks: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class WorldEndingBand:
     min_score: int
     ending_id: str
@@ -258,6 +506,7 @@ class FrozenInitialWorld:
     ending_bands: tuple[WorldEndingBand, ...]
     dimension_defs: tuple[WorldDimensionDef, ...] = ()
     action_grammar: WorldActionGrammar | None = None
+    reaction_boundaries: AgentReactionBoundaries | None = None
 
     def to_payload(self) -> dict[str, object]:
         return {
@@ -278,6 +527,7 @@ class FrozenInitialWorld:
             "ending_bands": [world_ending_band_to_payload(band) for band in self.ending_bands],
             "dimension_defs": [world_dimension_def_to_payload(dimension) for dimension in self.dimension_defs],
             "action_grammar": world_action_grammar_to_payload(self.action_grammar) if self.action_grammar is not None else None,
+            "reaction_boundaries": self.reaction_boundaries.to_payload() if self.reaction_boundaries is not None else None,
         }
 
     @classmethod
@@ -300,6 +550,7 @@ class FrozenInitialWorld:
             ending_bands=tuple(world_ending_band_from_payload(item) for item in payload.get("ending_bands", [])),
             dimension_defs=tuple(world_dimension_def_from_payload(item) for item in payload.get("dimension_defs", [])),
             action_grammar=world_action_grammar_from_payload(payload["action_grammar"]) if payload.get("action_grammar") is not None else None,
+            reaction_boundaries=AgentReactionBoundaries.from_payload(payload["reaction_boundaries"]) if payload.get("reaction_boundaries") is not None else None,
         )
 
     def initial_dimension_map(self) -> dict[str, int]:
@@ -660,6 +911,7 @@ class ScenarioDefinition:
         ending_bands: tuple[WorldEndingBand, ...] | None = None,
         dimension_defs: tuple[WorldDimensionDef, ...] | None = None,
         action_grammar: WorldActionGrammar | None = None,
+        reaction_boundaries: AgentReactionBoundaries | None = None,
     ) -> FrozenInitialWorld:
         resolved_bands = ending_bands or default_world_ending_bands()
         resolved_dimension_defs = dimension_defs or default_world_dimension_defs(self.initial_world.to_dimension_map())
@@ -681,7 +933,40 @@ class ScenarioDefinition:
             ending_bands=resolved_bands,
             dimension_defs=resolved_dimension_defs,
             action_grammar=action_grammar or default_world_action_grammar(self.actions),
+            reaction_boundaries=reaction_boundaries or default_agent_reaction_boundaries(),
         )
+
+
+def default_agent_reaction_boundaries() -> AgentReactionBoundaries:
+    return AgentReactionBoundaries(
+        scalar_axes=(
+            AgentStateAxisDef(
+                key="trust_in_player",
+                label="对玩家信任",
+                description="是否愿意继续给玩家解释空间。",
+                max_delta_per_turn=18,
+            ),
+            AgentStateAxisDef(
+                key="pressure_load",
+                label="压力负载",
+                description="该代理当前承受的内外压力。",
+                max_delta_per_turn=18,
+            ),
+            AgentStateAxisDef(
+                key="escalation_drive",
+                label="升级冲动",
+                description="该代理是否准备把冲突推向更激烈阶段。",
+                max_delta_per_turn=18,
+            ),
+            AgentStateAxisDef(
+                key="public_alignment",
+                label="公开站位",
+                description="该代理是否愿意公开贴近玩家叙事。",
+                max_delta_per_turn=18,
+            ),
+        ),
+        allowed_hook_tags=("institutional_freeze", "counterattack_preparing", "public_break", "public-procedure-scrutiny"),
+    )
 
 
 def default_world_ending_bands() -> tuple[WorldEndingBand, ...]:

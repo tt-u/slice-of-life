@@ -1,4 +1,10 @@
 from eventforge.domain import (
+    AgentMemoryEntry,
+    AgentReactionBoundaries,
+    AgentReactionProposal,
+    AgentRelationshipState,
+    AgentRunState,
+    AgentStateAxisDef,
     FrozenInitialWorld,
     MaterialResearchPack,
     ScenarioDefinition,
@@ -138,6 +144,52 @@ def test_frozen_world_builds_action_generation_context_from_runtime_state() -> N
     assert "exchange_trust" in context.situation.unstable_dimensions
 
 
+def test_agent_run_state_round_trips_through_serialized_payload() -> None:
+    state = AgentRunState(
+        agent_id="school-admin",
+        agent_name="武汉大学校方",
+        role="校方",
+        stance="谨慎止损",
+        current_objective="压住程序争议",
+        scalar_state={
+            "trust_in_player": 42,
+            "pressure_load": 77,
+            "escalation_drive": 61,
+            "public_alignment": 48,
+        },
+        relationships=(
+            AgentRelationshipState(
+                target_entity_id="yang-jingyuan",
+                alignment=18,
+                strain=84,
+                dependency=32,
+                visibility=91,
+            ),
+        ),
+        memories=(
+            AgentMemoryEntry(
+                turn_index=1,
+                action_id="publish-timeline",
+                summary="校方被迫公开更多处理细节。",
+                salience=83,
+                valence=-42,
+            ),
+        ),
+        triggered_hooks=("public-procedure-scrutiny",),
+    )
+
+    payload = state.to_payload()
+
+    assert payload["scalar_state"]["trust_in_player"] == 42
+    assert payload["relationships"][0]["target_entity_id"] == "yang-jingyuan"
+    assert payload["memories"][0]["action_id"] == "publish-timeline"
+    assert payload["triggered_hooks"] == ["public-procedure-scrutiny"]
+
+    restored = AgentRunState.from_payload(payload)
+
+    assert restored == state
+
+
 def test_frozen_world_round_trips_through_serialized_payload() -> None:
     frozen = FLASH_CRASH_SCENARIO.to_frozen_world(
         allowed_turn_counts=(5, 7),
@@ -156,8 +208,65 @@ def test_frozen_world_round_trips_through_serialized_payload() -> None:
     assert payload["dimension_defs"][0]["key"] == frozen.dimension_defs[0].key
     assert payload["action_grammar"]["rules"][0]["key"] == frozen.action_grammar.rules[0].key
     assert payload["ending_bands"][0]["label"] == "守住底线"
+    assert payload["reaction_boundaries"]["memory_limit"] == 3
+    assert payload["reaction_boundaries"]["scalar_axes"][0]["key"] == "trust_in_player"
 
     restored = FrozenInitialWorld.from_payload(payload)
 
     assert restored == frozen
     assert restored.resolve_ending_band(85).label == "守住底线"
+    assert restored.reaction_boundaries is not None
+    assert restored.reaction_boundaries.scalar_axes[0].key == "trust_in_player"
+
+
+def test_reaction_boundaries_round_trip_through_payload() -> None:
+    boundaries = AgentReactionBoundaries(
+        scalar_axes=(
+            AgentStateAxisDef(
+                key="trust_in_player",
+                label="对玩家信任",
+                description="是否愿意继续给玩家解释空间。",
+                min_value=0,
+                max_value=100,
+                max_delta_per_turn=12,
+            ),
+        ),
+        max_relationship_delta_per_turn=9,
+        max_dimension_impacts_per_reaction=1,
+        max_dimension_delta_per_reaction=7,
+        max_relationship_updates_per_reaction=1,
+        max_hooks_per_reaction=1,
+        memory_limit=2,
+        allowed_hook_tags=("public-procedure-scrutiny",),
+    )
+
+    payload = boundaries.to_payload()
+
+    assert payload["scalar_axes"][0]["max_delta_per_turn"] == 12
+    assert payload["allowed_hook_tags"] == ["public-procedure-scrutiny"]
+
+    restored = AgentReactionBoundaries.from_payload(payload)
+
+    assert restored == boundaries
+
+
+def test_agent_reaction_proposal_round_trips_through_serialized_payload() -> None:
+    proposal = AgentReactionProposal(
+        summary="校方表面降温，但内部转向更强硬的程序防守。",
+        stance="外柔内硬",
+        updated_objective="控制后续证据披露节奏",
+        scalar_deltas={"trust_in_player": -8, "pressure_load": 10},
+        relationship_deltas={"yang-jingyuan": {"strain": 9, "visibility": 6}},
+        dimension_impacts={"credibility": -5, "pressure": 7},
+        follow_on_hooks=("public-procedure-scrutiny",),
+    )
+
+    payload = proposal.to_payload()
+
+    assert payload["scalar_deltas"]["trust_in_player"] == -8
+    assert payload["relationship_deltas"]["yang-jingyuan"]["strain"] == 9
+    assert payload["follow_on_hooks"] == ["public-procedure-scrutiny"]
+
+    restored = AgentReactionProposal.from_payload(payload)
+
+    assert restored == proposal

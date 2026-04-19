@@ -1,5 +1,5 @@
-from eventforge.engine import action_impact_profile, build_game, run_auto_game
-from eventforge.domain import AgentProfile, SeedEntity, TurnChoice, ActionCard
+from eventforge.engine import action_impact_profile, build_game, run_auto_game, validate_agent_reaction_proposal
+from eventforge.domain import AgentProfile, AgentReactionContext, AgentReactionProposal, AgentRunState, SeedEntity, TurnChoice, ActionCard
 
 
 class FakeLLM:
@@ -187,6 +187,90 @@ def test_apply_choice_returns_distinct_agent_reactions() -> None:
     kol = next(reaction for reaction in resolution.agent_reactions if reaction.actor_name == "AshSignals")
     exchange = next(reaction for reaction in resolution.agent_reactions if reaction.actor_name == "Onyx Exchange")
     assert kol.summary != exchange.summary
+
+
+
+def test_validate_agent_reaction_proposal_clamps_unknown_fields_and_updates_memory() -> None:
+    game = build_game(turns=6, seed=3, llm_client=FakeLLM())
+    state = AgentRunState(
+        agent_id="onyx-exchange",
+        agent_name="Onyx Exchange",
+        role="exchange",
+        stance="谨慎观望",
+        current_objective="暂不升级风控",
+        scalar_state={
+            "trust_in_player": 95,
+            "pressure_load": 10,
+            "escalation_drive": 5,
+            "public_alignment": 40,
+        },
+    )
+    context = AgentReactionContext(
+        world_id=game.frozen_world.world_id,
+        world_title=game.frozen_world.title,
+        turn_index=2,
+        turns_total=6,
+        player_role=game.scenario.player_role,
+        player_objective=game.scenario.objective,
+        chosen_action_id="statement",
+        chosen_action_label="发布证据时间线",
+        chosen_action_summary="公开时间线，试图换回叙事控制，但会提升制度压力。",
+        current_dimensions=game.state.to_dimension_map(),
+        urgent_dimensions=("exchange_trust",),
+        unstable_dimensions=("exchange_trust",),
+        dominant_tensions=("平台风控",),
+        acting_agent=state,
+        relevant_entities=("project-founder",),
+        recent_turn_summaries=("上一回合社区持续质疑",),
+        boundaries=game.frozen_world.reaction_boundaries,
+    )
+    proposal = AgentReactionProposal(
+        summary="平台决定先给窗口，但会保留更严厉的后手。",
+        stance="暂时配合",
+        updated_objective="争取更多补充材料",
+        scalar_deltas={"trust_in_player": 50, "pressure_load": -50, "unknown_axis": 9},
+        relationship_deltas={
+            "project-founder": {"alignment": 30, "visibility": -80, "unknown_field": 5},
+            "ignored-target": {"strain": 10},
+        },
+        dimension_impacts={"exchange_trust": 99, "control": -99, "unknown_dimension": 4},
+        follow_on_hooks=("institutional_freeze", "bad-hook", "public-procedure-scrutiny"),
+    )
+
+    updated_state, result = validate_agent_reaction_proposal(
+        context=context,
+        proposal=proposal,
+        known_entities={"project-founder"},
+    )
+
+    assert updated_state.scalar_state["trust_in_player"] == 100
+    assert updated_state.scalar_state["pressure_load"] == 0
+    assert "unknown_axis" not in result.applied_scalar_deltas
+    assert result.applied_relationship_deltas == {"project-founder": {"alignment": 18, "visibility": -18}}
+    assert result.applied_dimension_impacts == {"exchange_trust": 12, "control": -12}
+    assert result.triggered_hooks == ("institutional_freeze",)
+    assert updated_state.triggered_hooks == ("institutional_freeze",)
+    assert updated_state.memories[-1].action_id == "statement"
+    assert updated_state.memories[-1].salience > 0
+
+
+
+def test_apply_choice_updates_agent_run_state_bridge_from_existing_reaction_logic() -> None:
+    game = build_game(turns=6, seed=3, llm_client=FakeLLM())
+    game.begin_turn()
+    action = next(action for action in game.available_actions() if action.id == "statement")
+
+    before = game.agent_run_states["exchange-onyx"]
+
+    resolution = game.apply_choice(TurnChoice(action=action, reason="test"))
+
+    after = game.agent_run_states["exchange-onyx"]
+
+    assert len(resolution.agent_reactions) == len(game.agent_profiles)
+    assert after.agent_id == "exchange-onyx"
+    assert after.scalar_state["trust_in_player"] >= before.scalar_state["trust_in_player"]
+    assert after.memories[-1].action_id == "statement"
+    assert after.memories[-1].turn_index == resolution.turn_number
 
 
 

@@ -7,8 +7,14 @@ from typing import Iterable
 
 from .domain import (
     ActionCard,
+    AgentMemoryEntry,
     AgentProfile,
     AgentReaction,
+    AgentReactionContext,
+    AgentReactionProposal,
+    AgentReactionResult,
+    AgentRelationshipState,
+    AgentRunState,
     ScenarioDefinition,
     TurnChoice,
     TurnResolution,
@@ -207,6 +213,115 @@ ENDING_BANDS = (
 )
 
 
+def validate_agent_reaction_proposal(
+    *,
+    context: AgentReactionContext,
+    proposal: AgentReactionProposal,
+    known_entities: set[str],
+) -> tuple[AgentRunState, AgentReactionResult]:
+    boundaries = context.boundaries
+    axis_defs = {axis.key: axis for axis in boundaries.scalar_axes}
+    applied_scalar_deltas: dict[str, int] = {}
+    next_scalar_state = dict(context.acting_agent.scalar_state)
+    for axis_key, raw_delta in proposal.scalar_deltas.items():
+        axis_def = axis_defs.get(axis_key)
+        if axis_def is None:
+            continue
+        bounded_delta = max(-axis_def.max_delta_per_turn, min(axis_def.max_delta_per_turn, int(raw_delta)))
+        current_value = next_scalar_state.get(axis_key, axis_def.min_value)
+        next_value = max(axis_def.min_value, min(axis_def.max_value, current_value + bounded_delta))
+        applied_scalar_deltas[axis_key] = next_value - current_value
+        next_scalar_state[axis_key] = next_value
+
+    relationship_index = {relationship.target_entity_id: relationship for relationship in context.acting_agent.relationships}
+    applied_relationship_deltas: dict[str, dict[str, int]] = {}
+    next_relationships: list[AgentRelationshipState] = list(context.acting_agent.relationships)
+    relationship_fields = ("alignment", "strain", "dependency", "visibility")
+    for target_id, delta_map in list(proposal.relationship_deltas.items())[: boundaries.max_relationship_updates_per_reaction]:
+        if target_id not in known_entities:
+            continue
+        base = relationship_index.get(target_id, AgentRelationshipState(target_entity_id=target_id, alignment=50, strain=50, dependency=50, visibility=50))
+        current_values = {
+            "alignment": base.alignment,
+            "strain": base.strain,
+            "dependency": base.dependency,
+            "visibility": base.visibility,
+        }
+        applied_for_target: dict[str, int] = {}
+        updated_values = dict(current_values)
+        for field_name, raw_delta in delta_map.items():
+            if field_name not in relationship_fields:
+                continue
+            bounded_delta = max(-boundaries.max_relationship_delta_per_turn, min(boundaries.max_relationship_delta_per_turn, int(raw_delta)))
+            next_value = max(0, min(100, current_values[field_name] + bounded_delta))
+            applied_for_target[field_name] = next_value - current_values[field_name]
+            updated_values[field_name] = next_value
+        if not applied_for_target:
+            continue
+        applied_relationship_deltas[target_id] = applied_for_target
+        updated_relationship = AgentRelationshipState(target_entity_id=target_id, **updated_values)
+        if target_id in relationship_index:
+            next_relationships = [updated_relationship if relationship.target_entity_id == target_id else relationship for relationship in next_relationships]
+        else:
+            next_relationships.append(updated_relationship)
+
+    known_dimensions = set(context.current_dimensions)
+    applied_dimension_impacts: dict[str, int] = {}
+    for dimension_key, raw_delta in list(proposal.dimension_impacts.items())[: boundaries.max_dimension_impacts_per_reaction]:
+        if dimension_key not in known_dimensions:
+            continue
+        applied_dimension_impacts[dimension_key] = max(
+            -boundaries.max_dimension_delta_per_reaction,
+            min(boundaries.max_dimension_delta_per_reaction, int(raw_delta)),
+        )
+
+    allowed_hooks = set(boundaries.allowed_hook_tags)
+    triggered_hooks: list[str] = []
+    for hook_tag in proposal.follow_on_hooks:
+        if hook_tag not in allowed_hooks or hook_tag in triggered_hooks:
+            continue
+        triggered_hooks.append(hook_tag)
+        if len(triggered_hooks) >= boundaries.max_hooks_per_reaction:
+            break
+
+    salience = min(100, max(0, sum(abs(delta) for delta in applied_scalar_deltas.values())))
+    valence = max(-100, min(100, sum(applied_dimension_impacts.values()) - sum(abs(delta) for delta in applied_relationship_deltas.get(next(iter(applied_relationship_deltas), ""), {}).values())))
+    memory_entry = AgentMemoryEntry(
+        turn_index=context.turn_index,
+        action_id=context.chosen_action_id,
+        summary=proposal.summary,
+        salience=salience,
+        valence=valence,
+    )
+    next_memories = (*context.acting_agent.memories, memory_entry)[-boundaries.memory_limit :]
+    next_triggered_hooks = tuple(dict.fromkeys((*context.acting_agent.triggered_hooks, *triggered_hooks)))
+
+    updated_state = AgentRunState(
+        agent_id=context.acting_agent.agent_id,
+        agent_name=context.acting_agent.agent_name,
+        role=context.acting_agent.role,
+        stance=proposal.stance,
+        current_objective=proposal.updated_objective,
+        scalar_state=next_scalar_state,
+        relationships=tuple(next_relationships),
+        memories=tuple(next_memories),
+        triggered_hooks=next_triggered_hooks,
+    )
+    result = AgentReactionResult(
+        agent_id=updated_state.agent_id,
+        agent_name=updated_state.agent_name,
+        role=updated_state.role,
+        summary=proposal.summary,
+        stance=updated_state.stance,
+        objective=updated_state.current_objective,
+        applied_scalar_deltas=applied_scalar_deltas,
+        applied_relationship_deltas=applied_relationship_deltas,
+        applied_dimension_impacts=applied_dimension_impacts,
+        triggered_hooks=tuple(triggered_hooks),
+    )
+    return updated_state, result
+
+
 class CrisisGame:
     def __init__(self, scenario: ScenarioDefinition, *, turns: int = 6, seed: int = 42, llm_client: OpenAICompatibleLLM | None = None) -> None:
         self.scenario = scenario
@@ -238,12 +353,32 @@ class CrisisGame:
             self.llm.generate_agent_profile(entity=entity, scenario_title=scenario.title, world_truth=scenario.truth)
             for entity in scenario.seed_entities
         ]
+        self.agent_run_states = {profile.id: self._build_initial_agent_run_state(profile) for profile in self.agent_profiles}
+        self.agent_reaction_results: list[AgentReactionResult] = []
         self.history: list[TurnResolution] = []
         self.pending_event: WorldEvent | None = None
         self.pending_actions: tuple[ActionCard, ...] | None = None
 
     def snapshot_state(self) -> dict[str, int]:
         return {key: getattr(self.state, key) for key in STATE_KEYS}
+
+    def _build_initial_agent_run_state(self, profile: AgentProfile) -> AgentRunState:
+        public_alignment = max(0, min(100, profile.trust_in_player))
+        pressure_load = max(0, min(100, 100 - profile.trust_in_player))
+        escalation_drive = max(0, min(100, 100 - profile.trust_in_player))
+        return AgentRunState(
+            agent_id=profile.id,
+            agent_name=profile.name,
+            role=profile.role,
+            stance=profile.stance,
+            current_objective=profile.public_goal,
+            scalar_state={
+                "trust_in_player": profile.trust_in_player,
+                "pressure_load": pressure_load,
+                "escalation_drive": escalation_drive,
+                "public_alignment": public_alignment,
+            },
+        )
 
     def begin_turn(self) -> WorldEvent:
         if self.pending_event is not None:
@@ -708,12 +843,57 @@ class CrisisGame:
 
     def _generate_agent_reactions(self, action: ActionCard) -> list[AgentReaction]:
         reactions: list[AgentReaction] = []
+        reaction_results: list[AgentReactionResult] = []
         updated_profiles: list[AgentProfile] = []
+        known_entities = {agent.id for agent in self.agent_profiles}
+        relevant_entities = tuple(entity.id for entity in self.scenario.seed_entities if entity.id != action.id)
         for agent in self.agent_profiles:
             trust_delta, state_delta, summary = self._agent_reaction_payload(agent, action)
             trust = max(0, min(100, agent.trust_in_player + trust_delta))
             stance = _derive_stance(agent.role, trust, self.state)
             updated_profiles.append(replace(agent, trust_in_player=trust, stance=stance))
+
+            run_state = self.agent_run_states.get(agent.id, self._build_initial_agent_run_state(agent))
+            proposal = AgentReactionProposal(
+                summary=summary,
+                stance=stance,
+                updated_objective=run_state.current_objective,
+                scalar_deltas={
+                    "trust_in_player": trust_delta,
+                    "pressure_load": max(-12, min(12, state_delta.get("pressure", 0))),
+                    "escalation_drive": max(-12, min(12, state_delta.get("control", 0) * -1 + state_delta.get("pressure", 0))),
+                    "public_alignment": max(-12, min(12, state_delta.get("narrative_control", 0) + state_delta.get("exchange_trust", 0))),
+                },
+                relationship_deltas={},
+                dimension_impacts={key: value for key, value in state_delta.items() if key in self.state.to_dimension_map()},
+                follow_on_hooks=("institutional_freeze",) if action.id == "freeze_wallet" and _role_bucket(agent.role) == "exchange" else (),
+            )
+            context = AgentReactionContext(
+                world_id=self.frozen_world.world_id,
+                world_title=self.frozen_world.title,
+                turn_index=self.state.turn_index,
+                turns_total=self.state.turns_total,
+                player_role=self.scenario.player_role,
+                player_objective=self.scenario.objective,
+                chosen_action_id=action.id,
+                chosen_action_label=action.label,
+                chosen_action_summary=action.description,
+                current_dimensions=self.state.to_dimension_map(),
+                urgent_dimensions=(),
+                unstable_dimensions=(),
+                dominant_tensions=tuple(item["axis"] for item in decision_focus_from_state(self.state)[:3]),
+                acting_agent=run_state,
+                relevant_entities=relevant_entities,
+                recent_turn_summaries=tuple(resolution.action_label for resolution in self.history[-2:]),
+                boundaries=self.frozen_world.reaction_boundaries,
+            )
+            updated_run_state, result = validate_agent_reaction_proposal(
+                context=context,
+                proposal=proposal,
+                known_entities=known_entities,
+            )
+            self.agent_run_states[agent.id] = updated_run_state
+            reaction_results.append(result)
             reactions.append(
                 AgentReaction(
                     actor_id=agent.id,
@@ -726,6 +906,7 @@ class CrisisGame:
                 )
             )
         self.agent_profiles = updated_profiles
+        self.agent_reaction_results = reaction_results
         return reactions
 
     def _agent_reaction_payload(self, agent: AgentProfile, action: ActionCard) -> tuple[int, dict[str, int], str]:
