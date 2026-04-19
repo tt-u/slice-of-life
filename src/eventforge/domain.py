@@ -207,6 +207,37 @@ class MaterialResearchPack:
     opening_event: "WorldEvent"
     research_notes: tuple[str, ...] = ()
 
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "case_id": self.case_id,
+            "title": self.title,
+            "source_material": self.source_material,
+            "premise": self.premise,
+            "opponent": self.opponent,
+            "audience": list(self.audience),
+            "truth": self.truth,
+            "entities": [seed_entity_to_payload(entity) for entity in self.entities],
+            "candidate_viewpoints": list(self.candidate_viewpoints),
+            "opening_event": world_event_to_payload(self.opening_event),
+            "research_notes": list(self.research_notes),
+        }
+
+    @classmethod
+    def from_payload(cls, payload: dict[str, object]) -> "MaterialResearchPack":
+        return cls(
+            case_id=str(payload["case_id"]),
+            title=str(payload["title"]),
+            source_material=str(payload["source_material"]),
+            premise=str(payload["premise"]),
+            opponent=str(payload["opponent"]),
+            audience=tuple(str(item) for item in payload.get("audience", [])),
+            truth=str(payload["truth"]),
+            entities=tuple(seed_entity_from_payload(item) for item in payload.get("entities", [])),
+            candidate_viewpoints=tuple(str(item) for item in payload.get("candidate_viewpoints", [])),
+            opening_event=world_event_from_payload(payload["opening_event"]),
+            research_notes=tuple(str(item) for item in payload.get("research_notes", [])),
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class FrozenInitialWorld:
@@ -292,6 +323,60 @@ class WorldEvent:
     actor_id: str = "system"
     actor_name: str = "System"
     state_delta: dict[str, int] = field(default_factory=dict)
+
+
+def seed_entity_to_payload(entity: SeedEntity) -> dict[str, object]:
+    return {
+        "id": entity.id,
+        "name": entity.name,
+        "role": entity.role,
+        "public_goal": entity.public_goal,
+        "pressure_point": entity.pressure_point,
+        "starting_trust": entity.starting_trust,
+        "influence": entity.influence,
+        "stance": entity.stance,
+        "details": entity.details,
+    }
+
+
+def seed_entity_from_payload(payload: object) -> SeedEntity:
+    if not isinstance(payload, dict):
+        raise TypeError("Seed entity payload must be a dict")
+    return SeedEntity(
+        id=str(payload["id"]),
+        name=str(payload["name"]),
+        role=str(payload["role"]),
+        public_goal=str(payload["public_goal"]),
+        pressure_point=str(payload["pressure_point"]),
+        starting_trust=int(payload["starting_trust"]),
+        influence=int(payload["influence"]),
+        stance=str(payload["stance"]),
+        details=str(payload["details"]),
+    )
+
+
+def world_event_to_payload(event: WorldEvent) -> dict[str, object]:
+    return {
+        "headline": event.headline,
+        "summary": event.summary,
+        "severity": event.severity,
+        "actor_id": event.actor_id,
+        "actor_name": event.actor_name,
+        "state_delta": dict(event.state_delta),
+    }
+
+
+def world_event_from_payload(payload: object) -> WorldEvent:
+    if not isinstance(payload, dict):
+        raise TypeError("World event payload must be a dict")
+    return WorldEvent(
+        headline=str(payload["headline"]),
+        summary=str(payload["summary"]),
+        severity=int(payload["severity"]),
+        actor_id=str(payload.get("actor_id", "system")),
+        actor_name=str(payload.get("actor_name", "System")),
+        state_delta={str(key): int(value) for key, value in dict(payload.get("state_delta", {})).items()},
+    )
 
 
 @dataclass(frozen=True, slots=True)

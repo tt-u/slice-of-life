@@ -19,6 +19,28 @@ def test_scenario_exports_material_research_pack_with_viewpoints() -> None:
     assert pack.entities == FLASH_CRASH_SCENARIO.seed_entities
 
 
+def test_material_research_pack_round_trips_through_serialized_payload() -> None:
+    pack = FLASH_CRASH_SCENARIO.to_material_research_pack(
+        source_material="公开材料摘要",
+        research_notes=("实体来自公开报道", "保留候选对立视角"),
+    )
+
+    payload = pack.to_payload()
+
+    assert payload["case_id"] == FLASH_CRASH_SCENARIO.id
+    assert payload["source_material"] == "公开材料摘要"
+    assert payload["candidate_viewpoints"] == [FLASH_CRASH_SCENARIO.player_role]
+    assert payload["entities"][0]["id"] == FLASH_CRASH_SCENARIO.seed_entities[0].id
+    assert payload["opening_event"]["headline"] == FLASH_CRASH_SCENARIO.opening_event.headline
+
+    restored = MaterialResearchPack.from_payload(payload)
+
+    assert restored == pack
+    assert restored.entities[0].name == FLASH_CRASH_SCENARIO.seed_entities[0].name
+    assert restored.opening_event.summary == FLASH_CRASH_SCENARIO.opening_event.summary
+    assert restored.research_notes == ("实体来自公开报道", "保留候选对立视角")
+
+
 def test_scenario_freezes_initial_world_into_immutable_artifact() -> None:
     frozen = FLASH_CRASH_SCENARIO.to_frozen_world()
 
