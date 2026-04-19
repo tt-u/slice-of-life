@@ -9,7 +9,7 @@ It is intentionally not a greenfield design draft. It describes the migration st
 - frozen worlds own `WorldActionGrammar`
 - runtime turn context is serialized as `TurnSituation` + `ActionGenerationContext`
 - runtime-facing menu choices are `GeneratedAction`
-- dimension-driven frozen worlds now expand each urgent axis into a larger combinatorial rule pool instead of freezing a near-final four-item mini menu
+- dimension-driven frozen worlds now expand across a broader combinatorial rule pool (up to six pressured dimensions × multiple tactic families) instead of freezing a near-final four-item mini menu
 - the current engine still uses a **legacy `ActionCard` bridge** to synthesize effect metadata and menu constraints
 
 ## Goal
@@ -122,8 +122,9 @@ That is the minimum hard guarantee behind the tradeoff rule.
 2. apply lightweight live gating (`treasury < 20`, `wallet_frozen`, etc.)
 3. score the current situation with frozen-world thresholds (`decision_focus`)
 4. randomly sample a menu-sized candidate subset from the larger world-owned pool, with commitment-slot and family/diversity guards
-5. build a structured `ActionGenerationContext` from `self.frozen_world`
-6. ask the LLM to rationalize only those sampled candidates using:
+5. expose each sampled candidate to the LLM with richer metadata (`commitment_tier`, `cost_types`, `tags`, `trigger_dimensions`, explicit upside/downside axes)
+6. build a structured `ActionGenerationContext` from `self.frozen_world`, including populated urgent/unstable dimensions for the live turn
+7. ask the LLM to rationalize only those sampled candidates using:
    - world title
    - player role
    - player objective
@@ -131,9 +132,9 @@ That is the minimum hard guarantee behind the tradeoff rule.
    - decision focus
    - sampled candidate templates
    - structured action context
-7. constrain returned template ids into a valid menu
-8. convert each allowed choice into a `GeneratedAction`
-9. cache the generated menu for the current turn
+8. constrain returned template ids into a valid menu
+9. convert each allowed choice into a `GeneratedAction`
+10. cache the generated menu for the current turn
 
 ## Important bridge reality
 

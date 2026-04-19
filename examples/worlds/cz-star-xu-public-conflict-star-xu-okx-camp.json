@@ -279,7 +279,7 @@
       {
         "key": "rumor_level-probe-1",
         "label": "试探压低旧案噪声",
-        "description": "先用轻量动作试探旧案噪声的止损空间，为“把事件重新定义为对 CZ 失实叙事的”争取一拍观察窗口，但会牺牲部分可信度与节奏掌控。",
+        "description": "徐明星/OKX 先用轻量动作试探旧案噪声的止损空间，为“把事件重新定义为对 CZ 失实叙事的”争取一拍观察窗口，但会牺牲部分可信度与节奏掌控。",
         "trigger_dimensions": [
           "rumor_level",
           "credibility",
@@ -316,7 +316,7 @@
       {
         "key": "rumor_level-coalition-1",
         "label": "联动压低旧案噪声",
-        "description": "拉动关键关系一起处理旧案噪声，把“把事件重新定义为对 CZ 失实叙事的”变成可执行协同，但会压缩可信度与节奏掌控。",
+        "description": "徐明星/OKX 拉动关键关系一起处理旧案噪声，把“把事件重新定义为对 CZ 失实叙事的”变成可执行协同，但会压缩可信度与节奏掌控。",
         "trigger_dimensions": [
           "rumor_level",
           "credibility",
@@ -352,9 +352,49 @@
         ]
       },
       {
+        "key": "rumor_level-hedge-1",
+        "label": "对冲压低旧案噪声",
+        "description": "徐明星/OKX 把旧案噪声和相关筹码一起打包对冲，尽量稳住“把事件重新定义为对 CZ 失实叙事的”的关键盘面，但会转嫁可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "rumor_level",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
         "key": "rumor_level-commit-1",
         "label": "重押压低旧案噪声",
-        "description": "以更重承诺直接改写旧案噪声，强推“把事件重新定义为对 CZ 失实叙事的”，但必须吞下可信度与节奏掌控的反噬。",
+        "description": "徐明星/OKX 以更重承诺直接改写旧案噪声，强推“把事件重新定义为对 CZ 失实叙事的”，但必须吞下可信度与节奏掌控的反噬。",
         "trigger_dimensions": [
           "rumor_level",
           "credibility",
@@ -394,7 +434,7 @@
       {
         "key": "volatility-probe-2",
         "label": "试探压低情绪波动",
-        "description": "先用轻量动作试探情绪波动的止损空间，为“把事件重新定义为对 CZ 失实叙事的”争取一拍观察窗口，但会牺牲部分节奏掌控与资源余量。",
+        "description": "徐明星/OKX 先用轻量动作试探情绪波动的止损空间，为“把事件重新定义为对 CZ 失实叙事的”争取一拍观察窗口，但会牺牲部分节奏掌控与资源余量。",
         "trigger_dimensions": [
           "volatility",
           "liquidity",
@@ -433,7 +473,7 @@
       {
         "key": "volatility-coalition-2",
         "label": "联动压低情绪波动",
-        "description": "拉动关键关系一起处理情绪波动，把“把事件重新定义为对 CZ 失实叙事的”变成可执行协同，但会压缩节奏掌控与资源余量。",
+        "description": "徐明星/OKX 拉动关键关系一起处理情绪波动，把“把事件重新定义为对 CZ 失实叙事的”变成可执行协同，但会压缩节奏掌控与资源余量。",
         "trigger_dimensions": [
           "volatility",
           "liquidity",
@@ -469,9 +509,48 @@
         ]
       },
       {
+        "key": "volatility-hedge-2",
+        "label": "对冲压低情绪波动",
+        "description": "徐明星/OKX 把情绪波动和相关筹码一起打包对冲，尽量稳住“把事件重新定义为对 CZ 失实叙事的”的关键盘面，但会转嫁节奏掌控与资源余量。",
+        "trigger_dimensions": [
+          "volatility",
+          "liquidity",
+          "control",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "volatility",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "volatility",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
         "key": "volatility-commit-2",
         "label": "重押压低情绪波动",
-        "description": "以更重承诺直接改写情绪波动，强推“把事件重新定义为对 CZ 失实叙事的”，但必须吞下节奏掌控与资源余量的反噬。",
+        "description": "徐明星/OKX 以更重承诺直接改写情绪波动，强推“把事件重新定义为对 CZ 失实叙事的”，但必须吞下节奏掌控与资源余量的反噬。",
         "trigger_dimensions": [
           "volatility",
           "liquidity",
@@ -509,7 +588,7 @@
       {
         "key": "pressure-probe-3",
         "label": "试探压低承压值",
-        "description": "先用轻量动作试探承压值的止损空间，为“把事件重新定义为对 CZ 失实叙事的”争取一拍观察窗口，但会牺牲部分可信度与节奏掌控。",
+        "description": "徐明星/OKX 先用轻量动作试探承压值的止损空间，为“把事件重新定义为对 CZ 失实叙事的”争取一拍观察窗口，但会牺牲部分可信度与节奏掌控。",
         "trigger_dimensions": [
           "pressure",
           "control",
@@ -545,7 +624,7 @@
       {
         "key": "pressure-coalition-3",
         "label": "联动压低承压值",
-        "description": "拉动关键关系一起处理承压值，把“把事件重新定义为对 CZ 失实叙事的”变成可执行协同，但会压缩可信度与节奏掌控。",
+        "description": "徐明星/OKX 拉动关键关系一起处理承压值，把“把事件重新定义为对 CZ 失实叙事的”变成可执行协同，但会压缩可信度与节奏掌控。",
         "trigger_dimensions": [
           "pressure",
           "control",
@@ -578,9 +657,47 @@
         ]
       },
       {
+        "key": "pressure-hedge-3",
+        "label": "对冲压低承压值",
+        "description": "徐明星/OKX 把承压值和相关筹码一起打包对冲，尽量稳住“把事件重新定义为对 CZ 失实叙事的”的关键盘面，但会转嫁可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "finance",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "pressure",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
         "key": "pressure-commit-3",
         "label": "重押压低承压值",
-        "description": "以更重承诺直接改写承压值，强推“把事件重新定义为对 CZ 失实叙事的”，但必须吞下可信度与节奏掌控的反噬。",
+        "description": "徐明星/OKX 以更重承诺直接改写承压值，强推“把事件重新定义为对 CZ 失实叙事的”，但必须吞下可信度与节奏掌控的反噬。",
         "trigger_dimensions": [
           "pressure",
           "control",
@@ -617,7 +734,7 @@
       {
         "key": "community_panic-probe-4",
         "label": "试探压低用户惊惧",
-        "description": "先用轻量动作试探用户惊惧的止损空间，为“把事件重新定义为对 CZ 失实叙事的”争取一拍观察窗口，但会牺牲部分可信度与节奏掌控。",
+        "description": "徐明星/OKX 先用轻量动作试探用户惊惧的止损空间，为“把事件重新定义为对 CZ 失实叙事的”争取一拍观察窗口，但会牺牲部分可信度与节奏掌控。",
         "trigger_dimensions": [
           "community_panic",
           "credibility",
@@ -654,7 +771,7 @@
       {
         "key": "community_panic-coalition-4",
         "label": "联动压低用户惊惧",
-        "description": "拉动关键关系一起处理用户惊惧，把“把事件重新定义为对 CZ 失实叙事的”变成可执行协同，但会压缩可信度与节奏掌控。",
+        "description": "徐明星/OKX 拉动关键关系一起处理用户惊惧，把“把事件重新定义为对 CZ 失实叙事的”变成可执行协同，但会压缩可信度与节奏掌控。",
         "trigger_dimensions": [
           "community_panic",
           "credibility",
@@ -690,9 +807,49 @@
         ]
       },
       {
+        "key": "community_panic-hedge-4",
+        "label": "对冲压低用户惊惧",
+        "description": "徐明星/OKX 把用户惊惧和相关筹码一起打包对冲，尽量稳住“把事件重新定义为对 CZ 失实叙事的”的关键盘面，但会转嫁可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "community_panic",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
         "key": "community_panic-commit-4",
         "label": "重押压低用户惊惧",
-        "description": "以更重承诺直接改写用户惊惧，强推“把事件重新定义为对 CZ 失实叙事的”，但必须吞下可信度与节奏掌控的反噬。",
+        "description": "徐明星/OKX 以更重承诺直接改写用户惊惧，强推“把事件重新定义为对 CZ 失实叙事的”，但必须吞下可信度与节奏掌控的反噬。",
         "trigger_dimensions": [
           "community_panic",
           "credibility",
@@ -726,6 +883,324 @@
           "commit",
           "world-generated",
           "community_panic",
+          "commitment"
+        ]
+      },
+      {
+        "key": "control-probe-5",
+        "label": "试探补强节奏掌控",
+        "description": "徐明星/OKX 先用轻量动作试探节奏掌控的止损空间，为“把事件重新定义为对 CZ 失实叙事的”争取一拍观察窗口，但会牺牲部分可信度与承压值。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "delay",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 1,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "control",
+          "tempo"
+        ]
+      },
+      {
+        "key": "control-coalition-5",
+        "label": "联动补强节奏掌控",
+        "description": "徐明星/OKX 拉动关键关系一起处理节奏掌控，把“把事件重新定义为对 CZ 失实叙事的”变成可执行协同，但会压缩可信度与承压值。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "control",
+          "coordination"
+        ]
+      },
+      {
+        "key": "control-hedge-5",
+        "label": "对冲补强节奏掌控",
+        "description": "徐明星/OKX 把节奏掌控和相关筹码一起打包对冲，尽量稳住“把事件重新定义为对 CZ 失实叙事的”的关键盘面，但会转嫁可信度与承压值。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "finance",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "control",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
+        "key": "control-commit-5",
+        "label": "重押补强节奏掌控",
+        "description": "徐明星/OKX 以更重承诺直接改写节奏掌控，强推“把事件重新定义为对 CZ 失实叙事的”，但必须吞下可信度与承压值的反噬。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "finance"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "control",
+          "commitment"
+        ]
+      },
+      {
+        "key": "credibility-probe-6",
+        "label": "试探补强可信度",
+        "description": "徐明星/OKX 先用轻量动作试探可信度的止损空间，为“把事件重新定义为对 CZ 失实叙事的”争取一拍观察窗口，但会牺牲部分承压值与节奏掌控。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 1,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "credibility",
+          "tempo"
+        ]
+      },
+      {
+        "key": "credibility-coalition-6",
+        "label": "联动补强可信度",
+        "description": "徐明星/OKX 拉动关键关系一起处理可信度，把“把事件重新定义为对 CZ 失实叙事的”变成可执行协同，但会压缩承压值与节奏掌控。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "credibility",
+          "coordination"
+        ]
+      },
+      {
+        "key": "credibility-hedge-6",
+        "label": "对冲补强可信度",
+        "description": "徐明星/OKX 把可信度和相关筹码一起打包对冲，尽量稳住“把事件重新定义为对 CZ 失实叙事的”的关键盘面，但会转嫁承压值与节奏掌控。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "credibility",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
+        "key": "credibility-commit-6",
+        "label": "重押补强可信度",
+        "description": "徐明星/OKX 以更重承诺直接改写可信度，强推“把事件重新定义为对 CZ 失实叙事的”，但必须吞下承压值与节奏掌控的反噬。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "credibility",
           "commitment"
         ]
       }

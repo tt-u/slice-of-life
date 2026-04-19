@@ -337,7 +337,12 @@ def test_available_actions_are_generated_by_llm_each_turn() -> None:
     assert llm.last_choice_prompt["decision_focus"]
     assert llm.last_choice_prompt["action_context"].action_grammar.menu_size == 4
     assert llm.last_choice_prompt["action_context"].situation.urgent_dimensions
+    assert llm.last_choice_prompt["action_context"].situation.unstable_dimensions
     assert all("impact_tier" in template for template in llm.last_available_templates)
+    assert all("commitment_tier" in template for template in llm.last_available_templates)
+    assert all("cost_types" in template for template in llm.last_available_templates)
+    assert all("tags" in template for template in llm.last_available_templates)
+    assert all("trigger_dimensions" in template for template in llm.last_available_templates)
     assert all("upside_axes" in template for template in llm.last_available_templates)
     assert all("downside_axes" in template for template in llm.last_available_templates)
     assert all(template["upside_axes"] for template in llm.last_available_templates)
@@ -484,12 +489,14 @@ def test_dimension_driven_world_action_grammar_creates_large_combinatorial_rule_
         objective="稳住校内外冲突升级",
     )
 
-    assert len(grammar.rules) >= 12
+    assert len(grammar.rules) >= 24
     assert grammar.menu_size == 4
     assert len({rule.key for rule in grammar.rules}) == len(grammar.rules)
-    assert len({rule.tags[0] for rule in grammar.rules if rule.tags}) >= 3
+    assert len({rule.tags[0] for rule in grammar.rules if rule.tags}) >= 4
+    assert len({rule.tags[2] for rule in grammar.rules if len(rule.tags) >= 3}) >= 6
     assert any(rule.max_upside_count > 1 for rule in grammar.rules)
     assert any(rule.max_downside_count > 1 for rule in grammar.rules)
+    assert any(len(rule.trigger_dimensions) >= 4 for rule in grammar.rules)
 
 
 

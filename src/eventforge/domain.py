@@ -1270,14 +1270,15 @@ def dimension_driven_world_action_grammar(
         if fallback_key in initial_dimensions and fallback_key not in prioritized_keys:
             prioritized_keys.append(fallback_key)
 
-    selected_keys = prioritized_keys[:4]
+    selected_keys = prioritized_keys[: min(6, len(prioritized_keys))]
     rules: list[ActionGenerationRule] = []
     objective_snippet = objective[:18] if objective else "稳住局势"
+    role_snippet = player_role[:8] if player_role else "当事方"
     tactic_specs = (
         {
             "family": "probe",
             "label_prefix": "试探",
-            "description": "先用轻量动作试探{dimension}的止损空间，为“{objective}”争取一拍观察窗口，但会牺牲部分{downside}。",
+            "description": "{role}先用轻量动作试探{dimension}的止损空间，为“{objective}”争取一拍观察窗口，但会牺牲部分{downside}。",
             "extra_cost_types": ("delay", "public"),
             "intensity_range": (1, 1),
             "min_upside": 1,
@@ -1289,7 +1290,7 @@ def dimension_driven_world_action_grammar(
         {
             "family": "coalition",
             "label_prefix": "联动",
-            "description": "拉动关键关系一起处理{dimension}，把“{objective}”变成可执行协同，但会压缩{downside}。",
+            "description": "{role}拉动关键关系一起处理{dimension}，把“{objective}”变成可执行协同，但会压缩{downside}。",
             "extra_cost_types": ("private", "public"),
             "intensity_range": (2, 2),
             "min_upside": 2,
@@ -1299,9 +1300,21 @@ def dimension_driven_world_action_grammar(
             "extra_tags": ("coordination",),
         },
         {
+            "family": "hedge",
+            "label_prefix": "对冲",
+            "description": "{role}把{dimension}和相关筹码一起打包对冲，尽量稳住“{objective}”的关键盘面，但会转嫁{downside}。",
+            "extra_cost_types": ("finance", "delay", "private"),
+            "intensity_range": (2, 3),
+            "min_upside": 2,
+            "max_upside": 3,
+            "min_downside": 2,
+            "max_downside": 2,
+            "extra_tags": ("tradeoff", "hedge"),
+        },
+        {
             "family": "commit",
             "label_prefix": "重押",
-            "description": "以更重承诺直接改写{dimension}，强推“{objective}”，但必须吞下{downside}的反噬。",
+            "description": "{role}以更重承诺直接改写{dimension}，强推“{objective}”，但必须吞下{downside}的反噬。",
             "extra_cost_types": ("legal", "finance", "private"),
             "intensity_range": (3, 4),
             "min_upside": 2,
@@ -1328,6 +1341,7 @@ def dimension_driven_world_action_grammar(
                     key=f"{dimension_key}-{tactic['family']}-{index}",
                     label=f"{tactic['label_prefix']}{_dimension_focus_label_prefix(dimension)}{dimension.label}",
                     description=str(tactic["description"]).format(
+                        role=role_snippet,
                         dimension=dimension.label,
                         objective=objective_snippet,
                         downside=_dimension_tradeoff_phrase(downside_dimensions, dimension_by_key),

@@ -279,7 +279,7 @@
       {
         "key": "rumor_level-probe-1",
         "label": "试探压低传言强度",
-        "description": "先用轻量动作试探传言强度的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与控制权。",
+        "description": "校方先用轻量动作试探传言强度的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与控制权。",
         "trigger_dimensions": [
           "rumor_level",
           "credibility",
@@ -316,7 +316,7 @@
       {
         "key": "rumor_level-coalition-1",
         "label": "联动压低传言强度",
-        "description": "拉动关键关系一起处理传言强度，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与控制权。",
+        "description": "校方拉动关键关系一起处理传言强度，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与控制权。",
         "trigger_dimensions": [
           "rumor_level",
           "credibility",
@@ -352,9 +352,49 @@
         ]
       },
       {
+        "key": "rumor_level-hedge-1",
+        "label": "对冲压低传言强度",
+        "description": "校方把传言强度和相关筹码一起打包对冲，尽量稳住“在多线质疑中重新稳住程序公信力，并防”的关键盘面，但会转嫁公信力与控制权。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "rumor_level",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
         "key": "rumor_level-commit-1",
         "label": "重押压低传言强度",
-        "description": "以更重承诺直接改写传言强度，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与控制权的反噬。",
+        "description": "校方以更重承诺直接改写传言强度，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与控制权的反噬。",
         "trigger_dimensions": [
           "rumor_level",
           "credibility",
@@ -394,7 +434,7 @@
       {
         "key": "community_panic-probe-2",
         "label": "试探压低群体撕裂",
-        "description": "先用轻量动作试探群体撕裂的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与控制权。",
+        "description": "校方先用轻量动作试探群体撕裂的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与控制权。",
         "trigger_dimensions": [
           "community_panic",
           "credibility",
@@ -431,7 +471,7 @@
       {
         "key": "community_panic-coalition-2",
         "label": "联动压低群体撕裂",
-        "description": "拉动关键关系一起处理群体撕裂，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与控制权。",
+        "description": "校方拉动关键关系一起处理群体撕裂，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与控制权。",
         "trigger_dimensions": [
           "community_panic",
           "credibility",
@@ -467,9 +507,49 @@
         ]
       },
       {
+        "key": "community_panic-hedge-2",
+        "label": "对冲压低群体撕裂",
+        "description": "校方把群体撕裂和相关筹码一起打包对冲，尽量稳住“在多线质疑中重新稳住程序公信力，并防”的关键盘面，但会转嫁公信力与控制权。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "community_panic",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
         "key": "community_panic-commit-2",
         "label": "重押压低群体撕裂",
-        "description": "以更重承诺直接改写群体撕裂，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与控制权的反噬。",
+        "description": "校方以更重承诺直接改写群体撕裂，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与控制权的反噬。",
         "trigger_dimensions": [
           "community_panic",
           "credibility",
@@ -509,7 +589,7 @@
       {
         "key": "narrative_control-probe-3",
         "label": "试探补强叙事控制",
-        "description": "先用轻量动作试探叙事控制的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与承压值。",
+        "description": "校方先用轻量动作试探叙事控制的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与承压值。",
         "trigger_dimensions": [
           "narrative_control",
           "credibility",
@@ -546,7 +626,7 @@
       {
         "key": "narrative_control-coalition-3",
         "label": "联动补强叙事控制",
-        "description": "拉动关键关系一起处理叙事控制，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与承压值。",
+        "description": "校方拉动关键关系一起处理叙事控制，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与承压值。",
         "trigger_dimensions": [
           "narrative_control",
           "credibility",
@@ -582,9 +662,49 @@
         ]
       },
       {
+        "key": "narrative_control-hedge-3",
+        "label": "对冲补强叙事控制",
+        "description": "校方把叙事控制和相关筹码一起打包对冲，尽量稳住“在多线质疑中重新稳住程序公信力，并防”的关键盘面，但会转嫁公信力与承压值。",
+        "trigger_dimensions": [
+          "narrative_control",
+          "credibility",
+          "exchange_trust",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "narrative_control",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
         "key": "narrative_control-commit-3",
         "label": "重押补强叙事控制",
-        "description": "以更重承诺直接改写叙事控制，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与承压值的反噬。",
+        "description": "校方以更重承诺直接改写叙事控制，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与承压值的反噬。",
         "trigger_dimensions": [
           "narrative_control",
           "credibility",
@@ -624,7 +744,7 @@
       {
         "key": "credibility-probe-4",
         "label": "试探补强公信力",
-        "description": "先用轻量动作试探公信力的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分承压值与控制权。",
+        "description": "校方先用轻量动作试探公信力的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分承压值与控制权。",
         "trigger_dimensions": [
           "credibility",
           "narrative_control",
@@ -663,7 +783,7 @@
       {
         "key": "credibility-coalition-4",
         "label": "联动补强公信力",
-        "description": "拉动关键关系一起处理公信力，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩承压值与控制权。",
+        "description": "校方拉动关键关系一起处理公信力，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩承压值与控制权。",
         "trigger_dimensions": [
           "credibility",
           "narrative_control",
@@ -701,9 +821,51 @@
         ]
       },
       {
+        "key": "credibility-hedge-4",
+        "label": "对冲补强公信力",
+        "description": "校方把公信力和相关筹码一起打包对冲，尽量稳住“在多线质疑中重新稳住程序公信力，并防”的关键盘面，但会转嫁承压值与控制权。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "credibility",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
         "key": "credibility-commit-4",
         "label": "重押补强公信力",
-        "description": "以更重承诺直接改写公信力，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下承压值与控制权的反噬。",
+        "description": "校方以更重承诺直接改写公信力，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下承压值与控制权的反噬。",
         "trigger_dimensions": [
           "credibility",
           "narrative_control",
@@ -739,6 +901,307 @@
           "commit",
           "world-generated",
           "credibility",
+          "commitment"
+        ]
+      },
+      {
+        "key": "control-probe-5",
+        "label": "试探补强控制权",
+        "description": "校方先用轻量动作试探控制权的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与承压值。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "delay",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 1,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "control",
+          "tempo"
+        ]
+      },
+      {
+        "key": "control-coalition-5",
+        "label": "联动补强控制权",
+        "description": "校方拉动关键关系一起处理控制权，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与承压值。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "control",
+          "coordination"
+        ]
+      },
+      {
+        "key": "control-hedge-5",
+        "label": "对冲补强控制权",
+        "description": "校方把控制权和相关筹码一起打包对冲，尽量稳住“在多线质疑中重新稳住程序公信力，并防”的关键盘面，但会转嫁公信力与承压值。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "finance",
+          "delay"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "control",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
+        "key": "control-commit-5",
+        "label": "重押补强控制权",
+        "description": "校方以更重承诺直接改写控制权，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与承压值的反噬。",
+        "trigger_dimensions": [
+          "control",
+          "exchange_trust",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "legal",
+          "finance"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "control",
+          "commitment"
+        ]
+      },
+      {
+        "key": "pressure-probe-6",
+        "label": "试探压低承压值",
+        "description": "校方先用轻量动作试探承压值的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与控制权。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 1,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "pressure",
+          "tempo"
+        ]
+      },
+      {
+        "key": "pressure-coalition-6",
+        "label": "联动压低承压值",
+        "description": "校方拉动关键关系一起处理承压值，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与控制权。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "pressure",
+          "coordination"
+        ]
+      },
+      {
+        "key": "pressure-hedge-6",
+        "label": "对冲压低承压值",
+        "description": "校方把承压值和相关筹码一起打包对冲，尽量稳住“在多线质疑中重新稳住程序公信力，并防”的关键盘面，但会转嫁公信力与控制权。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "finance",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          3
+        ],
+        "tags": [
+          "hedge",
+          "world-generated",
+          "pressure",
+          "tradeoff",
+          "hedge"
+        ]
+      },
+      {
+        "key": "pressure-commit-6",
+        "label": "重押压低承压值",
+        "description": "校方以更重承诺直接改写承压值，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与控制权的反噬。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "legal",
+          "finance"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "pressure",
           "commitment"
         ]
       }

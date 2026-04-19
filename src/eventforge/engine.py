@@ -26,6 +26,8 @@ from .domain import (
     WorldEvent,
     WorldReport,
     WorldState,
+    infer_unstable_dimensions,
+    infer_urgent_dimensions,
 )
 from .llm import OpenAICompatibleLLM
 from .scenarios import get_default_scenario
@@ -517,11 +519,15 @@ class CrisisGame:
             dimension_defs=self.frozen_world.resolved_dimension_defs(),
         )
         sampled_templates = self._sample_action_templates(template_pool=template_pool, decision_focus=decision_focus)
+        dimension_defs = self.frozen_world.resolved_dimension_defs()
+        urgent_dimensions = infer_urgent_dimensions(self.state.to_dimension_map(), dimension_defs)
+        unstable_dimensions = infer_unstable_dimensions(self.state.to_dimension_map(), dimension_defs)
         templates = []
         for action in sampled_templates:
             profile = action_impact_profile(action)
             commitment_tier = self._template_commitment_tier(action)
             tradeoff = self._template_tradeoff_profile(action)
+            rule = self._action_generation_rule(action.id)
             templates.append(
                 {
                     "id": action.id,
@@ -529,6 +535,10 @@ class CrisisGame:
                     "description": action.description,
                     "impact_cost": profile["impact_cost"],
                     "impact_tier": commitment_tier,
+                    "commitment_tier": commitment_tier,
+                    "cost_types": list(self._template_cost_types(action)),
+                    "tags": list(self._template_tags(action)),
+                    "trigger_dimensions": list(rule.trigger_dimensions) if rule is not None else [],
                     "upside_axes": tradeoff["upside_axes"],
                     "downside_axes": tradeoff["downside_axes"],
                 }
@@ -541,8 +551,8 @@ class CrisisGame:
                 selected_player_role=self.frozen_world.player_role,
                 objective=self.frozen_world.objective,
                 dominant_tensions=tuple(item["axis"] for item in decision_focus[:3]),
-                urgent_dimensions=(),
-                unstable_dimensions=(),
+                urgent_dimensions=urgent_dimensions,
+                unstable_dimensions=unstable_dimensions,
                 recent_action_summaries=tuple(resolution.action_label for resolution in self.history[-2:]),
             ),
         )
