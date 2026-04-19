@@ -1,11 +1,27 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Literal
 
 Role = str
 ActionTag = Literal["public", "private", "finance", "legal", "delay"]
 WinTier = Literal["decisive_win", "scrappy_win", "pyrrhic_win", "loss"]
+WorldDimensionHealth = Literal["higher_is_better", "lower_is_better", "balanced"]
+
+WORLD_STATE_DIMENSION_KEYS = (
+    "credibility",
+    "treasury",
+    "pressure",
+    "price",
+    "liquidity",
+    "sell_pressure",
+    "volatility",
+    "community_panic",
+    "rumor_level",
+    "narrative_control",
+    "exchange_trust",
+    "control",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,22 +91,148 @@ class WorldState:
     flags: set[str] = field(default_factory=set)
 
     def clamp(self) -> None:
-        for field_name in (
-            "credibility",
-            "treasury",
-            "pressure",
-            "price",
-            "liquidity",
-            "sell_pressure",
-            "volatility",
-            "community_panic",
-            "rumor_level",
-            "narrative_control",
-            "exchange_trust",
-            "control",
-        ):
+        for field_name in WORLD_STATE_DIMENSION_KEYS:
             value = getattr(self, field_name)
             setattr(self, field_name, max(0, min(100, value)))
+
+    def to_dimension_map(self) -> dict[str, int]:
+        return {field_name: int(getattr(self, field_name)) for field_name in WORLD_STATE_DIMENSION_KEYS}
+
+
+@dataclass(frozen=True, slots=True)
+class WorldDimensionDef:
+    key: str
+    label: str
+    description: str
+    direction_of_health: WorldDimensionHealth
+    warning_threshold: int | None = None
+    crisis_threshold: int | None = None
+    terminal_threshold: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ActionCostType:
+    key: str
+    label: str
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class ActionGenerationRule:
+    key: str
+    label: str
+    description: str
+    trigger_dimensions: tuple[str, ...]
+    preferred_upside_dimensions: tuple[str, ...]
+    likely_downside_dimensions: tuple[str, ...]
+    allowed_cost_types: tuple[str, ...]
+    minimum_upside_count: int = 1
+    minimum_downside_count: int = 1
+    max_upside_count: int = 2
+    max_downside_count: int = 2
+    intensity_range: tuple[int, int] = (1, 3)
+    tags: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class WorldActionGrammar:
+    rules: tuple[ActionGenerationRule, ...]
+    cost_types: tuple[ActionCostType, ...]
+    forbidden_pairs: tuple[tuple[str, str], ...] = ()
+    forbidden_tags: tuple[str, ...] = ()
+    required_tradeoff: bool = True
+    menu_size: int = 4
+    low_commitment_slots: int = 1
+    medium_commitment_slots: int = 2
+    high_commitment_slots: int = 1
+
+
+@dataclass(frozen=True, slots=True)
+class GeneratedAction:
+    id: str
+    label: str
+    description: str
+    rationale: str
+    upside_dimensions: tuple[str, ...]
+    downside_dimensions: tuple[str, ...]
+    upside_magnitude: dict[str, int]
+    downside_magnitude: dict[str, int]
+    cost_types: tuple[str, ...]
+    affected_entities: tuple[str, ...]
+    commitment_tier: Literal["low", "medium", "high"]
+    tags: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class WorldEndingBand:
+    min_score: int
+    ending_id: str
+    label: str
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class MaterialResearchPack:
+    case_id: str
+    title: str
+    source_material: str
+    premise: str
+    opponent: str
+    audience: tuple[str, ...]
+    truth: str
+    entities: tuple[SeedEntity, ...]
+    candidate_viewpoints: tuple[str, ...]
+    opening_event: "WorldEvent"
+    research_notes: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class FrozenInitialWorld:
+    world_id: str
+    title: str
+    premise: str
+    player_role: str
+    player_secret: str
+    objective: str
+    opponent: str
+    audience: tuple[str, ...]
+    truth: str
+    selectable_roles: tuple[str, ...]
+    allowed_turn_counts: tuple[int, ...]
+    opening_event: "WorldEvent"
+    initial_dimensions: tuple[tuple[str, int], ...]
+    entities: tuple[SeedEntity, ...]
+    ending_bands: tuple[WorldEndingBand, ...]
+    action_grammar: WorldActionGrammar | None = None
+
+    def initial_dimension_map(self) -> dict[str, int]:
+        return {key: value for key, value in self.initial_dimensions}
+
+    def instantiate_state(self, *, turns_total: int) -> WorldState:
+        dimension_map = self.initial_dimension_map()
+        return WorldState(
+            turn_index=0,
+            turns_total=turns_total,
+            credibility=dimension_map["credibility"],
+            treasury=dimension_map["treasury"],
+            pressure=dimension_map["pressure"],
+            price=dimension_map["price"],
+            liquidity=dimension_map["liquidity"],
+            sell_pressure=dimension_map["sell_pressure"],
+            volatility=dimension_map["volatility"],
+            community_panic=dimension_map["community_panic"],
+            rumor_level=dimension_map["rumor_level"],
+            narrative_control=dimension_map["narrative_control"],
+            exchange_trust=dimension_map["exchange_trust"],
+            control=dimension_map["control"],
+            truth_public=False,
+            flags=set(),
+        )
+
+    def resolve_ending_band(self, ending_score: int) -> WorldEndingBand:
+        score = max(0, min(100, ending_score))
+        ordered = sorted(self.ending_bands, key=lambda band: band.min_score, reverse=True)
+        return next(band for band in ordered if score >= band.min_score)
 
 
 @dataclass(frozen=True, slots=True)
@@ -184,6 +326,66 @@ class ScenarioDefinition:
     actions: tuple[ActionCard, ...]
     initial_world: WorldState
     playable_roles: tuple[str, ...] = ()
+
+    def selectable_roles(self) -> tuple[str, ...]:
+        return self.playable_roles or (self.player_role,)
+
+    def to_material_research_pack(
+        self,
+        *,
+        source_material: str,
+        research_notes: tuple[str, ...] = (),
+    ) -> MaterialResearchPack:
+        return MaterialResearchPack(
+            case_id=self.id,
+            title=self.title,
+            source_material=source_material,
+            premise=self.premise,
+            opponent=self.opponent,
+            audience=self.audience,
+            truth=self.truth,
+            entities=self.seed_entities,
+            candidate_viewpoints=self.selectable_roles(),
+            opening_event=replace(self.opening_event),
+            research_notes=research_notes,
+        )
+
+    def to_frozen_world(
+        self,
+        *,
+        allowed_turn_counts: tuple[int, ...] = (4, 6, 8, 10),
+        ending_bands: tuple[WorldEndingBand, ...] | None = None,
+        action_grammar: WorldActionGrammar | None = None,
+    ) -> FrozenInitialWorld:
+        resolved_bands = ending_bands or default_world_ending_bands()
+        return FrozenInitialWorld(
+            world_id=self.id,
+            title=self.title,
+            premise=self.premise,
+            player_role=self.player_role,
+            player_secret=self.player_secret,
+            objective=self.objective,
+            opponent=self.opponent,
+            audience=self.audience,
+            truth=self.truth,
+            selectable_roles=self.selectable_roles(),
+            allowed_turn_counts=allowed_turn_counts,
+            opening_event=replace(self.opening_event),
+            initial_dimensions=tuple(self.initial_world.to_dimension_map().items()),
+            entities=self.seed_entities,
+            ending_bands=resolved_bands,
+            action_grammar=action_grammar,
+        )
+
+
+def default_world_ending_bands() -> tuple[WorldEndingBand, ...]:
+    return (
+        WorldEndingBand(min_score=85, ending_id="phoenix-rebound", label="凤凰回升", description="你不但稳住了局势，还把叙事重新拉回到自己有利的位置。"),
+        WorldEndingBand(min_score=65, ending_id="hard-stabilized", label="艰难稳盘", description="你付出不少代价，才勉强把局势按回可控区间。"),
+        WorldEndingBand(min_score=45, ending_id="fragile-truce", label="脆弱停火", description="你暂时止血，但信任裂缝没有真正修复。"),
+        WorldEndingBand(min_score=25, ending_id="pyrrhic-survival", label="惨胜续命", description="你保住了部分控制权，但代价高到几乎透支未来。"),
+        WorldEndingBand(min_score=0, ending_id="collapse", label="失控崩解", description="局势脱离了你的掌控，外部叙事和内部秩序一同崩塌。"),
+    )
 
 
 @dataclass(frozen=True, slots=True)
