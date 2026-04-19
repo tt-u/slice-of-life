@@ -155,7 +155,7 @@ def test_generated_material_scenarios_do_not_inherit_flash_crash_actions() -> No
     flash_crash_ids = {action.id for action in FLASH_CRASH_SCENARIO.actions}
 
     assert scenario.actions == ()
-    assert len(frozen_world.action_grammar.rules) == 4
+    assert len(frozen_world.action_grammar.rules) >= 12
     assert {rule.key for rule in frozen_world.action_grammar.rules}.isdisjoint(flash_crash_ids)
 
 

@@ -1,379 +1,36 @@
 {
-  "action_grammar": {
-    "cost_types": [
-      {
-        "description": "带来公开关注、质疑或舆论压力。",
-        "key": "public",
-        "label": "公开代价"
-      },
-      {
-        "description": "需要消耗私下协调空间或关系信用。",
-        "key": "private",
-        "label": "私下协调代价"
-      },
-      {
-        "description": "需要消耗预算、现金或资产缓冲。",
-        "key": "finance",
-        "label": "资源代价"
-      },
-      {
-        "description": "需要承担程序、审计或制度约束。",
-        "key": "legal",
-        "label": "制度代价"
-      },
-      {
-        "description": "通过拖延换取喘息，但损失先手。",
-        "key": "delay",
-        "label": "时机代价"
-      }
-    ],
-    "forbidden_pairs": [],
-    "forbidden_tags": [],
-    "high_commitment_slots": 1,
-    "low_commitment_slots": 1,
-    "medium_commitment_slots": 2,
-    "menu_size": 4,
-    "required_tradeoff": true,
-    "rules": [
-      {
-        "allowed_cost_types": [
-          "public",
-          "delay"
-        ],
-        "description": "以CZ视角优先处理旧案噪声，推进“在重提旧案时守住自己版本的可信度，并”，但会挤占其他操作空间。",
-        "intensity_range": [
-          1,
-          3
-        ],
-        "key": "rumor_level-focus-1",
-        "label": "压低旧案噪声",
-        "likely_downside_dimensions": [
-          "credibility",
-          "control"
-        ],
-        "max_downside_count": 2,
-        "max_upside_count": 1,
-        "minimum_downside_count": 2,
-        "minimum_upside_count": 1,
-        "preferred_upside_dimensions": [
-          "rumor_level"
-        ],
-        "tags": [
-          "world-generated",
-          "rumor_level"
-        ],
-        "trigger_dimensions": [
-          "rumor_level",
-          "credibility",
-          "control"
-        ]
-      },
-      {
-        "allowed_cost_types": [
-          "finance",
-          "private"
-        ],
-        "description": "以CZ视角优先处理情绪波动，推进“在重提旧案时守住自己版本的可信度，并”，但会挤占其他操作空间。",
-        "intensity_range": [
-          1,
-          3
-        ],
-        "key": "volatility-focus-2",
-        "label": "压低情绪波动",
-        "likely_downside_dimensions": [
-          "control",
-          "treasury"
-        ],
-        "max_downside_count": 2,
-        "max_upside_count": 1,
-        "minimum_downside_count": 2,
-        "minimum_upside_count": 1,
-        "preferred_upside_dimensions": [
-          "volatility"
-        ],
-        "tags": [
-          "world-generated",
-          "volatility"
-        ],
-        "trigger_dimensions": [
-          "volatility",
-          "control",
-          "treasury"
-        ]
-      },
-      {
-        "allowed_cost_types": [
-          "finance",
-          "private"
-        ],
-        "description": "以CZ视角优先处理热度位，推进“在重提旧案时守住自己版本的可信度，并”，但会挤占其他操作空间。",
-        "intensity_range": [
-          1,
-          3
-        ],
-        "key": "price-focus-3",
-        "label": "压低热度位",
-        "likely_downside_dimensions": [
-          "liquidity",
-          "credibility"
-        ],
-        "max_downside_count": 2,
-        "max_upside_count": 1,
-        "minimum_downside_count": 2,
-        "minimum_upside_count": 1,
-        "preferred_upside_dimensions": [
-          "price"
-        ],
-        "tags": [
-          "world-generated",
-          "price"
-        ],
-        "trigger_dimensions": [
-          "price",
-          "liquidity",
-          "credibility"
-        ]
-      },
-      {
-        "allowed_cost_types": [
-          "public",
-          "delay"
-        ],
-        "description": "以CZ视角优先处理叙事控制，推进“在重提旧案时守住自己版本的可信度，并”，但会挤占其他操作空间。",
-        "intensity_range": [
-          1,
-          3
-        ],
-        "key": "narrative_control-focus-4",
-        "label": "补强叙事控制",
-        "likely_downside_dimensions": [
-          "credibility",
-          "pressure"
-        ],
-        "max_downside_count": 2,
-        "max_upside_count": 1,
-        "minimum_downside_count": 2,
-        "minimum_upside_count": 1,
-        "preferred_upside_dimensions": [
-          "narrative_control"
-        ],
-        "tags": [
-          "world-generated",
-          "narrative_control"
-        ],
-        "trigger_dimensions": [
-          "narrative_control",
-          "credibility",
-          "pressure"
-        ]
-      }
-    ]
-  },
-  "allowed_turn_counts": [
-    4,
-    6,
-    8,
-    10
-  ],
+  "world_id": "cz-star-xu-public-conflict-cz",
+  "title": "CZ / 徐明星公开冲突",
+  "premise": "一本回忆录把十多年行业旧账重新抛回台面，让 CZ 与徐明星/OKX 阵营再次公开互撕。",
+  "player_role": "CZ",
+  "player_secret": "你知道只要拿不出足够硬的新证据，旧案一旦被深挖，回忆录就可能从武器反噬成自证偏见。",
+  "objective": "在重提旧案时守住自己版本的可信度，并避免冲突被重新解释成你借回忆录操纵叙事。",
+  "opponent": "徐明星/OKX 阵营的公开反击、会放大旧证据裂痕的围观者，以及把创始人口角映射成治理风险的市场情绪。",
   "audience": [
     "交易平台用户",
     "行业从业者",
     "加密媒体读者",
     "二级市场围观者"
   ],
-  "dimension_defs": [
-    {
-      "crisis_threshold": 40,
-      "description": "玩家阵营当前版本能否被行业与媒体当作更可信的叙事。",
-      "direction_of_health": "higher_is_better",
-      "key": "credibility",
-      "label": "可信度",
-      "terminal_threshold": 20,
-      "warning_threshold": 60
-    },
-    {
-      "crisis_threshold": 30,
-      "description": "还能调动多少平台资源、人脉与证据渠道继续打这场旧账。",
-      "direction_of_health": "higher_is_better",
-      "key": "treasury",
-      "label": "资源余量",
-      "terminal_threshold": 15,
-      "warning_threshold": 50
-    },
-    {
-      "crisis_threshold": 70,
-      "description": "来自对位创始人、媒体追问和旧案回流的即时压强。",
-      "direction_of_health": "lower_is_better",
-      "key": "pressure",
-      "label": "承压值",
-      "terminal_threshold": 85,
-      "warning_threshold": 50
-    },
-    {
-      "crisis_threshold": 68,
-      "description": "这场冲突在加密舆论场中占据了多少注意力。",
-      "direction_of_health": "lower_is_better",
-      "key": "price",
-      "label": "热度位",
-      "terminal_threshold": 84,
-      "warning_threshold": 50
-    },
-    {
-      "crisis_threshold": 35,
-      "description": "你还能否切换证据、口径与动作，而不是被单一叙事锁死。",
-      "direction_of_health": "higher_is_better",
-      "key": "liquidity",
-      "label": "腾挪空间",
-      "terminal_threshold": 20,
-      "warning_threshold": 55
-    },
-    {
-      "crisis_threshold": 60,
-      "description": "围观者是否开始把口水战映射成平台风险和交易抛压。",
-      "direction_of_health": "lower_is_better",
-      "key": "sell_pressure",
-      "label": "抛压联想",
-      "terminal_threshold": 80,
-      "warning_threshold": 45
-    },
-    {
-      "crisis_threshold": 65,
-      "description": "围观情绪是否在新爆料、旧截图和二次传播中持续抽搐。",
-      "direction_of_health": "lower_is_better",
-      "key": "volatility",
-      "label": "情绪波动",
-      "terminal_threshold": 80,
-      "warning_threshold": 45
-    },
-    {
-      "crisis_threshold": 58,
-      "description": "交易平台用户是否把创始人互撕读成真实治理风险。",
-      "direction_of_health": "lower_is_better",
-      "key": "community_panic",
-      "label": "用户惊惧",
-      "terminal_threshold": 76,
-      "warning_threshold": 40
-    },
-    {
-      "crisis_threshold": 62,
-      "description": "未经完整核验的旧合约、举报传闻和黑历史回流强度。",
-      "direction_of_health": "lower_is_better",
-      "key": "rumor_level",
-      "label": "旧案噪声",
-      "terminal_threshold": 80,
-      "warning_threshold": 42
-    },
-    {
-      "crisis_threshold": 38,
-      "description": "玩家阵营能否主导公众把冲突理解成哪一种故事。",
-      "direction_of_health": "higher_is_better",
-      "key": "narrative_control",
-      "label": "叙事控制",
-      "terminal_threshold": 22,
-      "warning_threshold": 58
-    },
-    {
-      "crisis_threshold": 40,
-      "description": "外界是否相信相关平台仍具备稳定治理与风控能力。",
-      "direction_of_health": "higher_is_better",
-      "key": "exchange_trust",
-      "label": "平台信任",
-      "terminal_threshold": 22,
-      "warning_threshold": 58
-    },
-    {
-      "crisis_threshold": 40,
-      "description": "玩家阵营对爆料节奏、证据投放和后续攻防的控制程度。",
-      "direction_of_health": "higher_is_better",
-      "key": "control",
-      "label": "节奏掌控",
-      "terminal_threshold": 22,
-      "warning_threshold": 60
-    }
+  "truth": "这不是单纯的嘴仗，而是个人回忆录、旧案证据、平台治理历史与行业信任同时争夺解释权的复合冲突。",
+  "selectable_roles": [
+    "CZ",
+    "徐明星/OKX camp"
   ],
-  "ending_bands": [
-    {
-      "description": "你压住了最致命的旧案回流，让市场暂时接受了你的版本，冲突仍在但主导权归你。",
-      "ending_id": "cz-star-xu-narrative-suppression",
-      "label": "叙事压制",
-      "min_score": 80
-    },
-    {
-      "description": "双方都没能彻底击穿对面，旧账继续悬着，平台与个人信誉一起带伤前行。",
-      "ending_id": "cz-star-xu-fractured-stalemate",
-      "label": "裂痕僵持",
-      "min_score": 55
-    },
-    {
-      "description": "你想借旧案压制对手，却让更多围观者把矛头转向你的证据缺口和治理伤口。",
-      "ending_id": "cz-star-xu-credibility-backlash",
-      "label": "信誉反噬",
-      "min_score": 30
-    },
-    {
-      "description": "争吵已经不再只是创始人恩怨，市场开始把它读成平台治理系统性失锚。",
-      "ending_id": "cz-star-xu-platform-adrift",
-      "label": "平台失锚",
-      "min_score": 0
-    }
+  "allowed_turn_counts": [
+    4,
+    6,
+    8,
+    10
   ],
-  "entities": [
-    {
-      "details": "拥有巨大的行业注意力和传播能力，但越主动翻旧账越容易被要求拿出硬证据。",
-      "id": "cz-binance",
-      "influence": 94,
-      "name": "CZ 与 Binance 叙事面",
-      "pressure_point": "任何被核实的旧案矛盾都会反噬其回忆录可信度",
-      "public_goal": "守住个人创业史版本并避免被定性为反复翻旧账的操盘者",
-      "role": "CZ",
-      "stance": "主动出击",
-      "starting_trust": 46
-    },
-    {
-      "details": "既要维护徐明星本人信誉，也要避免 OKX 被再次读成治理脆弱的平台。",
-      "id": "star-xu-okx",
-      "influence": 88,
-      "name": "徐明星与 OKX 阵营",
-      "pressure_point": "提币冻结旧案与举报传闻同时拖累平台治理形象",
-      "public_goal": "把冲突重新定义为对 CZ 失实叙事的公开纠偏",
-      "role": "徐明星/OKX camp",
-      "stance": "高压反击",
-      "starting_trust": 39
-    },
-    {
-      "details": "虽然不是当前正面冲突双方，却是举报传闻链里最容易被借用的支点。",
-      "id": "leon-li-huobi",
-      "influence": 63,
-      "name": "李林与火币旧案旁证",
-      "pressure_point": "名字被反复当作举报传闻的证明或反证明",
-      "public_goal": "避免自己的旧案被持续当作别人互攻弹药",
-      "role": "行业旧案证人",
-      "stance": "被动卷入",
-      "starting_trust": 34
-    },
-    {
-      "details": "不属于独立人物阵营，而是会不断回流到当下叙事中的旧证据集合。",
-      "id": "roger-ver-contract",
-      "influence": 58,
-      "name": "Roger Ver / OKCoin 合约旧案",
-      "pressure_point": "旧证据越碎片化，越容易被任何一方剪裁利用",
-      "public_goal": "迫使双方回到可核查的旧记录上",
-      "role": "历史证据场",
-      "stance": "证据回流",
-      "starting_trust": 31
-    },
-    {
-      "details": "一旦把冲突理解为平台治理风险，而不只是创始人口角，外溢杀伤会迅速放大。",
-      "id": "market-watchers",
-      "influence": 91,
-      "name": "交易平台用户与行业围观者",
-      "pressure_point": "碎片化旧案让他们更容易用情绪化结论替代细节判断",
-      "public_goal": "判断谁在撒谎以及平台治理是否因此存在真实风险",
-      "role": "市场舆论",
-      "stance": "高热围观",
-      "starting_trust": 22
-    }
-  ],
+  "opening_event": {
+    "headline": "回忆录与 X 贴文把旧案重新点燃",
+    "summary": "CZ 新书与徐明星连续发帖互相指控，把合约伪造、举报传闻和提币冻结旧案一起拉回公众视野。",
+    "severity": 82,
+    "actor_id": "cz-binance",
+    "actor_name": "CZ 与 Binance 叙事面",
+    "state_delta": {}
+  },
   "initial_dimensions": [
     [
       "credibility",
@@ -424,72 +81,737 @@
       71
     ]
   ],
-  "objective": "在重提旧案时守住自己版本的可信度，并避免冲突被重新解释成你借回忆录操纵叙事。",
-  "opening_event": {
-    "actor_id": "cz-binance",
-    "actor_name": "CZ 与 Binance 叙事面",
-    "headline": "回忆录与 X 贴文把旧案重新点燃",
-    "severity": 82,
-    "state_delta": {},
-    "summary": "CZ 新书与徐明星连续发帖互相指控，把合约伪造、举报传闻和提币冻结旧案一起拉回公众视野。"
+  "entities": [
+    {
+      "id": "cz-binance",
+      "name": "CZ 与 Binance 叙事面",
+      "role": "CZ",
+      "public_goal": "守住个人创业史版本并避免被定性为反复翻旧账的操盘者",
+      "pressure_point": "任何被核实的旧案矛盾都会反噬其回忆录可信度",
+      "starting_trust": 46,
+      "influence": 94,
+      "stance": "主动出击",
+      "details": "拥有巨大的行业注意力和传播能力，但越主动翻旧账越容易被要求拿出硬证据。"
+    },
+    {
+      "id": "star-xu-okx",
+      "name": "徐明星与 OKX 阵营",
+      "role": "徐明星/OKX camp",
+      "public_goal": "把冲突重新定义为对 CZ 失实叙事的公开纠偏",
+      "pressure_point": "提币冻结旧案与举报传闻同时拖累平台治理形象",
+      "starting_trust": 39,
+      "influence": 88,
+      "stance": "高压反击",
+      "details": "既要维护徐明星本人信誉，也要避免 OKX 被再次读成治理脆弱的平台。"
+    },
+    {
+      "id": "leon-li-huobi",
+      "name": "李林与火币旧案旁证",
+      "role": "行业旧案证人",
+      "public_goal": "避免自己的旧案被持续当作别人互攻弹药",
+      "pressure_point": "名字被反复当作举报传闻的证明或反证明",
+      "starting_trust": 34,
+      "influence": 63,
+      "stance": "被动卷入",
+      "details": "虽然不是当前正面冲突双方，却是举报传闻链里最容易被借用的支点。"
+    },
+    {
+      "id": "roger-ver-contract",
+      "name": "Roger Ver / OKCoin 合约旧案",
+      "role": "历史证据场",
+      "public_goal": "迫使双方回到可核查的旧记录上",
+      "pressure_point": "旧证据越碎片化，越容易被任何一方剪裁利用",
+      "starting_trust": 31,
+      "influence": 58,
+      "stance": "证据回流",
+      "details": "不属于独立人物阵营，而是会不断回流到当下叙事中的旧证据集合。"
+    },
+    {
+      "id": "market-watchers",
+      "name": "交易平台用户与行业围观者",
+      "role": "市场舆论",
+      "public_goal": "判断谁在撒谎以及平台治理是否因此存在真实风险",
+      "pressure_point": "碎片化旧案让他们更容易用情绪化结论替代细节判断",
+      "starting_trust": 22,
+      "influence": 91,
+      "stance": "高热围观",
+      "details": "一旦把冲突理解为平台治理风险，而不只是创始人口角，外溢杀伤会迅速放大。"
+    }
+  ],
+  "ending_bands": [
+    {
+      "min_score": 80,
+      "ending_id": "cz-star-xu-narrative-suppression",
+      "label": "叙事压制",
+      "description": "你压住了最致命的旧案回流，让市场暂时接受了你的版本，冲突仍在但主导权归你。"
+    },
+    {
+      "min_score": 55,
+      "ending_id": "cz-star-xu-fractured-stalemate",
+      "label": "裂痕僵持",
+      "description": "双方都没能彻底击穿对面，旧账继续悬着，平台与个人信誉一起带伤前行。"
+    },
+    {
+      "min_score": 30,
+      "ending_id": "cz-star-xu-credibility-backlash",
+      "label": "信誉反噬",
+      "description": "你想借旧案压制对手，却让更多围观者把矛头转向你的证据缺口和治理伤口。"
+    },
+    {
+      "min_score": 0,
+      "ending_id": "cz-star-xu-platform-adrift",
+      "label": "平台失锚",
+      "description": "争吵已经不再只是创始人恩怨，市场开始把它读成平台治理系统性失锚。"
+    }
+  ],
+  "dimension_defs": [
+    {
+      "key": "credibility",
+      "label": "可信度",
+      "description": "玩家阵营当前版本能否被行业与媒体当作更可信的叙事。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 60,
+      "crisis_threshold": 40,
+      "terminal_threshold": 20
+    },
+    {
+      "key": "treasury",
+      "label": "资源余量",
+      "description": "还能调动多少平台资源、人脉与证据渠道继续打这场旧账。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 50,
+      "crisis_threshold": 30,
+      "terminal_threshold": 15
+    },
+    {
+      "key": "pressure",
+      "label": "承压值",
+      "description": "来自对位创始人、媒体追问和旧案回流的即时压强。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 50,
+      "crisis_threshold": 70,
+      "terminal_threshold": 85
+    },
+    {
+      "key": "price",
+      "label": "热度位",
+      "description": "这场冲突在加密舆论场中占据了多少注意力。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 50,
+      "crisis_threshold": 68,
+      "terminal_threshold": 84
+    },
+    {
+      "key": "liquidity",
+      "label": "腾挪空间",
+      "description": "你还能否切换证据、口径与动作，而不是被单一叙事锁死。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 55,
+      "crisis_threshold": 35,
+      "terminal_threshold": 20
+    },
+    {
+      "key": "sell_pressure",
+      "label": "抛压联想",
+      "description": "围观者是否开始把口水战映射成平台风险和交易抛压。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 45,
+      "crisis_threshold": 60,
+      "terminal_threshold": 80
+    },
+    {
+      "key": "volatility",
+      "label": "情绪波动",
+      "description": "围观情绪是否在新爆料、旧截图和二次传播中持续抽搐。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 45,
+      "crisis_threshold": 65,
+      "terminal_threshold": 80
+    },
+    {
+      "key": "community_panic",
+      "label": "用户惊惧",
+      "description": "交易平台用户是否把创始人互撕读成真实治理风险。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 40,
+      "crisis_threshold": 58,
+      "terminal_threshold": 76
+    },
+    {
+      "key": "rumor_level",
+      "label": "旧案噪声",
+      "description": "未经完整核验的旧合约、举报传闻和黑历史回流强度。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 42,
+      "crisis_threshold": 62,
+      "terminal_threshold": 80
+    },
+    {
+      "key": "narrative_control",
+      "label": "叙事控制",
+      "description": "玩家阵营能否主导公众把冲突理解成哪一种故事。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 58,
+      "crisis_threshold": 38,
+      "terminal_threshold": 22
+    },
+    {
+      "key": "exchange_trust",
+      "label": "平台信任",
+      "description": "外界是否相信相关平台仍具备稳定治理与风控能力。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 58,
+      "crisis_threshold": 40,
+      "terminal_threshold": 22
+    },
+    {
+      "key": "control",
+      "label": "节奏掌控",
+      "description": "玩家阵营对爆料节奏、证据投放和后续攻防的控制程度。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 60,
+      "crisis_threshold": 40,
+      "terminal_threshold": 22
+    }
+  ],
+  "action_grammar": {
+    "rules": [
+      {
+        "key": "rumor_level-probe-1",
+        "label": "试探压低旧案噪声",
+        "description": "先用轻量动作试探旧案噪声的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 1,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "rumor_level",
+          "tempo"
+        ]
+      },
+      {
+        "key": "rumor_level-coalition-1",
+        "label": "联动压低旧案噪声",
+        "description": "拉动关键关系一起处理旧案噪声，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩可信度与节奏掌控。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "rumor_level",
+          "coordination"
+        ]
+      },
+      {
+        "key": "rumor_level-commit-1",
+        "label": "重押压低旧案噪声",
+        "description": "以更重承诺直接改写旧案噪声，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下可信度与节奏掌控的反噬。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "rumor_level",
+          "commitment"
+        ]
+      },
+      {
+        "key": "volatility-probe-2",
+        "label": "试探压低情绪波动",
+        "description": "先用轻量动作试探情绪波动的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分节奏掌控与资源余量。",
+        "trigger_dimensions": [
+          "volatility",
+          "liquidity",
+          "control",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "volatility",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 1,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "volatility",
+          "tempo"
+        ]
+      },
+      {
+        "key": "volatility-coalition-2",
+        "label": "联动压低情绪波动",
+        "description": "拉动关键关系一起处理情绪波动，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩节奏掌控与资源余量。",
+        "trigger_dimensions": [
+          "volatility",
+          "liquidity",
+          "control",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "volatility",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "volatility",
+          "coordination"
+        ]
+      },
+      {
+        "key": "volatility-commit-2",
+        "label": "重押压低情绪波动",
+        "description": "以更重承诺直接改写情绪波动，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下节奏掌控与资源余量的反噬。",
+        "trigger_dimensions": [
+          "volatility",
+          "liquidity",
+          "control",
+          "treasury"
+        ],
+        "preferred_upside_dimensions": [
+          "volatility",
+          "liquidity"
+        ],
+        "likely_downside_dimensions": [
+          "control",
+          "treasury"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "volatility",
+          "commitment"
+        ]
+      },
+      {
+        "key": "price-probe-3",
+        "label": "试探压低热度位",
+        "description": "先用轻量动作试探热度位的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分腾挪空间与可信度。",
+        "trigger_dimensions": [
+          "price",
+          "liquidity",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "price"
+        ],
+        "likely_downside_dimensions": [
+          "liquidity",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "delay",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 1,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "price",
+          "tempo"
+        ]
+      },
+      {
+        "key": "price-coalition-3",
+        "label": "联动压低热度位",
+        "description": "拉动关键关系一起处理热度位，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩腾挪空间与可信度。",
+        "trigger_dimensions": [
+          "price",
+          "liquidity",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "price"
+        ],
+        "likely_downside_dimensions": [
+          "liquidity",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "public"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "price",
+          "coordination"
+        ]
+      },
+      {
+        "key": "price-commit-3",
+        "label": "重押压低热度位",
+        "description": "以更重承诺直接改写热度位，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下腾挪空间与可信度的反噬。",
+        "trigger_dimensions": [
+          "price",
+          "liquidity",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "price"
+        ],
+        "likely_downside_dimensions": [
+          "liquidity",
+          "credibility"
+        ],
+        "allowed_cost_types": [
+          "finance",
+          "private",
+          "legal"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "price",
+          "commitment"
+        ]
+      },
+      {
+        "key": "narrative_control-probe-4",
+        "label": "试探补强叙事控制",
+        "description": "先用轻量动作试探叙事控制的止损空间，为“在重提旧案时守住自己版本的可信度，并”争取一拍观察窗口，但会牺牲部分可信度与承压值。",
+        "trigger_dimensions": [
+          "narrative_control",
+          "credibility",
+          "exchange_trust",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 1,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "narrative_control",
+          "tempo"
+        ]
+      },
+      {
+        "key": "narrative_control-coalition-4",
+        "label": "联动补强叙事控制",
+        "description": "拉动关键关系一起处理叙事控制，把“在重提旧案时守住自己版本的可信度，并”变成可执行协同，但会压缩可信度与承压值。",
+        "trigger_dimensions": [
+          "narrative_control",
+          "credibility",
+          "exchange_trust",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "narrative_control",
+          "coordination"
+        ]
+      },
+      {
+        "key": "narrative_control-commit-4",
+        "label": "重押补强叙事控制",
+        "description": "以更重承诺直接改写叙事控制，强推“在重提旧案时守住自己版本的可信度，并”，但必须吞下可信度与承压值的反噬。",
+        "trigger_dimensions": [
+          "narrative_control",
+          "credibility",
+          "exchange_trust",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "narrative_control",
+          "commitment"
+        ]
+      }
+    ],
+    "cost_types": [
+      {
+        "key": "public",
+        "label": "公开代价",
+        "description": "带来公开关注、质疑或舆论压力。"
+      },
+      {
+        "key": "private",
+        "label": "私下协调代价",
+        "description": "需要消耗私下协调空间或关系信用。"
+      },
+      {
+        "key": "finance",
+        "label": "资源代价",
+        "description": "需要消耗预算、现金或资产缓冲。"
+      },
+      {
+        "key": "legal",
+        "label": "制度代价",
+        "description": "需要承担程序、审计或制度约束。"
+      },
+      {
+        "key": "delay",
+        "label": "时机代价",
+        "description": "通过拖延换取喘息，但损失先手。"
+      }
+    ],
+    "forbidden_pairs": [],
+    "forbidden_tags": [],
+    "required_tradeoff": true,
+    "menu_size": 4,
+    "low_commitment_slots": 1,
+    "medium_commitment_slots": 2,
+    "high_commitment_slots": 1
   },
-  "opponent": "徐明星/OKX 阵营的公开反击、会放大旧证据裂痕的围观者，以及把创始人口角映射成治理风险的市场情绪。",
-  "player_role": "CZ",
-  "player_secret": "你知道只要拿不出足够硬的新证据，旧案一旦被深挖，回忆录就可能从武器反噬成自证偏见。",
-  "premise": "一本回忆录把十多年行业旧账重新抛回台面，让 CZ 与徐明星/OKX 阵营再次公开互撕。",
   "reaction_boundaries": {
+    "scalar_axes": [
+      {
+        "key": "trust_in_player",
+        "label": "对玩家信任",
+        "description": "是否愿意继续给玩家解释空间。",
+        "min_value": 0,
+        "max_value": 100,
+        "max_delta_per_turn": 18
+      },
+      {
+        "key": "pressure_load",
+        "label": "压力负载",
+        "description": "该代理当前承受的内外压力。",
+        "min_value": 0,
+        "max_value": 100,
+        "max_delta_per_turn": 18
+      },
+      {
+        "key": "escalation_drive",
+        "label": "升级冲动",
+        "description": "该代理是否准备把冲突推向更激烈阶段。",
+        "min_value": 0,
+        "max_value": 100,
+        "max_delta_per_turn": 18
+      },
+      {
+        "key": "public_alignment",
+        "label": "公开站位",
+        "description": "该代理是否愿意公开贴近玩家叙事。",
+        "min_value": 0,
+        "max_value": 100,
+        "max_delta_per_turn": 18
+      }
+    ],
+    "max_relationship_delta_per_turn": 18,
+    "max_dimension_impacts_per_reaction": 2,
+    "max_dimension_delta_per_reaction": 12,
+    "max_relationship_updates_per_reaction": 2,
+    "max_hooks_per_reaction": 1,
+    "memory_limit": 3,
     "allowed_hook_tags": [
       "institutional_freeze",
       "counterattack_preparing",
       "public_break",
       "public-procedure-scrutiny"
-    ],
-    "max_dimension_delta_per_reaction": 12,
-    "max_dimension_impacts_per_reaction": 2,
-    "max_hooks_per_reaction": 1,
-    "max_relationship_delta_per_turn": 18,
-    "max_relationship_updates_per_reaction": 2,
-    "memory_limit": 3,
-    "scalar_axes": [
-      {
-        "description": "是否愿意继续给玩家解释空间。",
-        "key": "trust_in_player",
-        "label": "对玩家信任",
-        "max_delta_per_turn": 18,
-        "max_value": 100,
-        "min_value": 0
-      },
-      {
-        "description": "该代理当前承受的内外压力。",
-        "key": "pressure_load",
-        "label": "压力负载",
-        "max_delta_per_turn": 18,
-        "max_value": 100,
-        "min_value": 0
-      },
-      {
-        "description": "该代理是否准备把冲突推向更激烈阶段。",
-        "key": "escalation_drive",
-        "label": "升级冲动",
-        "max_delta_per_turn": 18,
-        "max_value": 100,
-        "min_value": 0
-      },
-      {
-        "description": "该代理是否愿意公开贴近玩家叙事。",
-        "key": "public_alignment",
-        "label": "公开站位",
-        "max_delta_per_turn": 18,
-        "max_value": 100,
-        "min_value": 0
-      }
     ]
-  },
-  "selectable_roles": [
-    "CZ",
-    "徐明星/OKX camp"
-  ],
-  "title": "CZ / 徐明星公开冲突",
-  "truth": "这不是单纯的嘴仗，而是个人回忆录、旧案证据、平台治理历史与行业信任同时争夺解释权的复合冲突。",
-  "world_id": "cz-star-xu-public-conflict-cz"
+  }
 }

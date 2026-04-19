@@ -277,16 +277,18 @@
   "action_grammar": {
     "rules": [
       {
-        "key": "rumor_level-focus-1",
-        "label": "压低传言强度",
-        "description": "以校方视角优先处理传言强度，推进“在多线质疑中重新稳住程序公信力，并防”，但会挤占其他操作空间。",
+        "key": "rumor_level-probe-1",
+        "label": "试探压低传言强度",
+        "description": "先用轻量动作试探传言强度的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与控制权。",
         "trigger_dimensions": [
           "rumor_level",
           "credibility",
+          "narrative_control",
           "control"
         ],
         "preferred_upside_dimensions": [
-          "rumor_level"
+          "rumor_level",
+          "narrative_control"
         ],
         "likely_downside_dimensions": [
           "credibility",
@@ -297,29 +299,111 @@
           "delay"
         ],
         "minimum_upside_count": 1,
-        "minimum_downside_count": 2,
+        "minimum_downside_count": 1,
         "max_upside_count": 1,
-        "max_downside_count": 2,
+        "max_downside_count": 1,
         "intensity_range": [
           1,
-          3
+          1
         ],
         "tags": [
+          "probe",
           "world-generated",
-          "rumor_level"
+          "rumor_level",
+          "tempo"
         ]
       },
       {
-        "key": "community_panic-focus-2",
-        "label": "压低群体撕裂",
-        "description": "以校方视角优先处理群体撕裂，推进“在多线质疑中重新稳住程序公信力，并防”，但会挤占其他操作空间。",
+        "key": "rumor_level-coalition-1",
+        "label": "联动压低传言强度",
+        "description": "拉动关键关系一起处理传言强度，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与控制权。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "rumor_level",
+          "coordination"
+        ]
+      },
+      {
+        "key": "rumor_level-commit-1",
+        "label": "重押压低传言强度",
+        "description": "以更重承诺直接改写传言强度，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与控制权的反噬。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "rumor_level",
+          "commitment"
+        ]
+      },
+      {
+        "key": "community_panic-probe-2",
+        "label": "试探压低群体撕裂",
+        "description": "先用轻量动作试探群体撕裂的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与控制权。",
         "trigger_dimensions": [
           "community_panic",
           "credibility",
+          "narrative_control",
           "control"
         ],
         "preferred_upside_dimensions": [
-          "community_panic"
+          "community_panic",
+          "narrative_control"
         ],
         "likely_downside_dimensions": [
           "credibility",
@@ -330,29 +414,111 @@
           "delay"
         ],
         "minimum_upside_count": 1,
-        "minimum_downside_count": 2,
+        "minimum_downside_count": 1,
         "max_upside_count": 1,
-        "max_downside_count": 2,
+        "max_downside_count": 1,
         "intensity_range": [
           1,
-          3
+          1
         ],
         "tags": [
+          "probe",
           "world-generated",
-          "community_panic"
+          "community_panic",
+          "tempo"
         ]
       },
       {
-        "key": "narrative_control-focus-3",
-        "label": "补强叙事控制",
-        "description": "以校方视角优先处理叙事控制，推进“在多线质疑中重新稳住程序公信力，并防”，但会挤占其他操作空间。",
+        "key": "community_panic-coalition-2",
+        "label": "联动压低群体撕裂",
+        "description": "拉动关键关系一起处理群体撕裂，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与控制权。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "community_panic",
+          "coordination"
+        ]
+      },
+      {
+        "key": "community_panic-commit-2",
+        "label": "重押压低群体撕裂",
+        "description": "以更重承诺直接改写群体撕裂，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与控制权的反噬。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "community_panic",
+          "commitment"
+        ]
+      },
+      {
+        "key": "narrative_control-probe-3",
+        "label": "试探补强叙事控制",
+        "description": "先用轻量动作试探叙事控制的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分公信力与承压值。",
         "trigger_dimensions": [
           "narrative_control",
           "credibility",
+          "exchange_trust",
           "pressure"
         ],
         "preferred_upside_dimensions": [
-          "narrative_control"
+          "narrative_control",
+          "exchange_trust"
         ],
         "likely_downside_dimensions": [
           "credibility",
@@ -363,29 +529,113 @@
           "delay"
         ],
         "minimum_upside_count": 1,
-        "minimum_downside_count": 2,
+        "minimum_downside_count": 1,
         "max_upside_count": 1,
-        "max_downside_count": 2,
+        "max_downside_count": 1,
         "intensity_range": [
           1,
-          3
+          1
         ],
         "tags": [
+          "probe",
           "world-generated",
-          "narrative_control"
+          "narrative_control",
+          "tempo"
         ]
       },
       {
-        "key": "credibility-focus-4",
-        "label": "补强公信力",
-        "description": "以校方视角优先处理公信力，推进“在多线质疑中重新稳住程序公信力，并防”，但会挤占其他操作空间。",
+        "key": "narrative_control-coalition-3",
+        "label": "联动补强叙事控制",
+        "description": "拉动关键关系一起处理叙事控制，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩公信力与承压值。",
+        "trigger_dimensions": [
+          "narrative_control",
+          "credibility",
+          "exchange_trust",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "narrative_control",
+          "coordination"
+        ]
+      },
+      {
+        "key": "narrative_control-commit-3",
+        "label": "重押补强叙事控制",
+        "description": "以更重承诺直接改写叙事控制，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下公信力与承压值的反噬。",
+        "trigger_dimensions": [
+          "narrative_control",
+          "credibility",
+          "exchange_trust",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "narrative_control",
+          "commitment"
+        ]
+      },
+      {
+        "key": "credibility-probe-4",
+        "label": "试探补强公信力",
+        "description": "先用轻量动作试探公信力的止损空间，为“在多线质疑中重新稳住程序公信力，并防”争取一拍观察窗口，但会牺牲部分承压值与控制权。",
         "trigger_dimensions": [
           "credibility",
+          "narrative_control",
+          "exchange_trust",
           "pressure",
           "control"
         ],
         "preferred_upside_dimensions": [
-          "credibility"
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
         ],
         "likely_downside_dimensions": [
           "pressure",
@@ -396,16 +646,100 @@
           "delay"
         ],
         "minimum_upside_count": 1,
-        "minimum_downside_count": 2,
+        "minimum_downside_count": 1,
         "max_upside_count": 1,
-        "max_downside_count": 2,
+        "max_downside_count": 1,
         "intensity_range": [
           1,
-          3
+          1
         ],
         "tags": [
+          "probe",
           "world-generated",
-          "credibility"
+          "credibility",
+          "tempo"
+        ]
+      },
+      {
+        "key": "credibility-coalition-4",
+        "label": "联动补强公信力",
+        "description": "拉动关键关系一起处理公信力，把“在多线质疑中重新稳住程序公信力，并防”变成可执行协同，但会压缩承压值与控制权。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "credibility",
+          "coordination"
+        ]
+      },
+      {
+        "key": "credibility-commit-4",
+        "label": "重押补强公信力",
+        "description": "以更重承诺直接改写公信力，强推“在多线质疑中重新稳住程序公信力，并防”，但必须吞下承压值与控制权的反噬。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "credibility",
+          "commitment"
         ]
       }
     ],

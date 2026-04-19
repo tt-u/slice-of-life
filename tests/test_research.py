@@ -144,7 +144,7 @@ def test_wuhan_anchor_frozen_world_builds_world_owned_contract_for_school_role()
     assert frozen.allowed_turn_counts == (4, 6, 8, 10)
     assert frozen.action_grammar is not None
     assert frozen.action_grammar.menu_size == 4
-    assert len(frozen.action_grammar.rules) == 4
+    assert len(frozen.action_grammar.rules) >= 12
     assert all(rule.minimum_upside_count >= 1 for rule in frozen.action_grammar.rules)
     assert all(rule.minimum_downside_count >= 1 for rule in frozen.action_grammar.rules)
     assert [band.label for band in frozen.ending_bands] == ["程序定锚", "争议拖行", "问责失序", "信任坠空"]
@@ -191,7 +191,7 @@ def test_cz_anchor_frozen_world_builds_world_owned_contract_for_cz_role() -> Non
     assert frozen.allowed_turn_counts == (4, 6, 8, 10)
     assert frozen.action_grammar is not None
     assert frozen.action_grammar.menu_size == 4
-    assert len(frozen.action_grammar.rules) == 4
+    assert len(frozen.action_grammar.rules) >= 12
     assert all(rule.minimum_upside_count >= 1 for rule in frozen.action_grammar.rules)
     assert all(rule.minimum_downside_count >= 1 for rule in frozen.action_grammar.rules)
     assert [band.label for band in frozen.ending_bands] == ["叙事压制", "裂痕僵持", "信誉反噬", "平台失锚"]

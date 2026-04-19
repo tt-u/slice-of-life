@@ -9,6 +9,7 @@ It is intentionally not a greenfield design draft. It describes the migration st
 - frozen worlds own `WorldActionGrammar`
 - runtime turn context is serialized as `TurnSituation` + `ActionGenerationContext`
 - runtime-facing menu choices are `GeneratedAction`
+- dimension-driven frozen worlds now expand each urgent axis into a larger combinatorial rule pool instead of freezing a near-final four-item mini menu
 - the current engine still uses a **legacy `ActionCard` bridge** to synthesize effect metadata and menu constraints
 
 ## Goal
@@ -31,7 +32,7 @@ Current fields:
 - `description`
 
 ### `ActionGenerationRule`
-One world-authored rule describing what kinds of tradeoff actions may be generated.
+One world-authored rule describing one branch inside the frozen world's larger action possibility space.
 
 Current fields:
 - `key`
@@ -119,18 +120,20 @@ That is the minimum hard guarantee behind the tradeoff rule.
 
 1. start from the runtime template pool
 2. apply lightweight live gating (`treasury < 20`, `wallet_frozen`, etc.)
-3. build a structured `ActionGenerationContext` from `self.frozen_world`
-4. ask the LLM for turn actions using:
+3. score the current situation with frozen-world thresholds (`decision_focus`)
+4. randomly sample a menu-sized candidate subset from the larger world-owned pool, with commitment-slot and family/diversity guards
+5. build a structured `ActionGenerationContext` from `self.frozen_world`
+6. ask the LLM to rationalize only those sampled candidates using:
    - world title
    - player role
    - player objective
    - state summary
    - decision focus
-   - available templates
+   - sampled candidate templates
    - structured action context
-5. constrain returned template ids into a valid menu
-6. convert each allowed choice into a `GeneratedAction`
-7. cache the generated menu for the current turn
+7. constrain returned template ids into a valid menu
+8. convert each allowed choice into a `GeneratedAction`
+9. cache the generated menu for the current turn
 
 ## Important bridge reality
 
@@ -150,13 +153,15 @@ This is acceptable as a migration bridge, but it is **not** the desired end stat
 
 The current runtime guarantees these practical menu rules before returning actions:
 
+- the frozen world may own many more rules than `menu_size`; only a sampled subset is exposed each turn
 - duplicate template ids are removed
 - at least one low-commitment action is preferred
 - at least one medium-commitment action is preferred
-- no more than one extreme/high-risk template is kept
+- high-commitment slots are bounded by the grammar
+- candidate families are diversified when possible before LLM phrasing
 - fewer than two valid actions is treated as an error
 
-This keeps menu spread bounded even while the engine still bridges through legacy templates.
+This keeps menu spread bounded while letting frozen worlds own a broader action possibility space.
 
 ## Current text-normalization rule
 

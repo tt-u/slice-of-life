@@ -1273,32 +1273,83 @@ def dimension_driven_world_action_grammar(
     selected_keys = prioritized_keys[:4]
     rules: list[ActionGenerationRule] = []
     objective_snippet = objective[:18] if objective else "稳住局势"
+    tactic_specs = (
+        {
+            "family": "probe",
+            "label_prefix": "试探",
+            "description": "先用轻量动作试探{dimension}的止损空间，为“{objective}”争取一拍观察窗口，但会牺牲部分{downside}。",
+            "extra_cost_types": ("delay", "public"),
+            "intensity_range": (1, 1),
+            "min_upside": 1,
+            "max_upside": 1,
+            "min_downside": 1,
+            "max_downside": 1,
+            "extra_tags": ("tempo",),
+        },
+        {
+            "family": "coalition",
+            "label_prefix": "联动",
+            "description": "拉动关键关系一起处理{dimension}，把“{objective}”变成可执行协同，但会压缩{downside}。",
+            "extra_cost_types": ("private", "public"),
+            "intensity_range": (2, 2),
+            "min_upside": 2,
+            "max_upside": 2,
+            "min_downside": 1,
+            "max_downside": 2,
+            "extra_tags": ("coordination",),
+        },
+        {
+            "family": "commit",
+            "label_prefix": "重押",
+            "description": "以更重承诺直接改写{dimension}，强推“{objective}”，但必须吞下{downside}的反噬。",
+            "extra_cost_types": ("legal", "finance", "private"),
+            "intensity_range": (3, 4),
+            "min_upside": 2,
+            "max_upside": 3,
+            "min_downside": 2,
+            "max_downside": 2,
+            "extra_tags": ("commitment",),
+        },
+    )
     for index, dimension_key in enumerate(selected_keys, start=1):
         dimension = dimension_by_key.get(dimension_key)
         if dimension is None:
             continue
         downside_dimensions = _dimension_focus_downside_dimensions(dimension_key, initial_dimensions)
-        rules.append(
-            ActionGenerationRule(
-                key=f"{dimension_key}-focus-{index}",
-                label=f"{_dimension_focus_label_prefix(dimension)}{dimension.label}",
-                description=f"以{player_role}视角优先处理{dimension.label}，推进“{objective_snippet}”，但会挤占其他操作空间。",
-                trigger_dimensions=tuple(dict.fromkeys((dimension_key, *downside_dimensions))),
-                preferred_upside_dimensions=(dimension_key,),
-                likely_downside_dimensions=downside_dimensions,
-                allowed_cost_types=_dimension_focus_cost_types(dimension_key),
-                minimum_upside_count=1,
-                minimum_downside_count=max(1, len(downside_dimensions)),
-                max_upside_count=1,
-                max_downside_count=max(1, len(downside_dimensions)),
-                intensity_range=(1, 3),
-                tags=("world-generated", dimension_key),
+        support_dimensions = _dimension_focus_support_dimensions(dimension_key, initial_dimensions)
+        for tactic in tactic_specs:
+            upside_dimensions = tuple(
+                dict.fromkeys(key for key in (dimension_key, *support_dimensions) if key not in downside_dimensions)
             )
-        )
+            max_upside = min(len(upside_dimensions), int(tactic["max_upside"]))
+            max_downside = min(len(downside_dimensions), int(tactic["max_downside"]))
+            rules.append(
+                ActionGenerationRule(
+                    key=f"{dimension_key}-{tactic['family']}-{index}",
+                    label=f"{tactic['label_prefix']}{_dimension_focus_label_prefix(dimension)}{dimension.label}",
+                    description=str(tactic["description"]).format(
+                        dimension=dimension.label,
+                        objective=objective_snippet,
+                        downside=_dimension_tradeoff_phrase(downside_dimensions, dimension_by_key),
+                    ),
+                    trigger_dimensions=tuple(dict.fromkeys((dimension_key, *support_dimensions, *downside_dimensions))),
+                    preferred_upside_dimensions=upside_dimensions,
+                    likely_downside_dimensions=downside_dimensions,
+                    allowed_cost_types=tuple(
+                        dict.fromkeys((*_dimension_focus_cost_types(dimension_key), *tuple(tactic["extra_cost_types"])))
+                    ),
+                    minimum_upside_count=min(len(upside_dimensions), max(1, int(tactic["min_upside"]))),
+                    minimum_downside_count=min(len(downside_dimensions), max(1, int(tactic["min_downside"]))),
+                    max_upside_count=max(1, max_upside),
+                    max_downside_count=max(1, max_downside),
+                    intensity_range=tuple(int(value) for value in tactic["intensity_range"]),
+                    tags=(str(tactic["family"]), "world-generated", dimension_key, *tuple(str(tag) for tag in tactic["extra_tags"])),
+                )
+            )
     return WorldActionGrammar(
         rules=tuple(rules),
         cost_types=_default_action_cost_types(),
-        menu_size=min(4, len(rules)) if rules else 4,
+        menu_size=4,
     )
 
 
@@ -1321,6 +1372,40 @@ def _dimension_focus_label_prefix(dimension: WorldDimensionDef) -> str:
     if dimension.direction_of_health == "higher_is_better":
         return "补强"
     return "调节"
+
+
+def _dimension_focus_support_dimensions(dimension_key: str, initial_dimensions: dict[str, int]) -> tuple[str, ...]:
+    support_map = {
+        "credibility": ("narrative_control", "exchange_trust"),
+        "pressure": ("control", "credibility"),
+        "narrative_control": ("credibility", "exchange_trust"),
+        "control": ("exchange_trust", "credibility"),
+        "treasury": ("liquidity", "control"),
+        "liquidity": ("price", "exchange_trust"),
+        "price": ("liquidity", "credibility"),
+        "exchange_trust": ("control", "credibility"),
+        "community_panic": ("credibility", "narrative_control"),
+        "rumor_level": ("credibility", "narrative_control"),
+        "sell_pressure": ("liquidity", "exchange_trust"),
+        "volatility": ("liquidity", "control"),
+    }
+    resolved = tuple(
+        key for key in support_map.get(dimension_key, ("control", "credibility")) if key in initial_dimensions and key != dimension_key
+    )
+    if resolved:
+        return resolved[:2]
+    fallback = tuple(key for key in initial_dimensions if key != dimension_key)
+    return fallback[:1] or ()
+
+
+
+def _dimension_tradeoff_phrase(
+    dimension_keys: tuple[str, ...],
+    dimension_by_key: dict[str, WorldDimensionDef],
+) -> str:
+    labels = [dimension_by_key.get(key).label if dimension_by_key.get(key) is not None else key for key in dimension_keys[:2]]
+    return "与".join(labels) if labels else "其他维度"
+
 
 
 def _dimension_focus_downside_dimensions(dimension_key: str, initial_dimensions: dict[str, int]) -> tuple[str, ...]:

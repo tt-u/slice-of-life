@@ -512,12 +512,13 @@ class CrisisGame:
             template_pool = [a for a in template_pool if a.id != "buyback"]
         if "wallet_frozen" in self.state.flags:
             template_pool = [a for a in template_pool if a.id != "freeze_wallet"]
-        templates = []
         decision_focus = decision_focus_from_state(
             self.state,
             dimension_defs=self.frozen_world.resolved_dimension_defs(),
         )
-        for action in template_pool:
+        sampled_templates = self._sample_action_templates(template_pool=template_pool, decision_focus=decision_focus)
+        templates = []
+        for action in sampled_templates:
             profile = action_impact_profile(action)
             commitment_tier = self._template_commitment_tier(action)
             tradeoff = self._template_tradeoff_profile(action)
@@ -554,9 +555,9 @@ class CrisisGame:
             available_templates=templates,
             action_context=action_context,
         )
-        template_map = {action.id: action for action in template_pool}
+        template_map = {action.id: action for action in sampled_templates}
         constrained_ids = self._constrain_generated_action_ids(
-            template_pool=template_pool,
+            template_pool=sampled_templates,
             generated_ids=[item["template_id"] for item in generated],
         )
         generated_map = {item["template_id"]: item for item in generated if item["template_id"] in constrained_ids}
@@ -572,6 +573,71 @@ class CrisisGame:
             raise ValueError("LLM-generated actions must include at least two valid choices")
         self.pending_actions = tuple(actions)
         return self.pending_actions
+
+    def _sample_action_templates(
+        self,
+        *,
+        template_pool: list[ActionCard],
+        decision_focus: list[dict[str, int | str]],
+    ) -> list[ActionCard]:
+        grammar = self.frozen_world.action_grammar
+        target_size = min(len(template_pool), max(2, grammar.menu_size if grammar is not None else 4))
+        if len(template_pool) <= target_size:
+            return list(template_pool)
+
+        focus_axes = {str(item["axis"]) for item in decision_focus[:4]}
+        low_slots = max(0, grammar.low_commitment_slots if grammar is not None else 1)
+        medium_slots = max(0, grammar.medium_commitment_slots if grammar is not None else 2)
+        high_slots = max(0, grammar.high_commitment_slots if grammar is not None else 1)
+        selected: list[ActionCard] = []
+        selected_ids: set[str] = set()
+        seen_families: set[str] = set()
+
+        def family_for(action: ActionCard) -> str:
+            tags = self._template_tags(action)
+            return tags[0] if tags else action.tag
+
+        def rule_overlap(action: ActionCard) -> int:
+            rule = self._action_generation_rule(action.id)
+            if rule is None:
+                return 0
+            return len(focus_axes & set(rule.trigger_dimensions))
+
+        shuffled_pool = list(template_pool)
+        self.random.shuffle(shuffled_pool)
+
+        def ranked_candidates(candidates: list[ActionCard]) -> list[ActionCard]:
+            return sorted(
+                candidates,
+                key=lambda action: (
+                    rule_overlap(action),
+                    1 if family_for(action) not in seen_families else 0,
+                ),
+                reverse=True,
+            )
+
+        def add_one(*, tier: str | None = None) -> bool:
+            candidates = [action for action in shuffled_pool if action.id not in selected_ids]
+            if tier is not None:
+                tier_candidates = [action for action in candidates if self._template_commitment_tier(action) == tier]
+                if tier_candidates:
+                    candidates = tier_candidates
+            if not candidates:
+                return False
+            chosen = ranked_candidates(candidates)[0]
+            selected.append(chosen)
+            selected_ids.add(chosen.id)
+            seen_families.add(family_for(chosen))
+            return True
+
+        for tier, slots in (("low", low_slots), ("medium", medium_slots), ("high", high_slots)):
+            for _ in range(slots):
+                if len(selected) >= target_size:
+                    break
+                add_one(tier=tier)
+        while len(selected) < target_size and add_one():
+            pass
+        return selected[:target_size]
 
     def _build_generated_action(self, *, base: ActionCard, item: dict[str, str]) -> GeneratedAction:
         tradeoff = self._template_tradeoff_profile(base)

@@ -277,16 +277,18 @@
   "action_grammar": {
     "rules": [
       {
-        "key": "community_panic-focus-1",
-        "label": "压低群体撕裂",
-        "description": "以杨景媛视角优先处理群体撕裂，推进“在被动承压中保住个人学位与叙事合法性”，但会挤占其他操作空间。",
+        "key": "community_panic-probe-1",
+        "label": "试探压低群体撕裂",
+        "description": "先用轻量动作试探群体撕裂的止损空间，为“在被动承压中保住个人学位与叙事合法性”争取一拍观察窗口，但会牺牲部分公信力与控制权。",
         "trigger_dimensions": [
           "community_panic",
           "credibility",
+          "narrative_control",
           "control"
         ],
         "preferred_upside_dimensions": [
-          "community_panic"
+          "community_panic",
+          "narrative_control"
         ],
         "likely_downside_dimensions": [
           "credibility",
@@ -297,29 +299,111 @@
           "delay"
         ],
         "minimum_upside_count": 1,
-        "minimum_downside_count": 2,
+        "minimum_downside_count": 1,
         "max_upside_count": 1,
-        "max_downside_count": 2,
+        "max_downside_count": 1,
         "intensity_range": [
           1,
-          3
+          1
         ],
         "tags": [
+          "probe",
           "world-generated",
-          "community_panic"
+          "community_panic",
+          "tempo"
         ]
       },
       {
-        "key": "rumor_level-focus-2",
-        "label": "压低传言强度",
-        "description": "以杨景媛视角优先处理传言强度，推进“在被动承压中保住个人学位与叙事合法性”，但会挤占其他操作空间。",
+        "key": "community_panic-coalition-1",
+        "label": "联动压低群体撕裂",
+        "description": "拉动关键关系一起处理群体撕裂，把“在被动承压中保住个人学位与叙事合法性”变成可执行协同，但会压缩公信力与控制权。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "community_panic",
+          "coordination"
+        ]
+      },
+      {
+        "key": "community_panic-commit-1",
+        "label": "重押压低群体撕裂",
+        "description": "以更重承诺直接改写群体撕裂，强推“在被动承压中保住个人学位与叙事合法性”，但必须吞下公信力与控制权的反噬。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "community_panic",
+          "commitment"
+        ]
+      },
+      {
+        "key": "rumor_level-probe-2",
+        "label": "试探压低传言强度",
+        "description": "先用轻量动作试探传言强度的止损空间，为“在被动承压中保住个人学位与叙事合法性”争取一拍观察窗口，但会牺牲部分公信力与控制权。",
         "trigger_dimensions": [
           "rumor_level",
           "credibility",
+          "narrative_control",
           "control"
         ],
         "preferred_upside_dimensions": [
-          "rumor_level"
+          "rumor_level",
+          "narrative_control"
         ],
         "likely_downside_dimensions": [
           "credibility",
@@ -330,26 +414,142 @@
           "delay"
         ],
         "minimum_upside_count": 1,
-        "minimum_downside_count": 2,
+        "minimum_downside_count": 1,
         "max_upside_count": 1,
-        "max_downside_count": 2,
+        "max_downside_count": 1,
         "intensity_range": [
           1,
-          3
+          1
         ],
         "tags": [
+          "probe",
           "world-generated",
-          "rumor_level"
+          "rumor_level",
+          "tempo"
         ]
       },
       {
-        "key": "pressure-focus-3",
-        "label": "压低承压值",
-        "description": "以杨景媛视角优先处理承压值，推进“在被动承压中保住个人学位与叙事合法性”，但会挤占其他操作空间。",
+        "key": "rumor_level-coalition-2",
+        "label": "联动压低传言强度",
+        "description": "拉动关键关系一起处理传言强度，把“在被动承压中保住个人学位与叙事合法性”变成可执行协同，但会压缩公信力与控制权。",
         "trigger_dimensions": [
-          "pressure",
+          "rumor_level",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
           "credibility",
           "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "rumor_level",
+          "coordination"
+        ]
+      },
+      {
+        "key": "rumor_level-commit-2",
+        "label": "重押压低传言强度",
+        "description": "以更重承诺直接改写传言强度，强推“在被动承压中保住个人学位与叙事合法性”，但必须吞下公信力与控制权的反噬。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "narrative_control",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level",
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "rumor_level",
+          "commitment"
+        ]
+      },
+      {
+        "key": "pressure-probe-3",
+        "label": "试探压低承压值",
+        "description": "先用轻量动作试探承压值的止损空间，为“在被动承压中保住个人学位与叙事合法性”争取一拍观察窗口，但会牺牲部分公信力与控制权。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 1,
+        "intensity_range": [
+          1,
+          1
+        ],
+        "tags": [
+          "probe",
+          "world-generated",
+          "pressure",
+          "tempo"
+        ]
+      },
+      {
+        "key": "pressure-coalition-3",
+        "label": "联动压低承压值",
+        "description": "拉动关键关系一起处理承压值，把“在被动承压中保住个人学位与叙事合法性”变成可执行协同，但会压缩公信力与控制权。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
         ],
         "preferred_upside_dimensions": [
           "pressure"
@@ -363,29 +563,72 @@
           "public"
         ],
         "minimum_upside_count": 1,
+        "minimum_downside_count": 1,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "pressure",
+          "coordination"
+        ]
+      },
+      {
+        "key": "pressure-commit-3",
+        "label": "重押压低承压值",
+        "description": "以更重承诺直接改写承压值，强推“在被动承压中保住个人学位与叙事合法性”，但必须吞下公信力与控制权的反噬。",
+        "trigger_dimensions": [
+          "pressure",
+          "control",
+          "credibility"
+        ],
+        "preferred_upside_dimensions": [
+          "pressure"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "private",
+          "public",
+          "legal",
+          "finance"
+        ],
+        "minimum_upside_count": 1,
         "minimum_downside_count": 2,
         "max_upside_count": 1,
         "max_downside_count": 2,
         "intensity_range": [
-          1,
-          3
+          3,
+          4
         ],
         "tags": [
+          "commit",
           "world-generated",
-          "pressure"
+          "pressure",
+          "commitment"
         ]
       },
       {
-        "key": "credibility-focus-4",
-        "label": "补强公信力",
-        "description": "以杨景媛视角优先处理公信力，推进“在被动承压中保住个人学位与叙事合法性”，但会挤占其他操作空间。",
+        "key": "credibility-probe-4",
+        "label": "试探补强公信力",
+        "description": "先用轻量动作试探公信力的止损空间，为“在被动承压中保住个人学位与叙事合法性”争取一拍观察窗口，但会牺牲部分承压值与控制权。",
         "trigger_dimensions": [
           "credibility",
+          "narrative_control",
+          "exchange_trust",
           "pressure",
           "control"
         ],
         "preferred_upside_dimensions": [
-          "credibility"
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
         ],
         "likely_downside_dimensions": [
           "pressure",
@@ -396,16 +639,100 @@
           "delay"
         ],
         "minimum_upside_count": 1,
-        "minimum_downside_count": 2,
+        "minimum_downside_count": 1,
         "max_upside_count": 1,
-        "max_downside_count": 2,
+        "max_downside_count": 1,
         "intensity_range": [
           1,
-          3
+          1
         ],
         "tags": [
+          "probe",
           "world-generated",
-          "credibility"
+          "credibility",
+          "tempo"
+        ]
+      },
+      {
+        "key": "credibility-coalition-4",
+        "label": "联动补强公信力",
+        "description": "拉动关键关系一起处理公信力，把“在被动承压中保住个人学位与叙事合法性”变成可执行协同，但会压缩承压值与控制权。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 1,
+        "max_upside_count": 2,
+        "max_downside_count": 2,
+        "intensity_range": [
+          2,
+          2
+        ],
+        "tags": [
+          "coalition",
+          "world-generated",
+          "credibility",
+          "coordination"
+        ]
+      },
+      {
+        "key": "credibility-commit-4",
+        "label": "重押补强公信力",
+        "description": "以更重承诺直接改写公信力，强推“在被动承压中保住个人学位与叙事合法性”，但必须吞下承压值与控制权的反噬。",
+        "trigger_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility",
+          "narrative_control",
+          "exchange_trust"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay",
+          "legal",
+          "finance",
+          "private"
+        ],
+        "minimum_upside_count": 2,
+        "minimum_downside_count": 2,
+        "max_upside_count": 3,
+        "max_downside_count": 2,
+        "intensity_range": [
+          3,
+          4
+        ],
+        "tags": [
+          "commit",
+          "world-generated",
+          "credibility",
+          "commitment"
         ]
       }
     ],

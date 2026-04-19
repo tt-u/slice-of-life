@@ -2,7 +2,7 @@ from dataclasses import replace
 
 import eventforge.engine as engine_module
 from eventforge.engine import build_game, run_auto_game, validate_agent_reaction_proposal
-from eventforge.domain import AgentProfile, AgentReactionContext, AgentReactionProposal, AgentRunState, GeneratedAction, SeedEntity, TurnChoice, ActionCard, FrozenInitialWorld
+from eventforge.domain import AgentProfile, AgentReactionContext, AgentReactionProposal, AgentRunState, GeneratedAction, SeedEntity, TurnChoice, ActionCard, FrozenInitialWorld, dimension_driven_world_action_grammar
 from eventforge.scenarios import FLASH_CRASH_SCENARIO
 
 
@@ -68,6 +68,22 @@ class HighImpactOnlyLLM(FakeLLM):
             {"template_id": "buyback", "label": "临时回购托底", "description": "直接动用国库资金稳住价格。"},
             {"template_id": "shift_blame", "label": "把锅甩给外部攻击", "description": "把责任导向外部攻击者。"},
             {"template_id": "silent", "label": "继续沉默", "description": "先不说话，观察市场。"},
+        ]
+
+
+class EchoSampledTemplatesLLM(FakeLLM):
+    def generate_turn_actions(self, **kwargs: object) -> list[dict[str, str]]:
+        self.choice_calls += 1
+        self.last_available_templates = kwargs.get("available_templates")
+        self.last_choice_prompt = kwargs
+        templates = list(self.last_available_templates or [])
+        return [
+            {
+                "template_id": str(template["id"]),
+                "label": f"执行{template['label']}",
+                "description": f"围绕{template['label']}推进当前局势。",
+            }
+            for template in templates
         ]
 
 
@@ -456,6 +472,58 @@ def test_available_actions_enforce_impact_diversity_when_llm_returns_only_heavy_
     assert "low" in tiers
     assert "medium" in tiers
     assert sum(1 for tier in tiers if tier == "high") <= 2
+
+
+
+def test_dimension_driven_world_action_grammar_creates_large_combinatorial_rule_pool() -> None:
+    frozen_world = FLASH_CRASH_SCENARIO.to_frozen_world()
+    grammar = dimension_driven_world_action_grammar(
+        frozen_world.initial_dimension_map(),
+        frozen_world.dimension_defs,
+        player_role="校方",
+        objective="稳住校内外冲突升级",
+    )
+
+    assert len(grammar.rules) >= 12
+    assert grammar.menu_size == 4
+    assert len({rule.key for rule in grammar.rules}) == len(grammar.rules)
+    assert len({rule.tags[0] for rule in grammar.rules if rule.tags}) >= 3
+    assert any(rule.max_upside_count > 1 for rule in grammar.rules)
+    assert any(rule.max_downside_count > 1 for rule in grammar.rules)
+
+
+
+def test_available_actions_randomly_sample_from_large_world_rule_pool_before_llm_rationalization() -> None:
+    frozen_world = FLASH_CRASH_SCENARIO.to_frozen_world()
+    expanded_world = replace(
+        frozen_world,
+        player_role="校方",
+        objective="稳住校内外冲突升级",
+        action_grammar=dimension_driven_world_action_grammar(
+            frozen_world.initial_dimension_map(),
+            frozen_world.dimension_defs,
+            player_role="校方",
+            objective="稳住校内外冲突升级",
+        ),
+    )
+    llm_a = EchoSampledTemplatesLLM()
+    llm_b = EchoSampledTemplatesLLM()
+    game_a = build_game(turns=6, seed=3, llm_client=llm_a, frozen_world=expanded_world)
+    game_b = build_game(turns=6, seed=9, llm_client=llm_b, frozen_world=expanded_world)
+
+    actions_a = game_a.available_actions()
+    actions_b = game_b.available_actions()
+    sampled_ids_a = [template["id"] for template in llm_a.last_available_templates]
+    sampled_ids_b = [template["id"] for template in llm_b.last_available_templates]
+
+    assert len(expanded_world.action_grammar.rules) > expanded_world.action_grammar.menu_size
+    assert len(sampled_ids_a) == expanded_world.action_grammar.menu_size
+    assert len(sampled_ids_b) == expanded_world.action_grammar.menu_size
+    assert len(set(sampled_ids_a)) == expanded_world.action_grammar.menu_size
+    assert len(set(sampled_ids_b)) == expanded_world.action_grammar.menu_size
+    assert set(sampled_ids_a) != set(sampled_ids_b)
+    assert [action.id for action in actions_a] == sampled_ids_a
+    assert [action.id for action in actions_b] == sampled_ids_b
 
 
 
