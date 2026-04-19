@@ -1296,8 +1296,15 @@ class CrisisGame:
         self.agent_reaction_results = reaction_results
         return reactions
 
-    def _agent_reaction_payload(self, agent: AgentProfile, action: ActionCard) -> tuple[int, dict[str, int], str]:
+    def _agent_reaction_payload(self, agent: AgentProfile, action: GeneratedAction | ActionCard) -> tuple[int, dict[str, int], str]:
         role_bucket = _role_bucket(agent.role, agent.name, agent.public_goal, agent.pressure_point)
+        tags = set(getattr(action, "tags", ()) or ())
+        upside = set(getattr(action, "upside_dimensions", ()) or ())
+        downside = set(getattr(action, "downside_dimensions", ()) or ())
+        cost_types = set(getattr(action, "cost_types", ()) or ())
+        commitment_tier = str(getattr(action, "commitment_tier", "medium") or "medium")
+        is_disclosure = bool({"audit", "disclosure", "signaling"} & tags)
+        is_aggressive = bool({"exploit", "opportunistic"} & tags) or commitment_tier == "high"
         if role_bucket == "kol":
             if action.id == "shift_blame":
                 if self.state.truth_public:
@@ -1307,6 +1314,10 @@ class CrisisGame:
                 return 18, {"rumor_level": -5, "narrative_control": 4}, f"{agent.name} 暂时放缓攻击节奏，开始把焦点放到更多证据上。"
             if action.id in {"statement", "ama"}:
                 return 8, {"rumor_level": -3, "narrative_control": 3}, f"{agent.name} 承认你至少愿意正面回应，但还会继续审视细节。"
+            if is_disclosure and ({"credibility", "narrative_control"} & upside):
+                return 6, {"rumor_level": -3, "narrative_control": 2}, f"{agent.name} 开始把争论转向证据与时间线，负面放大节奏明显放缓。"
+            if is_aggressive and "pressure" in downside:
+                return -4, {"rumor_level": 2, "pressure": 2}, f"{agent.name} 觉得你在强推叙事，准备继续追打你的说法漏洞。"
             return 0, {"rumor_level": 1}, f"{agent.name} 继续观察你的下一步动作。"
         if role_bucket == "whale":
             if action.id == "buyback":
@@ -1315,6 +1326,10 @@ class CrisisGame:
                 return 6, {"sell_pressure": -4, "price": 2}, f"{agent.name} 认为风险略有下降，减缓了抛售节奏。"
             if action.id == "silent":
                 return -12, {"sell_pressure": 8, "price": -4}, f"{agent.name} 把你的沉默理解成危险信号，继续减仓。"
+            if {"liquidity", "price", "exchange_trust"} & upside:
+                return 5, {"sell_pressure": -3, "price": 1}, f"{agent.name} 认为盘面至少有了可观察的稳定信号，先放慢撤退速度。"
+            if {"liquidity", "price", "exchange_trust"} & downside:
+                return -5, {"sell_pressure": 4, "price": -2}, f"{agent.name} 认为你的动作会继续伤害退出条件，先把风险敞口再降一档。"
             return 0, {"sell_pressure": 1}, f"{agent.name} 仍在按风控模型谨慎调整仓位。"
         if role_bucket == "market_maker":
             if action.id == "pressure_mm":
@@ -1323,6 +1338,10 @@ class CrisisGame:
                 return -8, {"liquidity": -4, "pressure": 2}, f"{agent.name} 感到你可能把责任推给自己，于是进一步缩手自保。"
             if action.id == "freeze_wallet":
                 return 3, {"liquidity": 2}, f"{agent.name} 认为你至少在做止血动作，因此暂时没有继续撤离。"
+            if {"liquidity", "control", "exchange_trust"} & upside:
+                return 5, {"liquidity": 4, "volatility": -2}, f"{agent.name} 看到你在补流动性与执行边界，愿意先回补一小段挂单深度。"
+            if {"liquidity", "control"} & downside or is_aggressive:
+                return -4, {"liquidity": -3, "volatility": 2}, f"{agent.name} 认为你的动作会放大盘口不确定性，因此继续缩手防守。"
             return 0, {"volatility": 1}, f"{agent.name} 继续以极其保守的方式维持盘口。"
         if role_bucket == "community":
             if action.id in {"ama", "statement"}:
@@ -1331,6 +1350,10 @@ class CrisisGame:
                 return 6, {"community_panic": -4}, f"{agent.name} 把回购解读为你没有跑路打算，开始安抚群成员。"
             if action.id == "silent":
                 return -10, {"community_panic": 7, "pressure": 3}, f"{agent.name} 顶不住群体质问，开始公开向你施压。"
+            if is_disclosure and ({"credibility", "narrative_control", "exchange_trust"} & upside):
+                return 6, {"community_panic": -4, "narrative_control": 2}, f"{agent.name} 开始替你整理时间线与证据入口，社区从情绪追打转向等待核验。"
+            if is_aggressive or {"credibility", "control"} & downside:
+                return -5, {"community_panic": 4, "pressure": 2}, f"{agent.name} 觉得你在硬推说法却没有稳住基本盘，社区质问声量再次抬头。"
             return 2, {"community_panic": -1}, f"{agent.name} 继续观察，但愿意先给你一点时间。"
         if role_bucket == "exchange":
             if action.id == "freeze_wallet":
@@ -1341,6 +1364,10 @@ class CrisisGame:
                 return -14, {"exchange_trust": -10, "control": -4, "pressure": 4}, f"{agent.name} 觉得你在转移责任，开始准备更严厉的风险动作。"
             if action.id == "silent":
                 return -12, {"exchange_trust": -8, "pressure": 5}, f"{agent.name} 把沉默解读为重大不确定性，进一步收紧容忍度。"
+            if ({"exchange_trust", "control", "credibility"} & upside) and (is_disclosure or "legal" in cost_types):
+                return 6, {"exchange_trust": 4, "control": 1}, f"{agent.name} 看到你愿意把争议收进可核验边界，风控态度暂时转向观望。"
+            if {"exchange_trust", "control"} & downside or is_aggressive:
+                return -6, {"exchange_trust": -4, "control": -2, "pressure": 2}, f"{agent.name} 认为你的动作会放大制度与执行风险，开始提前准备更硬的限制选项。"
             return 1, {"exchange_trust": 1}, f"{agent.name} 暂时记下你的动作，但还没有完全放心。"
         return 0, {}, f"{agent.name} 没有明显反应。"
 

@@ -989,6 +989,53 @@ def test_validate_agent_reaction_proposal_respects_zero_hook_and_memory_caps() -
 
 
 
+def test_agent_reaction_payload_keeps_supporting_legacy_action_cards() -> None:
+    game = build_game(turns=6, seed=3, llm_client=FakeLLM())
+    exchange_agent = next(agent for agent in game.agent_profiles if agent.name == "Onyx Exchange")
+    statement = next(action for action in game.action_templates if action.id == "statement")
+
+    trust_delta, state_delta, summary = game._agent_reaction_payload(exchange_agent, statement)
+
+    assert trust_delta == 6
+    assert state_delta["exchange_trust"] == 4
+    assert "仍要求更完整证据" in summary
+
+
+
+def test_world_authored_generated_actions_drive_non_generic_agent_reactions() -> None:
+    frozen_world = FrozenInitialWorld.from_payload(
+        build_cz_star_xu_public_conflict_frozen_world(player_role="CZ").to_payload()
+    )
+    game = build_game(turns=6, seed=7, frozen_world=frozen_world, llm_client=FakeLLM())
+    exchange_agent = next(agent for agent in game.agent_profiles if "OKX camp" in agent.role)
+    media_agent = next(agent for agent in game.agent_profiles if agent.name == "加密媒体与自媒体放大器")
+    action = GeneratedAction(
+        id="world-authored-disclosure-signal",
+        label="公开第三方核验时间线",
+        description="把旧案证据与时间线交给第三方核验，并同步解释边界。",
+        rationale="用解释权和平台沟通换取缓冲，但会抬高即时承压。",
+        upside_dimensions=("exchange_trust", "narrative_control", "credibility"),
+        downside_dimensions=("pressure",),
+        upside_magnitude={"exchange_trust": 7, "narrative_control": 6, "credibility": 5},
+        downside_magnitude={"pressure": 4},
+        cost_types=("public", "legal"),
+        affected_entities=(exchange_agent.id, media_agent.id),
+        commitment_tier="medium",
+        tags=("signal", "world-generated", "exchange_trust", "signaling", "disclosure"),
+    )
+
+    exchange_trust_delta, exchange_state_delta, exchange_summary = game._agent_reaction_payload(exchange_agent, action)
+    media_trust_delta, media_state_delta, media_summary = game._agent_reaction_payload(media_agent, action)
+
+    assert exchange_trust_delta >= 4
+    assert exchange_state_delta["exchange_trust"] >= 3
+    assert "继续观察" not in exchange_summary
+    assert media_trust_delta >= 4
+    assert media_state_delta["rumor_level"] <= -2
+    assert "继续观察" not in media_summary
+
+
+
 def test_auto_playtest_does_not_over_repeat_a_single_action_in_long_runs() -> None:
     frozen_world = FrozenInitialWorld.from_payload(
         build_cz_star_xu_public_conflict_frozen_world(player_role="CZ").to_payload()
