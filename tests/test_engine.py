@@ -563,6 +563,45 @@ def test_world_state_endings_map_to_score_bands() -> None:
 
 
 
+def test_world_report_uses_frozen_world_local_ending_labels() -> None:
+    llm = FakeLLM()
+    frozen_world = replace(
+        FLASH_CRASH_SCENARIO.to_frozen_world(),
+        ending_bands=(
+            FLASH_CRASH_SCENARIO.to_frozen_world().ending_bands[0],
+            FLASH_CRASH_SCENARIO.to_frozen_world().ending_bands[1],
+            FLASH_CRASH_SCENARIO.to_frozen_world().ending_bands[2],
+            FLASH_CRASH_SCENARIO.to_frozen_world().ending_bands[3],
+            replace(
+                FLASH_CRASH_SCENARIO.to_frozen_world().ending_bands[-1],
+                ending_id="world-local-collapse",
+                label="校誉尽失",
+                description="这条世界线使用自己的四字结局标签。",
+            ),
+        ),
+    )
+    game = build_game(turns=6, seed=1, llm_client=llm, frozen_world=frozen_world)
+    game.state.credibility = 20
+    game.state.treasury = 15
+    game.state.pressure = 95
+    game.state.price = 18
+    game.state.liquidity = 20
+    game.state.sell_pressure = 90
+    game.state.volatility = 88
+    game.state.community_panic = 92
+    game.state.rumor_level = 86
+    game.state.narrative_control = 18
+    game.state.exchange_trust = 15
+    game.state.control = 20
+
+    report = game.build_world_report()
+
+    assert report.ending_id == "world-local-collapse"
+    assert report.ending_title == "校誉尽失"
+    assert report.ending_description == "这条世界线使用自己的四字结局标签。"
+
+
+
 def test_extreme_pressure_triggers_anomaly_flag_and_warning() -> None:
     game = build_game(turns=6, seed=3, llm_client=FakeLLM())
     game.state.pressure = 92

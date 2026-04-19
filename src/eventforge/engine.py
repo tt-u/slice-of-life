@@ -263,40 +263,6 @@ def synthesize_action_templates_from_frozen_world(frozen_world: FrozenInitialWor
     return tuple(templates)
 
 
-ENDING_BANDS = (
-    {
-        "min_score": 85,
-        "id": "phoenix-recovery",
-        "title": "凤凰回升",
-        "description": "你不只是止血，还把世界状态拉回到高信任、高控制、低恐慌的强势修复区。",
-    },
-    {
-        "min_score": 70,
-        "id": "hard-won-stability",
-        "title": "艰难稳盘",
-        "description": "大局被你稳住了，核心结构恢复健康，但仍带着可见代价与后续修复任务。",
-    },
-    {
-        "min_score": 55,
-        "id": "fragile-truce",
-        "title": "脆弱停火",
-        "description": "最坏情况暂时没发生，但系统仍处在脆弱均衡，稍有失手就会再度恶化。",
-    },
-    {
-        "min_score": 35,
-        "id": "pyrrhic-survival",
-        "title": "惨胜续命",
-        "description": "你勉强保住局面的一部分，但代价巨大，世界状态已经留下明显结构性损伤。",
-    },
-    {
-        "min_score": 0,
-        "id": "unraveling-collapse",
-        "title": "失控崩解",
-        "description": "关键指标全面恶化，叙事、信任与市场结构同时失守，系统进入崩解态。",
-    },
-)
-
-
 def validate_agent_reaction_proposal(
     *,
     context: AgentReactionContext,
@@ -704,12 +670,12 @@ class CrisisGame:
         )
         negative_drag = state["pressure"] + max(0, 40 - state["treasury"]) * 2
         ending_score = max(0, min(100, (positive_score - negative_drag) // 8))
-        band = next(item for item in ENDING_BANDS if ending_score >= int(item["min_score"]))
+        band = self.frozen_world.resolve_ending_band(ending_score)
         return {
             "ending_score": ending_score,
-            "ending_id": str(band["id"]),
-            "ending_title": str(band["title"]),
-            "ending_description": str(band["description"]),
+            "ending_id": band.ending_id,
+            "ending_title": band.label,
+            "ending_description": band.description,
         }
 
     def timeline_lines(self) -> list[str]:
