@@ -1,0 +1,495 @@
+{
+  "world_id": "wuhan-university-yang-jingyuan-school",
+  "title": "武汉大学杨景媛事件",
+  "premise": "一份校方通报把司法结果、校内处分、学位复核、导师责任与舆情辟谣全部压到同一冲突面上。",
+  "player_role": "校方",
+  "player_secret": "你知道校内流程漏洞比公开通报写得更深，任何额外细节外泄都会把问责从个案拉成系统性质疑。",
+  "objective": "在多线质疑中重新稳住程序公信力，并防止事件继续升级成整体治理失信。",
+  "opponent": "杨景媛一侧的个人叙事防守、持续撕裂的公众舆论，以及对学校程序正当性的追问。",
+  "audience": [
+    "学生",
+    "校友",
+    "公众",
+    "媒体观察者"
+  ],
+  "truth": "这已不是单点指控，而是司法节点、校方复核、论文质量争议和网络传言同时争夺定义权的复合冲突。",
+  "selectable_roles": [
+    "校方",
+    "杨景媛"
+  ],
+  "allowed_turn_counts": [
+    4,
+    6,
+    8,
+    10
+  ],
+  "opening_event": {
+    "headline": "校方通报引爆二次舆论对冲",
+    "summary": "处分撤销、学位维持与多项辟谣被同时抛出，直接把校方与杨景媛再次推到舆论核心。",
+    "severity": 85,
+    "actor_id": "whu-admin",
+    "actor_name": "武汉大学校方",
+    "state_delta": {}
+  },
+  "initial_dimensions": [
+    [
+      "credibility",
+      36
+    ],
+    [
+      "treasury",
+      61
+    ],
+    [
+      "pressure",
+      68
+    ],
+    [
+      "price",
+      50
+    ],
+    [
+      "liquidity",
+      53
+    ],
+    [
+      "sell_pressure",
+      57
+    ],
+    [
+      "volatility",
+      62
+    ],
+    [
+      "community_panic",
+      74
+    ],
+    [
+      "rumor_level",
+      71
+    ],
+    [
+      "narrative_control",
+      34
+    ],
+    [
+      "exchange_trust",
+      39
+    ],
+    [
+      "control",
+      72
+    ]
+  ],
+  "entities": [
+    {
+      "id": "whu-admin",
+      "name": "武汉大学校方",
+      "role": "校方",
+      "public_goal": "稳住程序合法性与学校公信力",
+      "pressure_point": "处分撤销和学位维持结论不被公众接受",
+      "starting_trust": 32,
+      "influence": 93,
+      "stance": "高压止损",
+      "details": "手握正式通报与问责权，但每一步都受外部舆论放大检视。"
+    },
+    {
+      "id": "yang-jingyuan",
+      "name": "杨景媛",
+      "role": "杨景媛",
+      "public_goal": "保住学位与个人叙事合法性",
+      "pressure_point": "论文不规范问题与背景传言持续发酵",
+      "starting_trust": 28,
+      "influence": 82,
+      "stance": "被动自证",
+      "details": "直接冲突当事人之一，其学位与个人名誉已被绑定到校方复核结论上。"
+    },
+    {
+      "id": "xiao-moutao",
+      "name": "肖某瑫",
+      "role": "肖某瑫",
+      "public_goal": "巩固处分撤销后的名誉回升",
+      "pressure_point": "任何新说法都可能把事件重新拉回旧叙事",
+      "starting_trust": 41,
+      "influence": 77,
+      "stance": "翻盘反击",
+      "details": "另一核心冲突当事人，司法节点和校方复核使其位置明显回升。"
+    },
+    {
+      "id": "econ-management-chain",
+      "name": "经管学院与导师责任链",
+      "role": "导师/学院体系",
+      "public_goal": "把整改限制在制度修补层面",
+      "pressure_point": "论文审核责任被继续深挖",
+      "starting_trust": 24,
+      "influence": 65,
+      "stance": "防御整改",
+      "details": "承接论文规范争议与培养责任问责，是校方体系内部的重要受压点。"
+    },
+    {
+      "id": "campus-public",
+      "name": "校内外舆论与网络围观者",
+      "role": "公众舆论",
+      "public_goal": "逼出可被相信的完整解释",
+      "pressure_point": "被不实信息和情绪化站队牵着走",
+      "starting_trust": 18,
+      "influence": 88,
+      "stance": "高烈度撕裂",
+      "details": "既推动追问，也是放大传言和惩罚性舆情的主要场域。"
+    }
+  ],
+  "ending_bands": [
+    {
+      "min_score": 80,
+      "ending_id": "wuhan-procedure-anchored",
+      "label": "程序定锚",
+      "description": "你把司法、问责与复核叙事重新钉回可解释框架，局面暂时稳住。"
+    },
+    {
+      "min_score": 55,
+      "ending_id": "wuhan-contested-drift",
+      "label": "争议拖行",
+      "description": "你避免了立刻失控，但冲突继续拖行，任何新材料都可能再次引爆。"
+    },
+    {
+      "min_score": 30,
+      "ending_id": "wuhan-accountability-fracture",
+      "label": "问责失序",
+      "description": "程序修复没有止住追责外溢，越来越多人开始把事件理解为系统性失守。"
+    },
+    {
+      "min_score": 0,
+      "ending_id": "wuhan-trust-void",
+      "label": "信任坠空",
+      "description": "叙事、防线与程序信任同时坠落，世界滑向长期失控。"
+    }
+  ],
+  "dimension_defs": [
+    {
+      "key": "credibility",
+      "label": "公信力",
+      "description": "玩家阵营能否让外界相信自己的程序和说法。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 55,
+      "crisis_threshold": 35,
+      "terminal_threshold": 20
+    },
+    {
+      "key": "treasury",
+      "label": "协调余量",
+      "description": "还能调动多少制度、关系与执行资源去灭火。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 45,
+      "crisis_threshold": 25,
+      "terminal_threshold": 10
+    },
+    {
+      "key": "pressure",
+      "label": "承压值",
+      "description": "来自舆论、程序与对位方的即时压强。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 55,
+      "crisis_threshold": 75,
+      "terminal_threshold": 90
+    },
+    {
+      "key": "price",
+      "label": "议题温度",
+      "description": "事件是否仍在高位占据公共注意力。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 55,
+      "crisis_threshold": 70,
+      "terminal_threshold": 85
+    },
+    {
+      "key": "liquidity",
+      "label": "回旋空间",
+      "description": "是否还有足够空间调整叙事和处置动作。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 50,
+      "crisis_threshold": 30,
+      "terminal_threshold": 15
+    },
+    {
+      "key": "sell_pressure",
+      "label": "追责势能",
+      "description": "要求继续深挖和继续追责的势能。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 45,
+      "crisis_threshold": 65,
+      "terminal_threshold": 80
+    },
+    {
+      "key": "volatility",
+      "label": "舆情波动",
+      "description": "叙事是否持续在新爆点和旧传言间抽搐。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 45,
+      "crisis_threshold": 65,
+      "terminal_threshold": 80
+    },
+    {
+      "key": "community_panic",
+      "label": "群体撕裂",
+      "description": "校内外相关人群的情绪是否继续分裂升级。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 45,
+      "crisis_threshold": 65,
+      "terminal_threshold": 80
+    },
+    {
+      "key": "rumor_level",
+      "label": "传言强度",
+      "description": "未经核实说法扩散和反复再传播的强度。",
+      "direction_of_health": "lower_is_better",
+      "warning_threshold": 40,
+      "crisis_threshold": 60,
+      "terminal_threshold": 75
+    },
+    {
+      "key": "narrative_control",
+      "label": "叙事控制",
+      "description": "玩家阵营是否还能主导事件定义。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 55,
+      "crisis_threshold": 35,
+      "terminal_threshold": 20
+    },
+    {
+      "key": "exchange_trust",
+      "label": "程序信任",
+      "description": "外界对复核、问责和解释程序的信任程度。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 55,
+      "crisis_threshold": 35,
+      "terminal_threshold": 20
+    },
+    {
+      "key": "control",
+      "label": "控制权",
+      "description": "玩家阵营对事态节奏和后续动作的掌控程度。",
+      "direction_of_health": "higher_is_better",
+      "warning_threshold": 60,
+      "crisis_threshold": 35,
+      "terminal_threshold": 20
+    }
+  ],
+  "action_grammar": {
+    "rules": [
+      {
+        "key": "rumor_level-focus-1",
+        "label": "压低传言强度",
+        "description": "以校方视角优先处理传言强度，推进“在多线质疑中重新稳住程序公信力，并防”，但会挤占其他操作空间。",
+        "trigger_dimensions": [
+          "rumor_level",
+          "credibility",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "rumor_level"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          3
+        ],
+        "tags": [
+          "world-generated",
+          "rumor_level"
+        ]
+      },
+      {
+        "key": "community_panic-focus-2",
+        "label": "压低群体撕裂",
+        "description": "以校方视角优先处理群体撕裂，推进“在多线质疑中重新稳住程序公信力，并防”，但会挤占其他操作空间。",
+        "trigger_dimensions": [
+          "community_panic",
+          "credibility",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "community_panic"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          3
+        ],
+        "tags": [
+          "world-generated",
+          "community_panic"
+        ]
+      },
+      {
+        "key": "narrative_control-focus-3",
+        "label": "补强叙事控制",
+        "description": "以校方视角优先处理叙事控制，推进“在多线质疑中重新稳住程序公信力，并防”，但会挤占其他操作空间。",
+        "trigger_dimensions": [
+          "narrative_control",
+          "credibility",
+          "pressure"
+        ],
+        "preferred_upside_dimensions": [
+          "narrative_control"
+        ],
+        "likely_downside_dimensions": [
+          "credibility",
+          "pressure"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          3
+        ],
+        "tags": [
+          "world-generated",
+          "narrative_control"
+        ]
+      },
+      {
+        "key": "credibility-focus-4",
+        "label": "补强公信力",
+        "description": "以校方视角优先处理公信力，推进“在多线质疑中重新稳住程序公信力，并防”，但会挤占其他操作空间。",
+        "trigger_dimensions": [
+          "credibility",
+          "pressure",
+          "control"
+        ],
+        "preferred_upside_dimensions": [
+          "credibility"
+        ],
+        "likely_downside_dimensions": [
+          "pressure",
+          "control"
+        ],
+        "allowed_cost_types": [
+          "public",
+          "delay"
+        ],
+        "minimum_upside_count": 1,
+        "minimum_downside_count": 2,
+        "max_upside_count": 1,
+        "max_downside_count": 2,
+        "intensity_range": [
+          1,
+          3
+        ],
+        "tags": [
+          "world-generated",
+          "credibility"
+        ]
+      }
+    ],
+    "cost_types": [
+      {
+        "key": "public",
+        "label": "公开代价",
+        "description": "带来公开关注、质疑或舆论压力。"
+      },
+      {
+        "key": "private",
+        "label": "私下协调代价",
+        "description": "需要消耗私下协调空间或关系信用。"
+      },
+      {
+        "key": "finance",
+        "label": "资源代价",
+        "description": "需要消耗预算、现金或资产缓冲。"
+      },
+      {
+        "key": "legal",
+        "label": "制度代价",
+        "description": "需要承担程序、审计或制度约束。"
+      },
+      {
+        "key": "delay",
+        "label": "时机代价",
+        "description": "通过拖延换取喘息，但损失先手。"
+      }
+    ],
+    "forbidden_pairs": [],
+    "forbidden_tags": [],
+    "required_tradeoff": true,
+    "menu_size": 4,
+    "low_commitment_slots": 1,
+    "medium_commitment_slots": 2,
+    "high_commitment_slots": 1
+  },
+  "reaction_boundaries": {
+    "scalar_axes": [
+      {
+        "key": "trust_in_player",
+        "label": "对玩家信任",
+        "description": "是否愿意继续给玩家解释空间。",
+        "min_value": 0,
+        "max_value": 100,
+        "max_delta_per_turn": 18
+      },
+      {
+        "key": "pressure_load",
+        "label": "压力负载",
+        "description": "该代理当前承受的内外压力。",
+        "min_value": 0,
+        "max_value": 100,
+        "max_delta_per_turn": 18
+      },
+      {
+        "key": "escalation_drive",
+        "label": "升级冲动",
+        "description": "该代理是否准备把冲突推向更激烈阶段。",
+        "min_value": 0,
+        "max_value": 100,
+        "max_delta_per_turn": 18
+      },
+      {
+        "key": "public_alignment",
+        "label": "公开站位",
+        "description": "该代理是否愿意公开贴近玩家叙事。",
+        "min_value": 0,
+        "max_value": 100,
+        "max_delta_per_turn": 18
+      }
+    ],
+    "max_relationship_delta_per_turn": 18,
+    "max_dimension_impacts_per_reaction": 2,
+    "max_dimension_delta_per_reaction": 12,
+    "max_relationship_updates_per_reaction": 2,
+    "max_hooks_per_reaction": 1,
+    "memory_limit": 3,
+    "allowed_hook_tags": [
+      "institutional_freeze",
+      "counterattack_preparing",
+      "public_break",
+      "public-procedure-scrutiny"
+    ]
+  }
+}

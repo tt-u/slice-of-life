@@ -4,11 +4,15 @@ from pathlib import Path
 from eventforge.domain import (
     EntityResearchCard,
     EvidenceNote,
+    FrozenInitialWorld,
     MaterialResearchPack,
     ResearchDispute,
     ResearchRelationship,
 )
-from eventforge.research import build_wuhan_university_yang_jingyuan_research_pack
+from eventforge.research import (
+    build_wuhan_university_yang_jingyuan_frozen_world,
+    build_wuhan_university_yang_jingyuan_research_pack,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -96,3 +100,50 @@ def test_wuhan_anchor_research_pack_fixture_matches_serialized_payload() -> None
     restored = MaterialResearchPack.from_payload(payload)
 
     assert restored == pack
+
+
+def test_wuhan_anchor_frozen_world_builds_world_owned_contract_for_school_role() -> None:
+    frozen = build_wuhan_university_yang_jingyuan_frozen_world(player_role="校方")
+
+    assert isinstance(frozen, FrozenInitialWorld)
+    assert frozen.world_id == "wuhan-university-yang-jingyuan-school"
+    assert frozen.title == "武汉大学杨景媛事件"
+    assert frozen.player_role == "校方"
+    assert frozen.selectable_roles == ("校方", "杨景媛")
+    assert frozen.allowed_turn_counts == (4, 6, 8, 10)
+    assert frozen.action_grammar is not None
+    assert frozen.action_grammar.menu_size == 4
+    assert len(frozen.action_grammar.rules) == 4
+    assert all(rule.minimum_upside_count >= 1 for rule in frozen.action_grammar.rules)
+    assert all(rule.minimum_downside_count >= 1 for rule in frozen.action_grammar.rules)
+    assert [band.label for band in frozen.ending_bands] == ["程序定锚", "争议拖行", "问责失序", "信任坠空"]
+    assert frozen.resolve_ending_band(82).label == "程序定锚"
+    assert frozen.resolve_ending_band(55).label == "争议拖行"
+
+
+def test_wuhan_anchor_frozen_world_materially_differs_between_school_and_yang_roles() -> None:
+    school_world = build_wuhan_university_yang_jingyuan_frozen_world(player_role="校方")
+    yang_world = build_wuhan_university_yang_jingyuan_frozen_world(player_role="杨景媛")
+
+    school_dimensions = school_world.initial_dimension_map()
+    yang_dimensions = yang_world.initial_dimension_map()
+
+    assert school_world.player_role == "校方"
+    assert yang_world.player_role == "杨景媛"
+    assert school_world.world_id != yang_world.world_id
+    assert school_world.objective != yang_world.objective
+    assert school_dimensions["control"] >= yang_dimensions["control"] + 20
+    assert yang_dimensions["pressure"] >= school_dimensions["pressure"] + 15
+    assert yang_dimensions["narrative_control"] >= school_dimensions["narrative_control"] + 10
+    assert school_dimensions["credibility"] >= yang_dimensions["credibility"] + 8
+
+
+def test_wuhan_anchor_frozen_world_fixture_matches_serialized_payloads_for_each_role() -> None:
+    for player_role, fixture_name in (("校方", "wuhan-university-yang-jingyuan-school.json"), ("杨景媛", "wuhan-university-yang-jingyuan-yang-jingyuan.json")):
+        frozen = build_wuhan_university_yang_jingyuan_frozen_world(player_role=player_role)
+        fixture_path = ROOT / "examples" / "worlds" / fixture_name
+
+        payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+        restored = FrozenInitialWorld.from_payload(payload)
+
+        assert restored == frozen

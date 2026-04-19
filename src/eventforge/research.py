@@ -3,11 +3,16 @@ from __future__ import annotations
 from .domain import (
     EntityResearchCard,
     EvidenceNote,
+    FrozenInitialWorld,
     MaterialResearchPack,
     ResearchDispute,
     ResearchRelationship,
     SeedEntity,
+    WorldDimensionDef,
+    WorldEndingBand,
     WorldEvent,
+    default_agent_reaction_boundaries,
+    dimension_driven_world_action_grammar,
 )
 
 WHU_NOTICE_URL = "https://www.whu.edu.cn/info/5231/258444.htm"
@@ -208,3 +213,125 @@ def build_wuhan_university_yang_jingyuan_research_pack() -> MaterialResearchPack
         entity_cards=entity_cards,
         disputed_points=disputes,
     )
+
+
+def build_wuhan_university_yang_jingyuan_frozen_world(*, player_role: str = "校方") -> FrozenInitialWorld:
+    pack = build_wuhan_university_yang_jingyuan_research_pack()
+    normalized_role = _normalize_wuhan_player_role(player_role)
+    initial_dimensions = _wuhan_initial_dimensions_for_role(normalized_role)
+    dimension_defs = _wuhan_dimension_defs()
+    objective = _wuhan_objective_for_role(normalized_role)
+    player_secret = _wuhan_player_secret_for_role(normalized_role)
+    opponent = _wuhan_opponent_for_role(normalized_role)
+    action_grammar = dimension_driven_world_action_grammar(
+        initial_dimensions,
+        dimension_defs,
+        player_role=normalized_role,
+        objective=objective,
+    )
+
+    return FrozenInitialWorld(
+        world_id=f"{pack.case_id}-{'school' if normalized_role == '校方' else 'yang-jingyuan'}",
+        title=pack.title,
+        premise=pack.premise,
+        player_role=normalized_role,
+        player_secret=player_secret,
+        objective=objective,
+        opponent=opponent,
+        audience=pack.audience,
+        truth=pack.truth,
+        selectable_roles=pack.candidate_viewpoints,
+        allowed_turn_counts=(4, 6, 8, 10),
+        opening_event=pack.opening_event,
+        initial_dimensions=tuple(initial_dimensions.items()),
+        entities=pack.entities,
+        ending_bands=_wuhan_ending_bands(),
+        dimension_defs=dimension_defs,
+        action_grammar=action_grammar,
+        reaction_boundaries=default_agent_reaction_boundaries(),
+    )
+
+
+def _normalize_wuhan_player_role(player_role: str) -> str:
+    normalized = player_role.strip()
+    if normalized not in {"校方", "杨景媛"}:
+        raise ValueError(f"Unsupported Wuhan anchor role: {player_role}")
+    return normalized
+
+
+def _wuhan_initial_dimensions_for_role(player_role: str) -> dict[str, int]:
+    by_role = {
+        "校方": {
+            "credibility": 36,
+            "treasury": 61,
+            "pressure": 68,
+            "price": 50,
+            "liquidity": 53,
+            "sell_pressure": 57,
+            "volatility": 62,
+            "community_panic": 74,
+            "rumor_level": 71,
+            "narrative_control": 34,
+            "exchange_trust": 39,
+            "control": 72,
+        },
+        "杨景媛": {
+            "credibility": 24,
+            "treasury": 42,
+            "pressure": 87,
+            "price": 50,
+            "liquidity": 47,
+            "sell_pressure": 66,
+            "volatility": 69,
+            "community_panic": 82,
+            "rumor_level": 76,
+            "narrative_control": 46,
+            "exchange_trust": 28,
+            "control": 45,
+        },
+    }
+    return dict(by_role[player_role])
+
+
+def _wuhan_dimension_defs() -> tuple[WorldDimensionDef, ...]:
+    return (
+        WorldDimensionDef("credibility", "公信力", "玩家阵营能否让外界相信自己的程序和说法。", "higher_is_better", 55, 35, 20),
+        WorldDimensionDef("treasury", "协调余量", "还能调动多少制度、关系与执行资源去灭火。", "higher_is_better", 45, 25, 10),
+        WorldDimensionDef("pressure", "承压值", "来自舆论、程序与对位方的即时压强。", "lower_is_better", 55, 75, 90),
+        WorldDimensionDef("price", "议题温度", "事件是否仍在高位占据公共注意力。", "lower_is_better", 55, 70, 85),
+        WorldDimensionDef("liquidity", "回旋空间", "是否还有足够空间调整叙事和处置动作。", "higher_is_better", 50, 30, 15),
+        WorldDimensionDef("sell_pressure", "追责势能", "要求继续深挖和继续追责的势能。", "lower_is_better", 45, 65, 80),
+        WorldDimensionDef("volatility", "舆情波动", "叙事是否持续在新爆点和旧传言间抽搐。", "lower_is_better", 45, 65, 80),
+        WorldDimensionDef("community_panic", "群体撕裂", "校内外相关人群的情绪是否继续分裂升级。", "lower_is_better", 45, 65, 80),
+        WorldDimensionDef("rumor_level", "传言强度", "未经核实说法扩散和反复再传播的强度。", "lower_is_better", 40, 60, 75),
+        WorldDimensionDef("narrative_control", "叙事控制", "玩家阵营是否还能主导事件定义。", "higher_is_better", 55, 35, 20),
+        WorldDimensionDef("exchange_trust", "程序信任", "外界对复核、问责和解释程序的信任程度。", "higher_is_better", 55, 35, 20),
+        WorldDimensionDef("control", "控制权", "玩家阵营对事态节奏和后续动作的掌控程度。", "higher_is_better", 60, 35, 20),
+    )
+
+
+def _wuhan_ending_bands() -> tuple[WorldEndingBand, ...]:
+    return (
+        WorldEndingBand(80, "wuhan-procedure-anchored", "程序定锚", "你把司法、问责与复核叙事重新钉回可解释框架，局面暂时稳住。"),
+        WorldEndingBand(55, "wuhan-contested-drift", "争议拖行", "你避免了立刻失控，但冲突继续拖行，任何新材料都可能再次引爆。"),
+        WorldEndingBand(30, "wuhan-accountability-fracture", "问责失序", "程序修复没有止住追责外溢，越来越多人开始把事件理解为系统性失守。"),
+        WorldEndingBand(0, "wuhan-trust-void", "信任坠空", "叙事、防线与程序信任同时坠落，世界滑向长期失控。"),
+    )
+
+
+def _wuhan_objective_for_role(player_role: str) -> str:
+    if player_role == "校方":
+        return "在多线质疑中重新稳住程序公信力，并防止事件继续升级成整体治理失信。"
+    return "在被动承压中保住个人学位与叙事合法性，并避免再次被全面定义为事件替罪羊。"
+
+
+def _wuhan_player_secret_for_role(player_role: str) -> str:
+    if player_role == "校方":
+        return "你知道校内流程漏洞比公开通报写得更深，任何额外细节外泄都会把问责从个案拉成系统性质疑。"
+    return "你知道自己的学位与名誉高度绑定在校方复核结论上，一旦程序公信力继续下坠，你几乎没有独立防线。"
+
+
+def _wuhan_opponent_for_role(player_role: str) -> str:
+    if player_role == "校方":
+        return "杨景媛一侧的个人叙事防守、持续撕裂的公众舆论，以及对学校程序正当性的追问。"
+    return "校方主导的程序叙事、肖某瑫翻盘后的对位压力，以及持续发酵的公众审视。"
