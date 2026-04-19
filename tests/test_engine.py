@@ -328,6 +328,32 @@ def test_generated_choice_copy_does_not_duplicate_existing_tradeoff_suffix() -> 
 
 
 
+def test_generated_choice_copy_uses_frozen_world_dimension_labels_in_tradeoff_suffix_and_rationale() -> None:
+    llm = FakeLLM()
+    frozen_world = FLASH_CRASH_SCENARIO.to_frozen_world()
+    custom_dimension_defs = tuple(
+        replace(dimension, label={
+            "narrative_control": "校内叙事",
+            "exchange_trust": "平台耐心",
+            "pressure": "对抗压力",
+        }.get(dimension.key, dimension.label))
+        for dimension in frozen_world.dimension_defs
+    )
+    game = build_game(
+        turns=6,
+        seed=3,
+        llm_client=llm,
+        frozen_world=replace(frozen_world, dimension_defs=custom_dimension_defs),
+    )
+    game.begin_turn()
+
+    action = game.available_actions()[0]
+
+    assert "（+校内叙事/平台耐心 / -对抗压力）" in action.description
+    assert action.rationale == "争取校内叙事/平台耐心，代价是承受对抗压力。"
+
+
+
 def test_available_actions_enforce_impact_diversity_when_llm_returns_only_heavy_moves() -> None:
     game = build_game(turns=6, seed=3, llm_client=HighImpactOnlyLLM())
     game.begin_turn()

@@ -166,8 +166,11 @@ Current behavior:
 - if the exact canonical suffix is already present, keep it
 - if the description already ends with an explicit `（+... / -...）` pattern, keep it
 - otherwise append the canonical suffix
+- when the engine generates that canonical suffix itself, it now resolves metric labels from the active frozen world's `dimension_defs` instead of a flash-crash-era global label table
 
-This prevents duplicate tradeoff tails from live LLM output.
+`_build_generated_action(...)` now follows the same label source for its short rationale text, so user-facing tradeoff copy stays world-owned even while the engine still bridges through `ActionCard` underneath.
+
+This prevents duplicate tradeoff tails from live LLM output and keeps the copied upside/downside wording aligned with each frozen world's own metric vocabulary.
 
 ## Architecture boundary that remains
 

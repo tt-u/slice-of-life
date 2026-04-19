@@ -45,21 +45,6 @@ STATE_KEYS = (
 )
 GENERATED_ACTION_MAGNITUDE_CAPS = {"low": 4, "medium": 7, "high": 10}
 
-AXIS_LABELS = {
-    "credibility": "信誉",
-    "treasury": "国库",
-    "pressure": "压力",
-    "price": "币价",
-    "liquidity": "流动性",
-    "sell_pressure": "抛压",
-    "volatility": "波动",
-    "community_panic": "社区恐慌",
-    "rumor_level": "传言",
-    "narrative_control": "叙事控制",
-    "exchange_trust": "交易所信任",
-    "control": "控制权",
-}
-
 IMPACT_MODEL = {
     "tiny": 2,
     "light": 4,
@@ -191,11 +176,22 @@ def decision_focus_from_state(
     return [item for item in focus_candidates if int(item["urgency"]) > 0][:4]
 
 
-def format_tradeoff_suffix(action: ActionCard) -> str:
+def format_tradeoff_suffix(action: ActionCard, *, axis_labels: dict[str, str] | None = None) -> str:
     tradeoff = action_tradeoff_profile(action)
-    upside = "/".join(AXIS_LABELS.get(axis, axis) for axis in tradeoff["upside_axes"][:2])
-    downside = "/".join(AXIS_LABELS.get(axis, axis) for axis in tradeoff["downside_axes"][:2])
+    labels = axis_labels or {}
+    upside = "/".join(labels.get(axis, axis) for axis in tradeoff["upside_axes"][:2])
+    downside = "/".join(labels.get(axis, axis) for axis in tradeoff["downside_axes"][:2])
     return f"（+{upside} / -{downside}）"
+
+
+def _render_tradeoff_phrase(axes: list[str], *, axis_labels: dict[str, str], fallback: str) -> str:
+    if not axes:
+        return fallback
+    return "/".join(axis_labels.get(axis, axis) for axis in axes[:2])
+
+
+def _dimension_label_map(frozen_world: FrozenInitialWorld) -> dict[str, str]:
+    return {dimension.key: dimension.label for dimension in frozen_world.resolved_dimension_defs()}
 
 
 def _default_action_tag(cost_types: tuple[str, ...]) -> str:
@@ -533,7 +529,11 @@ class CrisisGame:
         commitment_tier = "low" if impact_tier == "low" else "medium" if impact_tier == "medium" else "high"
         upside_magnitude = {axis: 6 for axis in tradeoff["upside_axes"]}
         downside_magnitude = {axis: 5 for axis in tradeoff["downside_axes"]}
-        rationale = f"争取{ '/'.join(tradeoff['upside_axes'][:2]) }，代价是承受{ '/'.join(tradeoff['downside_axes'][:2]) }。"
+        axis_labels = _dimension_label_map(self.frozen_world)
+        rationale = (
+            f"争取{_render_tradeoff_phrase(tradeoff['upside_axes'], axis_labels=axis_labels, fallback='主动空间')}，"
+            f"代价是承受{_render_tradeoff_phrase(tradeoff['downside_axes'], axis_labels=axis_labels, fallback='额外压力')}。"
+        )
         description = self._normalize_action_description(base=base, description=item["description"])
         tags = [base.tag]
         if base.unlocks_truth:
@@ -557,7 +557,7 @@ class CrisisGame:
 
     def _normalize_action_description(self, *, base: ActionCard, description: str) -> str:
         clean = description.strip()
-        suffix = format_tradeoff_suffix(base)
+        suffix = format_tradeoff_suffix(base, axis_labels=_dimension_label_map(self.frozen_world))
         if suffix in clean:
             return clean
         if re.search(r"（[^）]*\+[^）]*-[^）]*）\s*$", clean):
