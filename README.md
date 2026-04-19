@@ -12,6 +12,10 @@ A research-first, LLM-driven game factory for turning one real public conflict c
 
 The historical flash-crash scenario remains in the repo only as sample/regression content. The core architecture now centers on research packs, frozen worlds, world-local action grammars, and runtime play from stored artifacts.
 
+## Architecture notes
+
+Current implementation-grounded architecture docs live under [`docs/plans/`](./docs/plans/README.md). Start there for the active action/runtime contracts and the migration audit; older draft plans in that directory are historical context only.
+
 ## Requirements
 
 Live material generation and free-play against generated worlds still require an OpenAI-compatible endpoint and key:
