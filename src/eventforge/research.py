@@ -233,6 +233,128 @@ def build_cz_star_xu_public_conflict_research_pack() -> MaterialResearchPack:
     )
 
 
+def build_cz_star_xu_public_conflict_frozen_world(*, player_role: str = "CZ") -> FrozenInitialWorld:
+    pack = build_cz_star_xu_public_conflict_research_pack()
+    normalized_role = _normalize_cz_star_xu_player_role(player_role)
+    initial_dimensions = _cz_star_xu_initial_dimensions_for_role(normalized_role)
+    dimension_defs = _cz_star_xu_dimension_defs()
+    objective = _cz_star_xu_objective_for_role(normalized_role)
+    player_secret = _cz_star_xu_player_secret_for_role(normalized_role)
+    opponent = _cz_star_xu_opponent_for_role(normalized_role)
+    action_grammar = dimension_driven_world_action_grammar(
+        initial_dimensions,
+        dimension_defs,
+        player_role=normalized_role,
+        objective=objective,
+    )
+
+    return FrozenInitialWorld(
+        world_id=f"{pack.case_id}-{'cz' if normalized_role == 'CZ' else 'star-xu-okx-camp'}",
+        title=pack.title,
+        premise=pack.premise,
+        player_role=normalized_role,
+        player_secret=player_secret,
+        objective=objective,
+        opponent=opponent,
+        audience=pack.audience,
+        truth=pack.truth,
+        selectable_roles=pack.candidate_viewpoints,
+        allowed_turn_counts=(4, 6, 8, 10),
+        opening_event=pack.opening_event,
+        initial_dimensions=tuple(initial_dimensions.items()),
+        entities=pack.entities,
+        ending_bands=_cz_star_xu_ending_bands(),
+        dimension_defs=dimension_defs,
+        action_grammar=action_grammar,
+        reaction_boundaries=default_agent_reaction_boundaries(),
+    )
+
+
+def _normalize_cz_star_xu_player_role(player_role: str) -> str:
+    normalized = player_role.strip()
+    if normalized not in {"CZ", "徐明星/OKX camp"}:
+        raise ValueError(f"Unsupported CZ / Star Xu anchor role: {player_role}")
+    return normalized
+
+
+def _cz_star_xu_initial_dimensions_for_role(player_role: str) -> dict[str, int]:
+    by_role = {
+        "CZ": {
+            "credibility": 54,
+            "treasury": 68,
+            "pressure": 58,
+            "price": 63,
+            "liquidity": 61,
+            "sell_pressure": 52,
+            "volatility": 66,
+            "community_panic": 49,
+            "rumor_level": 72,
+            "narrative_control": 47,
+            "exchange_trust": 56,
+            "control": 71,
+        },
+        "徐明星/OKX camp": {
+            "credibility": 41,
+            "treasury": 52,
+            "pressure": 76,
+            "price": 67,
+            "liquidity": 46,
+            "sell_pressure": 61,
+            "volatility": 74,
+            "community_panic": 63,
+            "rumor_level": 78,
+            "narrative_control": 58,
+            "exchange_trust": 43,
+            "control": 55,
+        },
+    }
+    return dict(by_role[player_role])
+
+
+def _cz_star_xu_dimension_defs() -> tuple[WorldDimensionDef, ...]:
+    return (
+        WorldDimensionDef("credibility", "可信度", "玩家阵营当前版本能否被行业与媒体当作更可信的叙事。", "higher_is_better", 60, 40, 20),
+        WorldDimensionDef("treasury", "资源余量", "还能调动多少平台资源、人脉与证据渠道继续打这场旧账。", "higher_is_better", 50, 30, 15),
+        WorldDimensionDef("pressure", "承压值", "来自对位创始人、媒体追问和旧案回流的即时压强。", "lower_is_better", 50, 70, 85),
+        WorldDimensionDef("price", "热度位", "这场冲突在加密舆论场中占据了多少注意力。", "lower_is_better", 50, 68, 84),
+        WorldDimensionDef("liquidity", "腾挪空间", "你还能否切换证据、口径与动作，而不是被单一叙事锁死。", "higher_is_better", 55, 35, 20),
+        WorldDimensionDef("sell_pressure", "抛压联想", "围观者是否开始把口水战映射成平台风险和交易抛压。", "lower_is_better", 45, 60, 80),
+        WorldDimensionDef("volatility", "情绪波动", "围观情绪是否在新爆料、旧截图和二次传播中持续抽搐。", "lower_is_better", 45, 65, 80),
+        WorldDimensionDef("community_panic", "用户惊惧", "交易平台用户是否把创始人互撕读成真实治理风险。", "lower_is_better", 40, 58, 76),
+        WorldDimensionDef("rumor_level", "旧案噪声", "未经完整核验的旧合约、举报传闻和黑历史回流强度。", "lower_is_better", 42, 62, 80),
+        WorldDimensionDef("narrative_control", "叙事控制", "玩家阵营能否主导公众把冲突理解成哪一种故事。", "higher_is_better", 58, 38, 22),
+        WorldDimensionDef("exchange_trust", "平台信任", "外界是否相信相关平台仍具备稳定治理与风控能力。", "higher_is_better", 58, 40, 22),
+        WorldDimensionDef("control", "节奏掌控", "玩家阵营对爆料节奏、证据投放和后续攻防的控制程度。", "higher_is_better", 60, 40, 22),
+    )
+
+
+def _cz_star_xu_ending_bands() -> tuple[WorldEndingBand, ...]:
+    return (
+        WorldEndingBand(80, "cz-star-xu-narrative-suppression", "叙事压制", "你压住了最致命的旧案回流，让市场暂时接受了你的版本，冲突仍在但主导权归你。"),
+        WorldEndingBand(55, "cz-star-xu-fractured-stalemate", "裂痕僵持", "双方都没能彻底击穿对面，旧账继续悬着，平台与个人信誉一起带伤前行。"),
+        WorldEndingBand(30, "cz-star-xu-credibility-backlash", "信誉反噬", "你想借旧案压制对手，却让更多围观者把矛头转向你的证据缺口和治理伤口。"),
+        WorldEndingBand(0, "cz-star-xu-platform-adrift", "平台失锚", "争吵已经不再只是创始人恩怨，市场开始把它读成平台治理系统性失锚。"),
+    )
+
+
+def _cz_star_xu_objective_for_role(player_role: str) -> str:
+    if player_role == "CZ":
+        return "在重提旧案时守住自己版本的可信度，并避免冲突被重新解释成你借回忆录操纵叙事。"
+    return "把事件重新定义为对 CZ 失实叙事的纠偏，同时稳住徐明星本人信誉与 OKX 治理信心。"
+
+
+def _cz_star_xu_player_secret_for_role(player_role: str) -> str:
+    if player_role == "CZ":
+        return "你知道只要拿不出足够硬的新证据，旧案一旦被深挖，回忆录就可能从武器反噬成自证偏见。"
+    return "你知道反击越猛烈，外界越会重新翻出 2020 年提币暂停与旧合同证据，任何口误都会扩大成平台风险。"
+
+
+def _cz_star_xu_opponent_for_role(player_role: str) -> str:
+    if player_role == "CZ":
+        return "徐明星/OKX 阵营的公开反击、会放大旧证据裂痕的围观者，以及把创始人口角映射成治理风险的市场情绪。"
+    return "CZ 的回忆录叙事、高流量媒体转述、以及随时可能把旧案重新剪辑成你方治理原罪的行业围观者。"
+
+
 def build_wuhan_university_yang_jingyuan_research_pack() -> MaterialResearchPack:
     official_notice = EvidenceNote(
         source_title=WHU_NOTICE_TITLE,

@@ -10,6 +10,7 @@ from eventforge.domain import (
     ResearchRelationship,
 )
 from eventforge.research import (
+    build_cz_star_xu_public_conflict_frozen_world,
     build_cz_star_xu_public_conflict_research_pack,
     build_wuhan_university_yang_jingyuan_frozen_world,
     build_wuhan_university_yang_jingyuan_research_pack,
@@ -171,6 +172,54 @@ def test_wuhan_anchor_frozen_world_materially_differs_between_school_and_yang_ro
 def test_wuhan_anchor_frozen_world_fixture_matches_serialized_payloads_for_each_role() -> None:
     for player_role, fixture_name in (("校方", "wuhan-university-yang-jingyuan-school.json"), ("杨景媛", "wuhan-university-yang-jingyuan-yang-jingyuan.json")):
         frozen = build_wuhan_university_yang_jingyuan_frozen_world(player_role=player_role)
+        fixture_path = ROOT / "examples" / "worlds" / fixture_name
+
+        payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+        restored = FrozenInitialWorld.from_payload(payload)
+
+        assert restored == frozen
+
+
+def test_cz_anchor_frozen_world_builds_world_owned_contract_for_cz_role() -> None:
+    frozen = build_cz_star_xu_public_conflict_frozen_world(player_role="CZ")
+
+    assert isinstance(frozen, FrozenInitialWorld)
+    assert frozen.world_id == "cz-star-xu-public-conflict-cz"
+    assert frozen.title == "CZ / 徐明星公开冲突"
+    assert frozen.player_role == "CZ"
+    assert frozen.selectable_roles == ("CZ", "徐明星/OKX camp")
+    assert frozen.allowed_turn_counts == (4, 6, 8, 10)
+    assert frozen.action_grammar is not None
+    assert frozen.action_grammar.menu_size == 4
+    assert len(frozen.action_grammar.rules) == 4
+    assert all(rule.minimum_upside_count >= 1 for rule in frozen.action_grammar.rules)
+    assert all(rule.minimum_downside_count >= 1 for rule in frozen.action_grammar.rules)
+    assert [band.label for band in frozen.ending_bands] == ["叙事压制", "裂痕僵持", "信誉反噬", "平台失锚"]
+    assert frozen.resolve_ending_band(81).label == "叙事压制"
+    assert frozen.resolve_ending_band(58).label == "裂痕僵持"
+
+
+def test_cz_anchor_frozen_world_materially_differs_between_cz_and_star_xu_roles() -> None:
+    cz_world = build_cz_star_xu_public_conflict_frozen_world(player_role="CZ")
+    star_xu_world = build_cz_star_xu_public_conflict_frozen_world(player_role="徐明星/OKX camp")
+
+    cz_dimensions = cz_world.initial_dimension_map()
+    star_xu_dimensions = star_xu_world.initial_dimension_map()
+
+    assert cz_world.player_role == "CZ"
+    assert star_xu_world.player_role == "徐明星/OKX camp"
+    assert cz_world.world_id != star_xu_world.world_id
+    assert cz_world.objective != star_xu_world.objective
+    assert cz_dimensions["control"] >= star_xu_dimensions["control"] + 10
+    assert star_xu_dimensions["pressure"] >= cz_dimensions["pressure"] + 10
+    assert cz_dimensions["credibility"] >= star_xu_dimensions["credibility"] + 10
+    assert star_xu_dimensions["community_panic"] >= cz_dimensions["community_panic"] + 10
+    assert star_xu_dimensions["narrative_control"] >= cz_dimensions["narrative_control"] + 8
+
+
+def test_cz_anchor_frozen_world_fixture_matches_serialized_payloads_for_each_role() -> None:
+    for player_role, fixture_name in (("CZ", "cz-star-xu-public-conflict-cz.json"), ("徐明星/OKX camp", "cz-star-xu-public-conflict-star-xu-okx-camp.json")):
+        frozen = build_cz_star_xu_public_conflict_frozen_world(player_role=player_role)
         fixture_path = ROOT / "examples" / "worlds" / fixture_name
 
         payload = json.loads(fixture_path.read_text(encoding="utf-8"))
