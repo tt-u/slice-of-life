@@ -1,8 +1,10 @@
+from collections import Counter
 from dataclasses import replace
 
 import eventforge.engine as engine_module
 from eventforge.engine import build_game, run_auto_game, validate_agent_reaction_proposal
 from eventforge.domain import AgentProfile, AgentReactionContext, AgentReactionProposal, AgentRunState, GeneratedAction, SeedEntity, TurnChoice, ActionCard, FrozenInitialWorld, dimension_driven_world_action_grammar
+from eventforge.research import build_cz_star_xu_public_conflict_frozen_world
 from eventforge.scenarios import FLASH_CRASH_SCENARIO
 
 
@@ -878,6 +880,25 @@ def test_validate_agent_reaction_proposal_respects_zero_hook_and_memory_caps() -
     assert result.triggered_hooks == ()
     assert updated_state.triggered_hooks == ()
     assert updated_state.memories == ()
+
+
+
+def test_auto_playtest_does_not_over_repeat_a_single_action_in_long_runs() -> None:
+    frozen_world = FrozenInitialWorld.from_payload(
+        build_cz_star_xu_public_conflict_frozen_world(player_role="CZ").to_payload()
+    )
+    game, report = run_auto_game(
+        turns=20,
+        seed=7,
+        frozen_world=frozen_world,
+        llm_client=EchoSampledTemplatesLLM(),
+    )
+
+    action_counts = Counter(resolution.action_id for resolution in game.history)
+
+    assert len(game.history) == 20
+    assert max(action_counts.values()) <= 5
+    assert report.initial_state != report.final_state
 
 
 

@@ -887,11 +887,35 @@ class CrisisGame:
             flags=set(self.state.flags),
         )
 
+    def _action_family(self, action_id: str) -> str:
+        rule = self._action_generation_rule(action_id)
+        if rule is not None and rule.tags:
+            return str(rule.tags[0])
+        template = self.action_template_map.get(action_id)
+        if template is not None:
+            return str(template.tag)
+        return action_id.split("-", 1)[0]
+
+    def _action_novelty_penalty(self, action: GeneratedAction) -> int:
+        recent_history = self.history[-6:]
+        if not recent_history:
+            return 0
+        exact_repeat_count = sum(1 for resolution in recent_history if resolution.action_id == action.id)
+        family = self._action_family(action.id)
+        family_repeat_count = sum(1 for resolution in recent_history if self._action_family(resolution.action_id) == family)
+        streak = 0
+        for resolution in reversed(self.history):
+            if resolution.action_id != action.id:
+                break
+            streak += 1
+        return exact_repeat_count * 14 + max(0, family_repeat_count - exact_repeat_count) * 5 + streak * 8
+
     def _score_action(self, action: GeneratedAction) -> int:
         dimension_deltas = self._generated_action_dimension_deltas(action)
         emergency_weight = 20 if self.state.exchange_trust < 45 else 0
         panic_weight = 20 if self.state.community_panic > 65 else 0
         treasury_penalty = 18 if self.state.treasury < 30 and dimension_deltas.get("treasury", 0) < 0 else 0
+        novelty_penalty = self._action_novelty_penalty(action)
         score = (
             dimension_deltas.get("control", 0) * 5
             + dimension_deltas.get("narrative_control", 0) * 4
@@ -900,6 +924,7 @@ class CrisisGame:
             - dimension_deltas.get("pressure", 0) * 2
             - dimension_deltas.get("volatility", 0) * 2
             - treasury_penalty
+            - novelty_penalty
             + (dimension_deltas.get("exchange_trust", 0) if emergency_weight else 0)
             + (dimension_deltas.get("narrative_control", 0) if panic_weight else 0)
         )
