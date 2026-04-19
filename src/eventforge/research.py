@@ -17,6 +17,220 @@ from .domain import (
 
 WHU_NOTICE_URL = "https://www.whu.edu.cn/info/5231/258444.htm"
 WHU_NOTICE_TITLE = "武汉大学情况通报"
+CZ_STAR_XU_COINTELEGRAPH_URL = "https://cointelegraph.com/news/cz-memoir-reignites-feud-with-okx-star-xu"
+CZ_STAR_XU_COINTELEGRAPH_TITLE = "CZ memoir revives feud with OKX founder Star Xu over contract forgery, Huobi arrest"
+STAR_XU_DENIAL_URL = "https://x.com/star_okx/status/2041754856814235695"
+STAR_XU_LIAR_URL = "https://x.com/star_okx/status/2041785361807114422"
+
+
+def build_cz_star_xu_public_conflict_research_pack() -> MaterialResearchPack:
+    cointelegraph_note = EvidenceNote(
+        source_title=CZ_STAR_XU_COINTELEGRAPH_TITLE,
+        source_url=CZ_STAR_XU_COINTELEGRAPH_URL,
+        note=(
+            "Cointelegraph 2026-04-08 报道：CZ 新回忆录再次点燃与徐明星的长期公开冲突，"
+            "争议聚焦 OKCoin 旧合约伪造指控、徐明星是否举报李林，以及 2020 年 OKEx 暂停提币。"
+        ),
+    )
+    star_xu_denial = EvidenceNote(
+        source_title="Star Xu X post denying Huobi informant allegation",
+        source_url=STAR_XU_DENIAL_URL,
+        note=(
+            "徐明星在 X 上称 CZ 书中关于其举报李林的说法“纯属不实信息”，"
+            "并强调大型平台每年都会遭遇大量举报投诉，举报本身并不能决定执法结果。"
+        ),
+    )
+    star_xu_counterattack = EvidenceNote(
+        source_title="Star Xu X post calling CZ a habitual liar",
+        source_url=STAR_XU_LIAR_URL,
+        note=(
+            "徐明星在 X 上点名称 CZ 为“habitual liar”，把冲突重新拉回 OKCoin 入离职历史、"
+            "Roger Ver 合约争议、是否操纵市场，以及是否在调查中充当污点证人等多条旧案。"
+        ),
+    )
+
+    entity_cards = (
+        EntityResearchCard(
+            entity_id="cz-binance",
+            name="CZ 与 Binance 叙事面",
+            role="CZ",
+            stance="借回忆录重写旧纠纷并捍卫自身创业史叙事",
+            public_position="CZ 在新书中称自己曾在 OKCoin 合约纠纷和后续行业冲突中遭遇 FUD，并把 2020 年提币暂停旧案再度归因到徐明星一侧。",
+            conflict_stakes="核心利害是个人可信度、Binance 历史正当性，以及其能否继续主导这场行业旧账的解释框架。",
+            notable_pressures=("回忆录被质疑借个人叙事翻旧账", "被指长期重复有利于自身的版本", "任何证据缺口都会伤害其公信力"),
+            relationships=(
+                ResearchRelationship("star-xu-okx", "direct-conflict", "与徐明星/OKX 阵营围绕旧合约、举报传闻和提币冻结责任展开正面冲突。"),
+                ResearchRelationship("roger-ver-contract", "legacy-contract", "其离开 OKCoin 时的 Roger Ver 合约版本差异被重新搬上台面。"),
+                ResearchRelationship("market-watchers", "narrative-contest", "需要说服行业围观者相信自己的回忆录版本不是选择性叙事。"),
+            ),
+            evidence=(cointelegraph_note,),
+        ),
+        EntityResearchCard(
+            entity_id="star-xu-okx",
+            name="徐明星与 OKX 阵营",
+            role="徐明星/OKX camp",
+            stance="公开反击并试图把冲突定义为 CZ 再次散播失实叙事",
+            public_position="徐明星连续发帖否认举报李林、质疑 CZ 的旧合约说法，并称其在 OKCoin 历史、市场操纵和婚姻等问题上都在说谎。",
+            conflict_stakes="核心利害是徐明星个人信誉、OKX 治理能力以及交易平台在旧案阴影下的品牌稳定性。",
+            notable_pressures=("2020 年提币暂停旧案再次被翻出", "举报传闻与污点证人指控同时压来", "若拿不出新证据容易被视为情绪化反击"),
+            relationships=(
+                ResearchRelationship("cz-binance", "direct-conflict", "与 CZ 围绕历史版本、证据可信度和谁在操纵行业舆论进行正面对撞。"),
+                ResearchRelationship("leon-li-huobi", "informant-dispute", "被卷入是否向 authorities 举报李林的传闻链条。"),
+                ResearchRelationship("market-watchers", "trust-defense", "必须稳住用户与观察者对 OKX 治理与钱包架构的信心。"),
+            ),
+            evidence=(star_xu_denial, star_xu_counterattack, cointelegraph_note),
+        ),
+        EntityResearchCard(
+            entity_id="leon-li-huobi",
+            name="李林与火币旧案旁证",
+            role="行业旧案证人",
+            stance="本体并未正面下场，但其名字成为举报传闻与平台治理比较的关键支点",
+            public_position="Cointelegraph 转述 CZ 书中说法：李林曾认为徐明星早年举报过自己；徐明星则公开否认该指控。",
+            conflict_stakes="核心利害在于其名字被当作旧案真伪的佐证节点，会放大行业内部举报与执法想象。",
+            notable_pressures=("本人并非当前冲突主角却被不断引用", "旧案传闻缺乏完全可验证的一手公开证据"),
+            relationships=(
+                ResearchRelationship("star-xu-okx", "informant-rumor", "关于徐明星是否举报李林的说法使其成为徐明星反击的关键参照物。"),
+                ResearchRelationship("cz-binance", "memoir-reference", "CZ 借其转述来强化自己对徐明星的旧案指控。"),
+            ),
+            evidence=(cointelegraph_note, star_xu_denial),
+        ),
+        EntityResearchCard(
+            entity_id="roger-ver-contract",
+            name="Roger Ver / OKCoin 合约旧案",
+            role="历史证据场",
+            stance="作为 2014-2015 年合约版本争议的证据池，被双方重新调用",
+            public_position="Cointelegraph 报道称徐明星再次搬出 OKCoin 当年发布的公证聊天视频和 Reddit 声明，用来指控 CZ 在 Roger Ver 合约上伪造版本或签名。",
+            conflict_stakes="核心利害在于旧合同与聊天记录的解释权，因为它直接影响谁在这场长期冲突里更像叙事操纵者。",
+            notable_pressures=("旧材料年代久远且解释空间大", "一旦被重新传播就会快速污染当前品牌评价"),
+            relationships=(
+                ResearchRelationship("cz-binance", "evidence-pressure", "旧合约材料持续给 CZ 的回忆录叙事施压。"),
+                ResearchRelationship("star-xu-okx", "evidence-weapon", "徐明星把它作为证明 CZ 不可信的核心武器。"),
+            ),
+            evidence=(cointelegraph_note, star_xu_counterattack),
+        ),
+        EntityResearchCard(
+            entity_id="market-watchers",
+            name="交易平台用户与行业围观者",
+            role="市场舆论",
+            stance="既消费八卦，又会把创始人互撕直接投射为平台治理风险",
+            public_position="公众关注的不只是旧账真假，还包括创始人互撕是否会伤害 Binance、OKX 以及亚洲交易平台整体治理形象。",
+            conflict_stakes="核心利害是把个人旧怨和平台安全、治理、信任风险连在一起，导致事件迅速从口水战升级为品牌风控问题。",
+            notable_pressures=("对钱包架构、治理透明度与创始人诚信高度敏感", "会把旧案重新传播成新的平台信任冲击"),
+            relationships=(
+                ResearchRelationship("cz-binance", "credibility-judgment", "围观者会把 CZ 的回忆录视作自证还是再造叙事。"),
+                ResearchRelationship("star-xu-okx", "governance-judgment", "围观者会把徐明星的反击与 2020 年提币暂停旧案绑定解读。"),
+            ),
+            evidence=(cointelegraph_note,),
+        ),
+    )
+
+    entities = (
+        SeedEntity(
+            id="cz-binance",
+            name="CZ 与 Binance 叙事面",
+            role="CZ",
+            public_goal="守住个人创业史版本并避免被定性为反复翻旧账的操盘者",
+            pressure_point="任何被核实的旧案矛盾都会反噬其回忆录可信度",
+            starting_trust=46,
+            influence=94,
+            stance="主动出击",
+            details="拥有巨大的行业注意力和传播能力，但越主动翻旧账越容易被要求拿出硬证据。",
+        ),
+        SeedEntity(
+            id="star-xu-okx",
+            name="徐明星与 OKX 阵营",
+            role="徐明星/OKX camp",
+            public_goal="把冲突重新定义为对 CZ 失实叙事的公开纠偏",
+            pressure_point="提币冻结旧案与举报传闻同时拖累平台治理形象",
+            starting_trust=39,
+            influence=88,
+            stance="高压反击",
+            details="既要维护徐明星本人信誉，也要避免 OKX 被再次读成治理脆弱的平台。",
+        ),
+        SeedEntity(
+            id="leon-li-huobi",
+            name="李林与火币旧案旁证",
+            role="行业旧案证人",
+            public_goal="避免自己的旧案被持续当作别人互攻弹药",
+            pressure_point="名字被反复当作举报传闻的证明或反证明",
+            starting_trust=34,
+            influence=63,
+            stance="被动卷入",
+            details="虽然不是当前正面冲突双方，却是举报传闻链里最容易被借用的支点。",
+        ),
+        SeedEntity(
+            id="roger-ver-contract",
+            name="Roger Ver / OKCoin 合约旧案",
+            role="历史证据场",
+            public_goal="迫使双方回到可核查的旧记录上",
+            pressure_point="旧证据越碎片化，越容易被任何一方剪裁利用",
+            starting_trust=31,
+            influence=58,
+            stance="证据回流",
+            details="不属于独立人物阵营，而是会不断回流到当下叙事中的旧证据集合。",
+        ),
+        SeedEntity(
+            id="market-watchers",
+            name="交易平台用户与行业围观者",
+            role="市场舆论",
+            public_goal="判断谁在撒谎以及平台治理是否因此存在真实风险",
+            pressure_point="碎片化旧案让他们更容易用情绪化结论替代细节判断",
+            starting_trust=22,
+            influence=91,
+            stance="高热围观",
+            details="一旦把冲突理解为平台治理风险，而不只是创始人口角，外溢杀伤会迅速放大。",
+        ),
+    )
+
+    disputes = (
+        ResearchDispute(
+            key="contract-forgery",
+            claim="CZ 在离开 OKCoin 时是否伪造或篡改过 Roger Ver 合约版本/签名",
+            sides=("CZ 的自述与回忆录版本", "徐明星/OKCoin 旧证据与反驳版本"),
+            status="contested",
+        ),
+        ResearchDispute(
+            key="informant-rumor",
+            claim="徐明星是否曾向 authorities 举报李林并导致旧案执法后果",
+            sides=("CZ 书中转述与围观传闻", "徐明星公开否认的一方"),
+            status="active",
+        ),
+        ResearchDispute(
+            key="withdrawal-governance",
+            claim="2020 年 OKEx 提币暂停究竟反映徐明星个人控制钱包还是更广泛的治理设计问题",
+            sides=("认为徐明星/OKX 治理架构失当的一方", "认为 CZ 借旧案夸大平台失序的一方"),
+            status="contested",
+        ),
+    )
+
+    return MaterialResearchPack(
+        case_id="cz-star-xu-public-conflict",
+        title="CZ / 徐明星公开冲突",
+        source_material=(
+            "以 2026-04-08 Cointelegraph 对 CZ 新回忆录与徐明星公开反击的报道为主线，"
+            "结合徐明星在 X 上的两条回应，整理 OKCoin 合约旧案、举报传闻与 2020 年提币暂停的冲突结构。"
+        ),
+        premise="一本回忆录把十多年行业旧账重新抛回台面，让 CZ 与徐明星/OKX 阵营再次公开互撕。",
+        opponent="对位创始人阵营、会把创始人口角直接映射成平台治理风险的市场围观者，以及难以彻底验证的旧案证据",
+        audience=("交易平台用户", "行业从业者", "加密媒体读者", "二级市场围观者"),
+        truth="这不是单纯的嘴仗，而是个人回忆录、旧案证据、平台治理历史与行业信任同时争夺解释权的复合冲突。",
+        entities=entities,
+        candidate_viewpoints=("CZ", "徐明星/OKX camp"),
+        opening_event=WorldEvent(
+            headline="回忆录与 X 贴文把旧案重新点燃",
+            summary="CZ 新书与徐明星连续发帖互相指控，把合约伪造、举报传闻和提币冻结旧案一起拉回公众视野。",
+            severity=82,
+            actor_id="cz-binance",
+            actor_name="CZ 与 Binance 叙事面",
+        ),
+        research_notes=(
+            "当前研究包以 Cointelegraph 报道和徐明星本人 X 帖为第一版公开证据基线。",
+            "首批可玩角色限定为直接正面对撞的 CZ 与徐明星/OKX camp；李林与 Roger Ver 合约旧案保留为高影响旁证节点。",
+            "后续冻结世界时必须保留合约真伪、举报传闻与平台治理可信度这三条主冲突轴。",
+        ),
+        entity_cards=entity_cards,
+        disputed_points=disputes,
+    )
 
 
 def build_wuhan_university_yang_jingyuan_research_pack() -> MaterialResearchPack:

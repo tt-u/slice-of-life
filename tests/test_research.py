@@ -10,6 +10,7 @@ from eventforge.domain import (
     ResearchRelationship,
 )
 from eventforge.research import (
+    build_cz_star_xu_public_conflict_research_pack,
     build_wuhan_university_yang_jingyuan_frozen_world,
     build_wuhan_university_yang_jingyuan_research_pack,
 )
@@ -95,6 +96,35 @@ def test_wuhan_anchor_research_pack_captures_direct_conflict_parties_and_evidenc
 def test_wuhan_anchor_research_pack_fixture_matches_serialized_payload() -> None:
     pack = build_wuhan_university_yang_jingyuan_research_pack()
     fixture_path = ROOT / "examples" / "research" / "wuhan-university-yang-jingyuan.json"
+
+    payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+    restored = MaterialResearchPack.from_payload(payload)
+
+    assert restored == pack
+
+
+def test_cz_star_xu_anchor_research_pack_captures_direct_conflict_parties_and_sources() -> None:
+    pack = build_cz_star_xu_public_conflict_research_pack()
+
+    assert pack.case_id == "cz-star-xu-public-conflict"
+    assert pack.title == "CZ / 徐明星公开冲突"
+    assert pack.candidate_viewpoints == ("CZ", "徐明星/OKX camp")
+    assert len(pack.entity_cards) >= 4
+    assert {card.role for card in pack.entity_cards} >= {"CZ", "徐明星/OKX camp"}
+    assert any(dispute.key == "contract-forgery" for dispute in pack.disputed_points)
+    source_urls = {
+        note.source_url
+        for card in pack.entity_cards
+        for note in card.evidence
+    }
+    assert "https://cointelegraph.com/news/cz-memoir-reignites-feud-with-okx-star-xu" in source_urls
+    assert "https://x.com/star_okx/status/2041754856814235695" in source_urls
+    assert "https://x.com/star_okx/status/2041785361807114422" in source_urls
+
+
+def test_cz_star_xu_anchor_research_pack_fixture_matches_serialized_payload() -> None:
+    pack = build_cz_star_xu_public_conflict_research_pack()
+    fixture_path = ROOT / "examples" / "research" / "cz-star-xu-public-conflict.json"
 
     payload = json.loads(fixture_path.read_text(encoding="utf-8"))
     restored = MaterialResearchPack.from_payload(payload)
